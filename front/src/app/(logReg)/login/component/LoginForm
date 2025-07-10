@@ -4,8 +4,9 @@ const LoginForm = ()=>{
         <>
         <h1>INICIAR SESION</h1>
         <h2>Inicia sesion para poder comprar</h2>
+        <h3>PRUEBA 1</h3>
         </>
-  );
+      );
 }
 
 export default LoginForm
