@@ -1,0 +1,10 @@
+
+const LoginForm = ()=>{
+     return (
+        <>
+        <h1>INICIAR SESION</h1>
+        </>
+  );
+}
+
+export default LoginForm
