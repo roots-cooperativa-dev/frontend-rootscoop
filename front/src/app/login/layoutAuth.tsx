@@ -7,7 +7,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Lado izquierdo (desktop) */}
       <div className="hidden md:block w-1/2 relative">
         <Image
-          src="/img/Login.jpg"
+          src="/img/LoginNew.jpg"
           alt="Roots"
           fill
           className="object-cover object-center"
@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="
         relative flex justify-center items-center
         w-full md:w-1/2 p-4 md:p-8
-        bg-[url('/img/Login.jpg')] bg-cover bg-center
+        bg-[url('/img/LoginNew.jpg')] bg-cover bg-center
         md:bg-none
       ">
         {/* Contenedor del formulario con blur en mobile */}
