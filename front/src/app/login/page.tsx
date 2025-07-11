@@ -1,4 +1,4 @@
-// app/auth/page.tsx
+// app/login/page.tsx
 "use client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
 import LoginForm from "./components/LoginForm";
