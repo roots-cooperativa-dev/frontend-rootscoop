@@ -46,14 +46,14 @@ export function TestimoniosBox() {
           ¿Tenés dudas?
         </h3>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
-          <div className="flex items-center gap-2 text-gray-800">
+          <div className="flex items-center flex-col gap-2 text-gray-800">
             <MessageCircle className="text-teal-600" />
             <div>
               <p className="font-medium">WhatsApp</p>
               <p className="text-sm">+54 9 2215 62-6003</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-gray-800">
+          <div className="flex items-center flex-col gap-2 text-gray-800">
             <Mail className="text-orange-600" />
             <div>
               <p className="font-medium">Email</p>
