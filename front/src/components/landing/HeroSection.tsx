@@ -26,9 +26,9 @@ export const HeroSection = () => {
                     <p className="text-xl md:text-3xl font-bold mb-4 drop-shadow-md">Cooperativa de Trabajo</p>
                     <p className="text-lg md:text-2xl mb-8 drop-shadow-md max-w-3xl mx-auto">
                         Desde 2013 construyendo
-                        <span className="text-[#febb07] font-bold"> soberanía alimentaria</span>,
-                        <span className="text-[#ff7e5f] font-bold"> feminismo</span> y
-                        <span className="text-[#b6e300] font-bold"> economía social</span>
+                        <span className="text-[#febb07] font-bold"> Soberanía alimentaria</span>,
+                        <span className="text-[#ff7e5f] font-bold"> Perspectiva de genero</span> y
+                        <span className="text-[#b6e300] font-bold"> Economía social</span>
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Button

@@ -25,9 +25,9 @@ export const ProductoDestacado = () => {
                         <Badge className="bg-[#febb07] !text-black font-bold mb-4">
                             Producto Destacado
                         </Badge>
-                        <h2 className="text-4xl font-black text-[#017d74] mb-6">
+                        <h2 className="font-chewy text-4xl font-black text-[#017d74] mb-6">
                             Remera ROOTS
-                            <span className="block text-[#922f4e]">Cooperativa</span>
+                            <span className="font-chewy block text-[#922f4e]">Cooperativa</span>
                         </h2>
                         <p className="text-xl text-gray-700 mb-6 font-medium">
                             Llevá con vos la identidad cooperativa. Remera 100% algodón con diseño exclusivo que representa

@@ -4,7 +4,7 @@ export const NuestraHistoria = () => {
 
         <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
-                <h2 className="text-4xl font-chewy font-black text-center mb-4 text-[#017d74]">Nuestra Historia</h2>
+                <h2 className="font-chewy text-4xl font-chewy font-black text-center mb-4 text-[#017d74]">Nuestra Historia</h2>
                 <p className="text-center text-gray-600 mb-12 text-lg">
                     Más de una década construyendo alternativas, tejiendo redes y sembrando futuro
                 </p>

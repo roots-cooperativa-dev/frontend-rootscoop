@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "../ui/card"
 export const LoqueHacemos = () => {
     return (
         <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-black text-center mb-4 text-[#017d74]">Lo que hacemos</h2>
+            <h2 className="font-chewy text-4xl font-black text-center mb-4 text-[#017d74]">Lo que hacemos</h2>
             <p className="text-center text-gray-600 mb-12 text-lg max-w-3xl mx-auto">
                 Somos mucho más que una cooperativa. Somos un espacio de encuentro, creación y resistencia. Cada cerveza que
                 fabricamos, cada pizza que horneamos, cada empanada que armamos, lleva el amor y la dedicación de 11

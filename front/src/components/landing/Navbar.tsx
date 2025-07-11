@@ -13,16 +13,16 @@ export const Navbar = () => {
     }
 
     return (
-
         <div className="container mx-auto px-4 py-4">
             <nav className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                     <Image
-                        src="logos/roots.png"
+                        src="/logos/roots.png"
                         alt="Rootscoop Logo"
-                        width={40}
+                        width={300}
                         height={40}
-                        className="w-10 h-10 rounded-full"
+                        className="rounded-full object-contain"
+                        priority
                     />
                 </div>
                 {/* Desktop Menu */}

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 export const Valores = () => {
     return (
         <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-black text-center mb-4 text-[#017d74]">Nuestros Valores</h2>
+            <h2 className="font-chewy text-4xl font-black text-center mb-4 text-[#017d74]">Nuestros Valores</h2>
             <p className="text-center text-gray-600 mb-12 text-lg">
                 Los pilares que sostienen nuestro trabajo cooperativo y nuestra forma de ver el mundo
             </p>

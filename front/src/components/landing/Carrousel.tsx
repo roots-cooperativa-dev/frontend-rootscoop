@@ -10,13 +10,13 @@ export const CarrouselSection = () => {
     const carouselItems = [
         {
             id: 1,
-            type: "youtube",
+            type: "visit",
             title: "Conocé el impacto de ROOTS",
             description:
                 "Descubrí cómo nuestra cooperativa transforma la comunidad cervecera y construye alternativas de economía social en este video exclusivo.",
-            thumbnail: "/placeholder.svg?height=200&width=300",
+            thumbnail: "/historia/foto-local.png",
             buttonText: "Ver video",
-            action: "https://youtube.com/watch?v=ejemplo",
+            action: "https://www.youtube.com/watch?v=oazy_n1QewA",
             color: "#922f4e",
         },
         {
@@ -25,8 +25,8 @@ export const CarrouselSection = () => {
             title: "Visitá la Mosca Soldado",
             description:
                 "Una experiencia única donde podrás conocer a nuestra mosca soldado, que se alimenta de los restos del lúpulo de nuestra cerveza artesanal, creando un ciclo ecológico perfecto.",
-            thumbnail: "/placeholder.svg?height=200&width=300",
-            buttonText: "Agendar visita",
+            thumbnail: "/historia/mosca-soldado.jpg",
+            buttonText: "Ver Video",
             action: "https://www.youtube.com/shorts/BZpREmaEtus",
             color: "#017d74",
         },
@@ -47,7 +47,7 @@ export const CarrouselSection = () => {
 
         <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-                <h2 className="text-4xl font-black text-[#017d74] mb-4">Explorá ROOTS</h2>
+                <h2 className="font-chewy text-4xl font-black text-[#017d74] mb-4">Explorá ROOTS</h2>
                 <p className="text-xl text-gray-700 max-w-3xl mx-auto">
                     Descubrí todas las formas de conocer y ser parte de nuestra cooperativa
                 </p>
@@ -90,7 +90,7 @@ export const CarrouselSection = () => {
                                         {/* Contenido */}
                                         <div className="p-8 md:p-12 flex flex-col justify-center order-1 md:order-2 bg-gray-50">
                                             <CardHeader className="p-0 mb-6">
-                                                <CardTitle className="text-3xl md:text-4xl font-black mb-4" style={{ color: item.color }}>
+                                                <CardTitle className="font-chewy text-3xl md:text-4xl font-black mb-4" style={{ color: item.color }}>
                                                     {item.title}
                                                 </CardTitle>
                                                 <CardDescription className="text-lg md:text-xl text-gray-700 leading-relaxed">
