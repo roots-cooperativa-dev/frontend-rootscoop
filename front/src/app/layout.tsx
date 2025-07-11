@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Cooperativa Roots',
-  description: 'Sitio web de cooperativa de trabajo Roots',
-  generator: 'v0.dev',
+  title: 'Roots Cooperativa',
+  description: 'Roots Cooperativa de Trabajo - Construyendo Soberanía Alimentaria y Economía Social desde 2013',
+  generator: 'Next.js',
 }
 
 export default function RootLayout({
