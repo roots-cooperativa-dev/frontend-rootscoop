@@ -26,7 +26,7 @@ export default function AuthPage() {
         height={300} 
         className="mb-4 mx-auto hidden md:block" 
       />
-      <h1 className="text-2xl font-semibold mb-2 text-center">¡Bienvenido/a!</h1>
+      <h1 className="text-2xl font-semibold mb-2 text-center font-chewy text-[#017d74]">¡Bienvenido/a!</h1>
       
       <p className="mb-6 text-center text-black md:text-gray-500">
         Ingresá a tu cuenta o registrate para ser parte
