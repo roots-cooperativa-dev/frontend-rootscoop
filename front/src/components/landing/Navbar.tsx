@@ -27,23 +27,23 @@ export const Navbar = () => {
                 </div>
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center space-x-6">
-                    <Link href="#historia" className="text-white/90 hover:text-white transition-colors font-medium">
+                    <Link href="#historia" className="font-bebas text-white/90 hover:text-white transition-colors font-medium">
                         Historia
                     </Link>
-                    <Link href="/productos" className="text-white/90 hover:text-white transition-colors font-medium">
+                    <Link href="/productos" className="font-bebas text-white/90 hover:text-white transition-colors font-medium">
                         Productos
                     </Link>
-                    <Link href="/visitas" className="text-white/90 hover:text-white transition-colors font-medium">
+                    <Link href="/visitas" className="font-bebas text-white/90 hover:text-white transition-colors font-medium">
                         Visitas
                     </Link>
-                    <Link href="/donaciones" className="text-white/90 hover:text-white transition-colors font-medium">
+                    <Link href="/donaciones" className="font-bebas text-white/90 hover:text-white transition-colors font-medium">
                         Donaciones
                     </Link>
-                    <Link href="/contacto" className="text-white/90 hover:text-white transition-colors font-medium">
+                    <Link href="/contacto" className="font-bebas text-white/90 hover:text-white transition-colors font-medium">
                         Contacto
                     </Link>
-                    <Button className="bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg" asChild>
-                        <Link href="/login">Ingresar</Link>
+                    <Button className="font-bebas bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg" asChild>
+                        <Link href="/login">Iniciar sesión</Link>
                     </Button>
                 </div>
                 {/* Mobile Menu Button */}
@@ -59,45 +59,45 @@ export const Navbar = () => {
                 <div className="md:hidden mt-4 bg-black/80 backdrop-blur-sm rounded-lg p-4 space-y-4">
                     <Link
                         href="#historia"
-                        className="block text-white/90 hover:text-white transition-colors font-medium py-2"
+                        className="font-bebas block text-white/90 hover:text-white transition-colors font-medium py-2"
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Historia
                     </Link>
                     <Link
                         href="/productos"
-                        className="block text-white/90 hover:text-white transition-colors font-medium py-2"
+                        className="font-bebas block text-white/90 hover:text-white transition-colors font-medium py-2"
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Productos
                     </Link>
                     <Link
                         href="/visitas"
-                        className="block text-white/90 hover:text-white transition-colors font-medium py-2"
+                        className="font-bebas block text-white/90 hover:text-white transition-colors font-medium py-2"
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Visitas
                     </Link>
                     <Link
                         href="/donaciones"
-                        className="block text-white/90 hover:text-white transition-colors font-medium py-2"
+                        className="font-bebas block text-white/90 hover:text-white transition-colors font-medium py-2"
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Donaciones
                     </Link>
                     <Link
                         href="/contacto"
-                        className="block text-white/90 hover:text-white transition-colors font-medium py-2"
+                        className="font-bebas block text-white/90 hover:text-white transition-colors font-medium py-2"
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
                         Contacto
                     </Link>
                     <Button
-                        className="w-full bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg mt-4"
+                        className="font-bebas w-full bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg mt-4"
                         asChild
                         onClick={() => setIsMobileMenuOpen(false)}
                     >
-                        <Link href="/login">Ingresar</Link>
+                        <Link href="/login">Iniciar sesión</Link>
                     </Button>
                 </div>
             )}

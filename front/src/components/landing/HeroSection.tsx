@@ -23,11 +23,11 @@ export const HeroSection = () => {
             <div className="relative z-10 h-full flex items-center justify-center">
                 <div className="text-center text-white max-w-4xl mx-auto px-4">
                     <h1 className="font-chewy text-5xl md:text-8xl font-black mb-6 drop-shadow-lg">ROOTS</h1>
-                    <p className="text-xl md:text-3xl font-bold mb-4 drop-shadow-md">Cooperativa de Trabajo</p>
-                    <p className="text-lg md:text-2xl mb-8 drop-shadow-md max-w-3xl mx-auto">
+                    <p className="font-bebas text-xl md:text-3xl font-bold mb-4 drop-shadow-md">Cooperativa de Trabajo</p>
+                    <p className="font-bebas text-lg md:text-2xl mb-8 drop-shadow-md max-w-3xl mx-auto">
                         Desde 2013 construyendo
-                        <span className="text-[#febb07] font-bold"> Soberanía alimentaria</span>,
-                        <span className="text-[#ff7e5f] font-bold"> Perspectiva de genero</span> y
+                        <span className="font-bebas text-[#febb07] font-bold"> Soberanía alimentaria</span>,
+                        <span className="font-bebas text-[#ff7e5f] font-bold"> Perspectiva de genero</span> y
                         <span className="text-[#b6e300] font-bold"> Economía social</span>
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -36,8 +36,8 @@ export const HeroSection = () => {
                             className="bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-xl transform hover:scale-105 transition-all"
                             asChild
                         >
-                            <Link href="#carrusel">
-                                <Sparkles className="w-5 h-5 mr-2" />
+                            <Link href="#carrusel"className="font-popular" >
+                                <Sparkles className=" w-5 h-5 mr-2" />
                                 Descubrí ROOTS
                             </Link>
                         </Button>
@@ -47,8 +47,8 @@ export const HeroSection = () => {
                             className="border-white text-white hover:bg-white hover:text-[#017d74] font-bold shadow-lg bg-white/10 backdrop-blur-sm"
                             asChild
                         >
-                            <Link href="#historia">
-                                <Heart className="w-5 h-5 mr-2" />
+                            <Link href="#historia"className="font-popular" >
+                                <Heart className=" w-5 h-5 mr-2" />
                                 Nuestra historia
                             </Link>
                         </Button>

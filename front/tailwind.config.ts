@@ -113,8 +113,9 @@ const config: Config = {
       },
       fontFamily: {
         chewy: ["Chewy", "cursive"],
+        bebas: ["Bebas"],
         cooperativo: ["Baloo 2", "Chewy", "cursive"],
-        popular: ["Montserrat", "Raleway", "sans-serif"],
+        popular: ["popular"],
         stencil: ["Oswald", "Impact", "sans-serif"],
       },
     },
