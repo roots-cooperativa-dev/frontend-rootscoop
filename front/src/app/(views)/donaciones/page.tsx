@@ -2,7 +2,8 @@ import Link from "next/link";
 import DonacionBox from "./components/form";
 import InfoBox from "./components/InfoBox";
 import TestimoniosBox from "./components/TestimoniosBox";
-import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 export default function DonacionPage() {
   return (
@@ -10,12 +11,14 @@ export default function DonacionPage() {
       <header className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-[#017d74] rounded-full flex items-center justify-center shadow-lg">
-                <ShoppingBag className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-black text-[#017d74]">ROOTS</span>
-            </Link>
+            <Image
+              src="/logos/roots.png"
+              alt="Rootscoop Logo"
+              width={350}
+              height={40}
+              className="rounded-full object-contain -ml-20"
+              priority
+            />
             <div className="flex items-center space-x-4">
               <Link
                 href="/"

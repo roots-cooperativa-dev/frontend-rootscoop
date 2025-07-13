@@ -2,6 +2,7 @@
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { CalendarDays } from "lucide-react";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Button } from "@/src/components/ui/button";
@@ -39,8 +40,10 @@ const ReservaFormulario = () => {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md space-y-6">
-      <h2 className="text-xl font-semibold text-gray-800">Reservar visita</h2>
-
+      <h2 className="text-xl font-semibold text-[#017d74]">Reservar visita</h2>
+      <p className="mt-2 text-s text-gray-600 italic">
+        Completa el formulario y te confirmaremos la disponibildad
+      </p>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -166,6 +169,7 @@ const ReservaFormulario = () => {
             </div>
 
             <Button type="submit" className="w-full mt-4">
+              <CalendarDays className="w-5 h-5" />
               Reservar visita
             </Button>
           </Form>
