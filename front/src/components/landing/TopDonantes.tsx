@@ -7,7 +7,7 @@ import { Badge } from "../ui/badge";
 export const TopDonantes = () => {
     return (
         <div className="container mx-auto px-4">
-            <h2 className="font-chewy text-4xl font-cooperativo font-black text-center mb-4 text-[#017d74]">Nuestros Compañeros de Ruta</h2>
+            <h2 className="font-chewy text-4xl font-cooperativo font-black text-center mb-4 text-[#017d74]">Top Colaboradores</h2>
             <p className="text-center text-gray-600 mb-12 text-lg max-w-3xl mx-auto">
                 Estas personas y organizaciones apoyan nuestro trabajo cooperativo con donaciones regulares. Su compromiso
                 hace posible que sigamos construyendo alternativas de economía social.
