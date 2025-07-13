@@ -8,7 +8,7 @@ import Link from "next/link";
 export const Servicios = () => {
     return (
         <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-chewy font-black text-center mb-4 text-[#017d74]">¿Cómo podés participar?</h2>
+            <h2 className="text-4xl font-chewy font-black text-center mb-4 text-[#017d74]">como participar</h2>
             <p className="text-center text-gray-600 mb-12 text-lg">
                 Hay muchas formas de ser parte de esta construcción colectiva. Cada aporte suma, cada gesto cuenta.
             </p>

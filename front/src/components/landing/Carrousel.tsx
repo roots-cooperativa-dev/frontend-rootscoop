@@ -11,7 +11,7 @@ export const CarrouselSection = () => {
         {
             id: 1,
             type: "visit",
-            title: "Conocé el impacto de ROOTS",
+            title: "Conoce el impacto de ROOTS",
             description:
                 "Descubrí cómo nuestra cooperativa transforma la comunidad cervecera y construye alternativas de economía social en este video exclusivo.",
             thumbnail: "/historia/foto-local.png",
@@ -22,7 +22,7 @@ export const CarrouselSection = () => {
         {
             id: 2,
             type: "visit",
-            title: "Visitá la Mosca Soldado",
+            title: "Visita la Mosca Soldado",
             description:
                 "Una experiencia única donde podrás conocer a nuestra mosca soldado, que se alimenta de los restos del lúpulo de nuestra cerveza artesanal, creando un ciclo ecológico perfecto.",
             thumbnail: "/historia/mosca-soldado.jpg",
@@ -47,8 +47,8 @@ export const CarrouselSection = () => {
 
         <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-                <h2 className="font-chewy text-4xl font-black text-[#017d74] mb-4">Explorá ROOTS</h2>
-                <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+                <h2 className="font-chewy text-4xl font-black text-[#017d74] mb-4">Explora ROOTS</h2>
+                <p className="font-bebas text-xl text-gray-700 max-w-3xl mx-auto">
                     Descubrí todas las formas de conocer y ser parte de nuestra cooperativa
                 </p>
             </div>
@@ -93,7 +93,7 @@ export const CarrouselSection = () => {
                                                 <CardTitle className="font-chewy text-3xl md:text-4xl font-black mb-4" style={{ color: item.color }}>
                                                     {item.title}
                                                 </CardTitle>
-                                                <CardDescription className="text-lg md:text-xl text-gray-700 leading-relaxed">
+                                                <CardDescription className="font-popular text-lg md:text-xl text-gray-700 leading-relaxed">
                                                     {item.description}
                                                 </CardDescription>
                                             </CardHeader>

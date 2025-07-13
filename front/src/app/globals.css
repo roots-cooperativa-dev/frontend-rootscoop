@@ -13,8 +13,22 @@ body {
 }
 @font-face {
   font-family: 'Chewy';
-  src: url('/fuentes/Chewy/Chewy-Regular.ttf') format('truetype');
+  src: url('../../public/fuentes/TFonts/TFonts.ttf') format('truetype');
   font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'bebas';
+  src: url('../../public/fuentes/Bebas/Bebas.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'popular';
+  src: url('../../public/fuentes/Montserrat/static/Montserrat-SemiBold.ttf') format('truetype');
+  font-weight: 600;
   font-style: normal;
   font-display: swap;
 }

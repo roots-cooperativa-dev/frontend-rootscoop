@@ -5,6 +5,8 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "../ui
 import { Badge } from "../ui/badge"
 import Link from "next/link"
 import { Button } from "../ui/button"
+import Image from "next/image"
+
 
 export const Productos = () => {
     return (
@@ -14,10 +16,14 @@ export const Productos = () => {
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <Link href="/" className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-[#017d74] rounded-full flex items-center justify-center shadow-lg">
-                                <ShoppingBag className="w-6 h-6 text-white" />
-                            </div>
-                            <span className="text-2xl font-black text-[#017d74]">ROOTS</span>
+                            <Image
+                                src="/logos/roots.png"
+                                alt="Rootscoop Logo"
+                                width={300}
+                                height={40}
+                                className="rounded-full object-contain"
+                                priority
+                            />
                         </Link>
                         <div className="flex items-center space-x-4">
                             <Button className="bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg" asChild>
@@ -36,7 +42,7 @@ export const Productos = () => {
             </header>
             <div className="container mx-auto px-4 py-8">
                 <div className="text-center mb-12">
-                    <h1 className="text-5xl font-black text-[#017d74] mb-4">Productos ROOTS</h1>
+                    <h1 className="font-chewy text-5xl font-black text-[#017d74] mb-4">Productos ROOTS</h1>
                     <p className="text-xl text-gray-700 max-w-3xl mx-auto font-medium">
                         Productos con identidad cooperativa. Cada compra apoya nuestro trabajo colectivo y fortalece la red de
                         <span className="text-[#922f4e] font-bold"> economía social</span>.
