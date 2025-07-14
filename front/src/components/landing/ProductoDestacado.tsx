@@ -29,7 +29,7 @@ export const ProductoDestacado = () => {
                             Remera ROOTS
                             <span className="font-chewy block text-[#922f4e]">Cooperativa</span>
                         </h2>
-                        <p className="text-xl text-gray-700 mb-6 font-medium">
+                        <p className="font-popular text-xl text-gray-700 mb-6 font-medium">
                             Llevá con vos la identidad cooperativa. Remera 100% algodón con diseño exclusivo que representa
                             nuestros valores de <span className="text-[#017d74] font-bold">autogestión</span> y{" "}
                             <span className="text-[#922f4e] font-bold">trabajo colectivo</span>.
@@ -37,19 +37,19 @@ export const ProductoDestacado = () => {
                         <div className="space-y-4 mb-8">
                             <div className="flex items-center space-x-3">
                                 <div className="w-2 h-2 bg-[#017d74] rounded-full"></div>
-                                <span className="text-gray-700">100% algodón orgánico</span>
+                                <span className="font-popular text-gray-700">100% algodón orgánico</span>
                             </div>
                             <div className="flex items-center space-x-3">
                                 <div className="w-2 h-2 bg-[#922f4e] rounded-full"></div>
-                                <span className="text-gray-700">Diseño exclusivo cooperativo</span>
+                                <span className="font-popular text-gray-700">Diseño exclusivo cooperativo</span>
                             </div>
                             <div className="flex items-center space-x-3">
                                 <div className="w-2 h-2 bg-[#febb07] rounded-full"></div>
-                                <span className="text-gray-700">Talles S, M, L, XL disponibles</span>
+                                <span className="font-popular text-gray-700">Talles S, M, L, XL disponibles</span>
                             </div>
                         </div>
                         <div className="flex items-center space-x-4 mb-8">
-                            <span className="text-3xl font-bold text-[#017d74]">$15.000</span>
+                            <span className="font-popular text-3xl font-bold text-[#017d74]">$15.000</span>
                             <Badge className="border-[#f39d10] !text-[#f39d10] bg-transparent">
                                 Envío gratis
                             </Badge>
@@ -60,7 +60,7 @@ export const ProductoDestacado = () => {
                                 className="bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-xl transform hover:scale-105 transition-all"
                                 asChild
                             >
-                                <Link href="/productos">
+                                <Link href="/productos" className="font-popular">
                                     <ShoppingBag className="w-5 h-5 mr-2" />
                                     Ver todos los productos
                                 </Link>
@@ -71,7 +71,7 @@ export const ProductoDestacado = () => {
                                 className="border-[#017d74] text-[#017d74] hover:bg-[#017d74] hover:text-white font-bold shadow-lg bg-transparent"
                                 asChild
                             >
-                                <Link href="/ubicaciones">
+                                <Link href="/ubicaciones" className="font-popular">
                                     <MapPin className="w-5 h-5 mr-2" />
                                     Dónde encontrarnos
                                 </Link>

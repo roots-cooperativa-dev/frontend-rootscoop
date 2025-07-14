@@ -34,7 +34,7 @@ export const VocesRoots = () => {
     return (
         <div className="container mx-auto px-4">
             <h2 className="font-chewy text-4xl font-black text-center mb-4 text-[#017d74]">Voces de ROOTS</h2>
-            <p className="text-center text-gray-600 mb-12 text-lg">
+            <p className="font-bebas text-center text-gray-600 mb-12 text-lg">
                 Las historias que nos construyen, contadas por quienes las viven
             </p>
             <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
