@@ -7,3 +7,8 @@ export interface IProducto {
   categoria: string;
   disponible: boolean;
 }
+
+export enum Irole {
+    ADMIN = "admin",
+    USER = "user"
+}
