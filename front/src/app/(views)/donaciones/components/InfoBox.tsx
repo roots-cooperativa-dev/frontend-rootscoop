@@ -1,30 +1,20 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../../../components/ui/card";
-import { Separator } from "../../../../components/ui/separator";
-import {
-  BadgeCheck,
-  Wrench,
-  Leaf,
-  Heart,
-  Flame,
-  Beer,
-  Users,
-} from "lucide-react";
+import { Card, CardContent } from "../../../../components/ui/card";
+import { Leaf, Heart, Beer, Users, Pizza } from "lucide-react";
 
 export default function InfoBox() {
   return (
     <div className="space-y-10">
       <Card className="border-pink-200">
         <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Heart className="h-4 w-4 text-pink-500" />
-            <h3 className="text-pink-600 font-semibold">¿Por qué donar?</h3>
+          <div>
+            <Heart className="h-12 w-12 rounded-full p-3 bg-gradient-to-br from-[#F72585] to-[#E63946] text-white shadow-md" />
+            <br />
+            <h3 className="text-[#f72585] font-semibold font-chewy">
+              ¿Por que donar ?
+            </h3>
           </div>
-          <p className="text-sm">
+          <br />
+          <p className="text-sm text-[#4b5563] font-bebas">
             ROOTS es una cooperativa autogestiva que no depende de subsidios
             estatales ni inversores privados. Cada donación nos permite seguir
             creciendo de forma independiente y sostenible.
@@ -34,16 +24,16 @@ export default function InfoBox() {
 
       <Card className="border-blue-200">
         <CardContent className="p-4">
-          <h3 className="text-blue-600 font-semibold mb-2">
-            ¿En qué usamos las donaciones?
+          <h3 className="text-[#2d9cdb] font-bold mb-2 font-chewy">
+            ¿En que usamos las donaciones?
           </h3>
-          <ul className="text-sm space-y-2">
-            <li className="flex items-center gap-2">
+          <ul className="text-sm space-y-2 font-bebas">
+            <li className="flex items-center gap-2 text-[#0a0a0a]">
               <Beer className="h-4 w-4 text-orange-500" />
               Equipamiento para cervecería
             </li>
             <li className="flex items-center gap-2">
-              <Flame className="h-4 w-4 text-rose-500" />
+              <Pizza className="h-4 w-4 text-rose-500" />
               Mejoras en la cocina
             </li>
             <li className="flex items-center gap-2">
@@ -60,8 +50,10 @@ export default function InfoBox() {
 
       <Card className="border-orange-200">
         <CardContent className="p-4">
-          <h3 className="text-orange-500 font-semibold mb-2">Transparencia</h3>
-          <p className="text-sm">
+          <h3 className="text-[#ff6b35] font-semibold mb-2 font-chewy">
+            Transparencia
+          </h3>
+          <p className="text-sm font-bebas">
             Cada trimestre publicamos un informe detallado de cómo utilizamos
             las donaciones. Creemos en la transparencia total con nuestra
             comunidad.

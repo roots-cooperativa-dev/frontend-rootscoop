@@ -33,10 +33,18 @@ export default function DonacionBox() {
 
   return (
     <Card className="md:col-span-2 p-6">
-      <Tabs defaultValue="donar" className="w-full">
+      <div className="mb-6">
+        <h2 className="font-chewy text-2xl font-bold bg-gradient-to-r from-orange-500 via-rose-500 to-indigo-600 bg-clip-text text-transparent">
+          Hacer una donacion
+        </h2>
+        <p className="text-gray-600 mt-1 font-popular">
+          Elegí el monto y la frecuencia que más te convenga
+        </p>
+      </div>
+      <Tabs defaultValue="donar" className="w-full font-chewy">
         <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="donar">Donación</TabsTrigger>
-          <TabsTrigger value="suscribirse">Suscripción</TabsTrigger>
+          <TabsTrigger value="donar">Donacion</TabsTrigger>
+          <TabsTrigger value="suscribirse">Suscripcion</TabsTrigger>
         </TabsList>
 
         <TabsContent value="donar">
@@ -55,7 +63,7 @@ export default function DonacionBox() {
             }}
           >
             {({ handleChange, values, setFieldValue }) => (
-              <Form className="space-y-4">
+              <Form className="space-y-4 font-bebas">
                 <div>
                   <Label className="block mb-2 font-semibold">Frecuencia</Label>
                   <RadioGroup
