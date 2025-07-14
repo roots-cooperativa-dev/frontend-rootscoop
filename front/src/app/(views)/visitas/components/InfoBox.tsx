@@ -19,9 +19,11 @@ const InfoBox = () => {
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#33a5d7] to-teal-300 flex items-center justify-center">
             <Eye className="text-white w-6 h-6" />
           </div>
-          <h3 className="text-sky-400 font-bold text-lg">¿Qué vas a ver?</h3>
+          <h3 className="text-sky-400 font-bold text-lg font-chewy">
+            ¿Que vas a ver?
+          </h3>
         </div>
-        <ul className="space-y-8 text-gray-700 text-sm flex-item-center">
+        <ul className="space-y-8 text-gray-700 text-sm flex-item-center font-bebas">
           <li className="flex items-center gap-2">
             <Beer className="h-4 w-4 text-orange-500" />
             Proceso completo de cerveza artesanal
@@ -47,14 +49,14 @@ const InfoBox = () => {
 
       {/* Información práctica */}
       <div className="border border-orange-200 bg-white-50 p-5 rounded-xl">
-        <h3 className="text-orange-400 font-bold text-lg mb-3">
-          Información práctica
+        <h3 className="text-orange-400 font-bold text-lg mb-3 font-chewy">
+          Informacion practica
         </h3>
-        <ul className="space-y-6 text-sm text-gray-800">
+        <ul className="space-y-6 text-sm text-gray-800 font-bebas">
           <li>
             <strong className="flex items-center gap-2 ">
               <Clock className="h-4 w-4 text-[#6a4c93]" />
-              Duración: 2 horas
+              Duracion: 2 horas
             </strong>
 
             <span className="text-gray-500 ml-6">Incluye degustación</span>
@@ -80,12 +82,12 @@ const InfoBox = () => {
 
       {/* ¿Cuánto cuesta? */}
       <div className="border border-pink-200 bg-white-50 p-5 rounded-xl">
-        <h3 className="text-[#f72585] font-bold text-lg mb-3">
-          ¿Cuánto cuesta?
+        <h3 className="text-[#f72585] font-bold text-lg mb-3 font-chewy">
+          ¿Cuanto cuesta?
         </h3>
-        <ul className="space-y-2 text-sm text-[#09090b]">
+        <ul className="space-y-2 text-sm text-[#09090b] font-bebas">
           <li className="flex justify-between">
-            <span>Visita estándar</span>
+            <span>Visita estandar</span>
             <span className="bg-sky-500 text-white text-xs px-2 py-1 rounded-full">
               $3.000
             </span>

@@ -25,7 +25,7 @@ export default function DonacionPage() {
                 className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Volver</span>
+                <span className="font-chewy">Volver</span>
               </Link>
             </div>
           </div>
@@ -34,11 +34,11 @@ export default function DonacionPage() {
       <div className="py-12 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold">
-            <span className="bg-gradient-to-r from-orange-500 via-rose-500 to-indigo-600 bg-clip-text text-transparent">
-              Apoyá a ROOTS
+            <span className="font-chewy bg-gradient-to-r from-orange-500 via-rose-500 to-indigo-600 bg-clip-text text-transparent">
+              Apoya a ROOTS
             </span>
           </h1>
-          <p className="mt-3 text-muted-foreground max-w-2xl mx-auto text-sm md:text-base">
+          <p className="font-bebas mt-3 text-muted-foreground max-w-2xl mx-auto text-sm md:text-base">
             Tu donación fortalece nuestro trabajo cooperativo y nos ayuda a
             seguir construyendo alternativas de
             <span className="text-orange-500 font-semibold">

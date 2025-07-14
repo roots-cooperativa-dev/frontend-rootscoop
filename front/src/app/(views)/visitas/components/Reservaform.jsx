@@ -40,8 +40,10 @@ const ReservaFormulario = () => {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md space-y-6">
-      <h2 className="text-xl font-semibold text-[#017d74]">Reservar visita</h2>
-      <p className="mt-2 text-s text-gray-600 italic">
+      <h2 className="text-xl font-semibold text-[#017d74] font-chewy">
+        Reservar visita
+      </h2>
+      <p className="mt-2 text-s text-gray-600 italic font-bebas">
         Completa el formulario y te confirmaremos la disponibildad
       </p>
       <Formik
@@ -50,10 +52,14 @@ const ReservaFormulario = () => {
         onSubmit={(values) => console.log(values)}
       >
         {({ handleChange, setFieldValue }) => (
-          <Form className="space-y-4">
+          <Form className="space-y-4 font-bebas">
             <div>
-              <Label>Nombre del contacto</Label>
-              <Input name="contactName" onChange={handleChange} />
+              <Label>Nombre del contacto *</Label>
+              <Input
+                name="contactName"
+                onChange={handleChange}
+                placeholder="Tu nombre"
+              />
               <ErrorMessage
                 name="contactName"
                 component="div"
@@ -62,8 +68,13 @@ const ReservaFormulario = () => {
             </div>
 
             <div>
-              <Label>Email</Label>
-              <Input type="email" name="email" onChange={handleChange} />
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                name="email"
+                onChange={handleChange}
+                placeholder="tu@email.com"
+              />
               <ErrorMessage
                 name="email"
                 component="div"
@@ -73,7 +84,11 @@ const ReservaFormulario = () => {
 
             <div>
               <Label>Teléfono</Label>
-              <Input name="phone" onChange={handleChange} />
+              <Input
+                name="phone"
+                onChange={handleChange}
+                placeholder="+54 9 11 1234-5678"
+              />
               <ErrorMessage
                 name="phone"
                 component="div"
@@ -82,7 +97,7 @@ const ReservaFormulario = () => {
             </div>
 
             <div>
-              <Label>Cantidad de personas</Label>
+              <Label>Cantidad de personas *</Label>
               <Select
                 onValueChange={(value) =>
                   setFieldValue("numberOfPeople", value)
@@ -108,7 +123,7 @@ const ReservaFormulario = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Fecha preferida</Label>
+                <Label>Fecha preferida *</Label>
                 <Input
                   type="date"
                   name="preferredDate"
@@ -121,7 +136,7 @@ const ReservaFormulario = () => {
                 />
               </div>
               <div>
-                <Label>Horario preferido</Label>
+                <Label>Horario preferido *</Label>
                 <Input
                   type="time"
                   name="preferredTime"
@@ -160,12 +175,20 @@ const ReservaFormulario = () => {
 
             <div>
               <Label>¿Qué les interesa conocer?</Label>
-              <Textarea name="interests" onChange={handleChange} />
+              <Textarea
+                name="interests"
+                onChange={handleChange}
+                placeholder="Ej: Proceso de cerveza, cocina cooperativa, historia de ROOTS"
+              />
             </div>
 
             <div>
               <Label>Comentarios adicionales</Label>
-              <Textarea name="additionalComments" onChange={handleChange} />
+              <Textarea
+                name="additionalComments"
+                onChange={handleChange}
+                placeholder="Alguna necesidad especial,restricciones alimentarias,etc."
+              />
             </div>
 
             <Button type="submit" className="w-full mt-4">
