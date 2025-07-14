@@ -7,9 +7,7 @@ import Link from "next/link";
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Inicio", icon: <Sun className="w-5 h-5" /> },
-  { href: "/dashboard/proyectos", label: "Proyectos", icon: <Package className="w-5 h-5" /> },
-  { href: "/dashboard/editar", label: "Editar", icon: <Edit className="w-5 h-5" /> },
-  { href: "/dashboard/ver", label: "Ver", icon: <Eye className="w-5 h-5" /> },
+  { href: "/dashboard/productos", label: "Productos", icon: <Package className="w-5 h-5" /> },
 ];
 
 export const DashboardSidebar = () => (

@@ -1,6 +1,6 @@
 'use client';
 
-import { productos } from "@/src/app/utils/ProductosPreCargados";
+import { productos } from "../../app/utils/ProductosPreCargados";
 import {
   Table,
   TableBody,
