@@ -8,7 +8,7 @@ export const TopDonantes = () => {
     return (
         <div className="container mx-auto px-4">
             <h2 className="font-chewy text-4xl font-cooperativo font-black text-center mb-4 text-[#017d74]">Top Colaboradores</h2>
-            <p className="text-center text-gray-600 mb-12 text-lg max-w-3xl mx-auto">
+            <p className="font-bebas text-center text-gray-600 mb-12 text-lg max-w-3xl mx-auto">
                 Estas personas y organizaciones apoyan nuestro trabajo cooperativo con donaciones regulares. Su compromiso
                 hace posible que sigamos construyendo alternativas de economía social.
             </p>
@@ -20,11 +20,11 @@ export const TopDonantes = () => {
                             <div className="w-20 h-20 bg-[#922f4e] rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
                                 <span className="text-2xl font-black text-white">1</span>
                             </div>
-                            <CardTitle className="text-[#922f4e] text-xl font-bold">Cooperativa Textil Unidos</CardTitle>
+                            <CardTitle className="font-bebas text-[#922f4e] text-xl font-bold">Cooperativa Textil Unidos</CardTitle>
                             <Badge className="bg-[#922f4e] text-white font-bold">Compañero Impulsor</Badge>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-gray-700 font-medium mb-3">
+                            <p className="font-popular text-gray-700 font-medium mb-3">
                                 "Apoyamos a ROOTS porque creemos en la fuerza del trabajo cooperativo. Juntos construimos un futuro
                                 más justo."
                             </p>
@@ -39,11 +39,11 @@ export const TopDonantes = () => {
                             <div className="w-20 h-20 bg-[#febb07] rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
                                 <span className="text-2xl font-black text-white">2</span>
                             </div>
-                            <CardTitle className="text-[#f39d10] text-xl font-bold">María Elena Rodríguez</CardTitle>
+                            <CardTitle className="font-bebas text-[#f39d10] text-xl font-bold">Maria Elena Rodriguez</CardTitle>
                             <Badge className="bg-[#febb07] text-white font-bold">Compañera Fiel</Badge>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-gray-700 font-medium mb-3">
+                            <p className="font-popular text-gray-700 font-medium mb-3">
                                 "ROOTS representa todo lo que creo: feminismo, cooperativismo y amor por la comunidad. Es mi forma
                                 de ser parte."
                             </p>
@@ -58,11 +58,11 @@ export const TopDonantes = () => {
                             <div className="w-20 h-20 bg-[#017d74] rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
                                 <span className="text-2xl font-black text-white">3</span>
                             </div>
-                            <CardTitle className="text-[#017d74] text-xl font-bold">Fundación Semillas</CardTitle>
+                            <CardTitle className="font-bebas text-[#017d74] text-xl font-bold">Fundacion Semillas</CardTitle>
                             <Badge className="bg-[#017d74] text-white font-bold">Aliado Estratégico</Badge>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-gray-700 font-medium mb-3">
+                            <p className="font-popular text-gray-700 font-medium mb-3">
                                 "Compartimos la visión de soberanía alimentaria. ROOTS es un ejemplo de que otro mundo es posible y
                                 necesario."
                             </p>
