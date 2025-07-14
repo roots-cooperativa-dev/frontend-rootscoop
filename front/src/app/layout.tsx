@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "../context/authContext";
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: "Roots Cooperativa",
@@ -15,7 +17,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <AuthProvider>
+        <body>{children}</body>
+         <Toaster />
+      </AuthProvider>
     </html>
   );
 }
