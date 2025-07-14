@@ -25,7 +25,7 @@ const VistaPage = () => {
                 className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Volver al inicio</span>
+                <span className="font-chewy">Volver al inicio</span>
               </Link>
             </div>
           </div>
@@ -33,8 +33,10 @@ const VistaPage = () => {
       </header>
       <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-[#017d74]">Visitá ROOTS</h1>
-          <p className="mt-2 text-lg text-[#374151]">
+          <h1 className="text-4xl font-bold text-[#017d74] font-chewy">
+            Visita ROOTS
+          </h1>
+          <p className="mt-2 text-lg text-[#374151] font-bebas">
             Conocé nuestra planta de investigación, el proceso de fabricación de
             cerveza artesanal y la cocina donde nacen nuestras{" "}
             <span className="text-[#ff6b35] font-semibold">pizzas</span> y{" "}

@@ -30,7 +30,7 @@ export function TestimoniosBox() {
 
   return (
     <section className="py-12 px-4 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-bold text-center text-[#017d74] mb-10">
+      <h2 className="text-3xl font-bold text-center text-[#017d74] mb-10 font-chewy">
         Experiencias de nuestros visitantes
       </h2>
 
