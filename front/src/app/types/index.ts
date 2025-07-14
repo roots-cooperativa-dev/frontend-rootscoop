@@ -8,6 +8,11 @@ export interface IProducto {
   files: File[]; 
 }
 
+export enum Irole {
+    ADMIN = "admin",
+    USER = "user"
+}
+
 export interface Size {
   id: string;
   size: string;
