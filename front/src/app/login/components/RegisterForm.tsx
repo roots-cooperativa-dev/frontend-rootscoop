@@ -11,29 +11,31 @@ export default function RegisterForm() {
   const router = useRouter();
 
   const formik = useFormik({
-    initialValues: { 
-      name: "", 
-      email: "", 
+    initialValues: {
+      name: "",
+      email: "",
       password: "",
       confirmPassword: "",
       birthdate: "",
       phone: "",
-      username: ""
+      username: "",
     },
     validationSchema: Yup.object({
       name: Yup.string().required("Requerido"),
       email: Yup.string().email("Email inválido").required("Requerido"),
-      password: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
+      password: Yup.string()
+        .min(6, "Mínimo 6 caracteres")
+        .required("Requerido"),
       confirmPassword: Yup.string()
-        .oneOf([Yup.ref('password')], "Las contraseñas no coinciden")
+        .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
         .required("Requerido"),
       birthdate: Yup.string().required("Requerido"),
-      phone: Yup.string().required("Requerido"),
+      phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
       username: Yup.string().required("Requerido"),
     }),
     onSubmit: async (values) => {
       try {
-        const data = {
+        const data: RegisterDto = {
           name: values.name,
           email: values.email,
           password: values.password,
@@ -42,6 +44,7 @@ export default function RegisterForm() {
           phone: Number(values.phone),
           username: values.username,
         };
+        console.log(data);
         await postRegister(data);
         toast.success("Usuario registrado correctamente");
         setTimeout(() => {

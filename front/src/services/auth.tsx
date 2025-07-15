@@ -1,7 +1,9 @@
 import axios from "axios";
+const urlBack = "https://roots-api-te93.onrender.com";
+const urlLocal = "http://localhost:3003"
 
 const axiosApiBack = axios.create({
-  baseURL: "http://localhost:3003",
+  baseURL: urlBack,
   headers: {
     "Content-Type": "application/json",
   },
@@ -20,8 +22,8 @@ export const postLogin = async (data: LoginDto) => {
 };
 
 export const loginGoogle = async (data: any) => {
-  const response = window.location.href = "http://localhost:3003/auth/google";
-
+  const response = window.location.href = "https://roots-api-te93.onrender.com/auth/google";
+  console.log(response)
   if (!response) throw new Error("Error en login con Google");
   return {
     message: "Sesión iniciada correctamente con Google",

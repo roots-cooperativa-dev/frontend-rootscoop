@@ -11,7 +11,6 @@ interface Iuser {
     username: string
     password: string
     confirmPassword: string
-    //orders: Iorder[];
 }
 enum Irole {
     ADMIN = "admin",
