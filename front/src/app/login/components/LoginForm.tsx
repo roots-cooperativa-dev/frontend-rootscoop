@@ -35,7 +35,7 @@ export default function LoginForm() {
 
         router.push(routes.home);
       } catch (error: any) {
-        // toast.error(error.message || "Error al iniciar sesión");
+        toast.error(error.message || "Error al iniciar sesión");
         console.error(error);
       } finally {
         setLoading(false);
@@ -44,7 +44,7 @@ export default function LoginForm() {
   });
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3003/auth/google";
+    window.location.href = "https://roots-api-te93.onrender.com/auth/google";
   };
 
   return (
