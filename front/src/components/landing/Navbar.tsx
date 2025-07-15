@@ -5,6 +5,7 @@ import { Badge } from "../ui/badge"
 import Link from "next/link"
 import { Button } from "../ui/button"
 import Image from "next/image"
+import AuthNav from "../authNav/authNav"
 
 export const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -42,9 +43,10 @@ export const Navbar = () => {
                     <Link href="/contacto" className="font-bebas text-white/90 hover:text-white transition-colors font-medium">
                         Contacto
                     </Link>
-                    <Button className="font-bebas bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg" asChild>
+                    {/* <Button className="font-bebas bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg" asChild>
                         <Link href="/login">Iniciar sesión</Link>
-                    </Button>
+                    </Button> */}
+                    <AuthNav/>
                 </div>
                 {/* Mobile Menu Button */}
                 <button
