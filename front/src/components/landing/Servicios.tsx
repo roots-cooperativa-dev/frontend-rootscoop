@@ -1,6 +1,6 @@
 'use client';
 
-import { ShoppingBag,Calendar, Gift, MapPin } from "lucide-react";
+import { ShoppingBag, Calendar, Gift, MapPin } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import Link from "next/link";
@@ -13,7 +13,7 @@ export const Servicios = () => {
                 Hay muchas formas de ser parte de esta construccion colectiva. Cada aporte suma, cada gesto cuenta.
             </p>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="hover:shadow-2xl transition-all transform hover:-translate-y-3 border-2 border-[#922f4e]/20 hover:border-[#922f4e]">
+                <Card className="flex flex-col justify-between hover:shadow-2xl transition-all transform hover:-translate-y-3 border-2 border-[#922f4e]/20 hover:border-[#922f4e]">
                     <CardHeader className="text-center">
                         <div className="w-16 h-16 bg-[#922f4e] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <ShoppingBag className="w-8 h-8 text-white" />
@@ -28,7 +28,7 @@ export const Servicios = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="hover:shadow-2xl transition-all transform hover:-translate-y-3 border-2 border-[#017d74]/20 hover:border-[#017d74]">
+                <Card className="flex flex-col justify-between hover:shadow-2xl transition-all transform hover:-translate-y-3 border-2 border-[#922f4e]/20 hover:border-[#922f4e]">
                     <CardHeader className="text-center">
                         <div className="w-16 h-16 bg-[#017d74] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <Calendar className="w-8 h-8 text-white" />
@@ -43,7 +43,7 @@ export const Servicios = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="hover:shadow-2xl transition-all transform hover:-translate-y-3 border-2 border-[#febb07]/20 hover:border-[#febb07]">
+                <Card className="flex flex-col justify-between hover:shadow-2xl transition-all transform hover:-translate-y-3 border-2 border-[#922f4e]/20 hover:border-[#922f4e]">
                     <CardHeader className="text-center">
                         <div className="w-16 h-16 bg-[#febb07] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <Gift className="w-8 h-8 text-white" />
@@ -57,7 +57,7 @@ export const Servicios = () => {
                         </Button>
                     </CardContent>
                 </Card>
-                <Card className="hover:shadow-2xl transition-all transform hover:-translate-y-3 border-2 border-[#642d91]/20 hover:border-[#642d91]">
+                <Card className="flex flex-col justify-between hover:shadow-2xl transition-all transform hover:-translate-y-3 border-2 border-[#922f4e]/20 hover:border-[#922f4e]">
                     <CardHeader className="text-center">
                         <div className="w-16 h-16 bg-[#642d91] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <MapPin className="w-8 h-8 text-white" />
