@@ -129,13 +129,22 @@ export const Productos = () => {
                                             </div>
                                             <span className="text-sm text-gray-600 ml-2">(12 reseñas)</span>
                                         </div>
-                                        <Button
-                                            className={`w-full ${producto.sizes[0]?.stock > 0 ? "bg-[#922f4e] hover:bg-[#642d91] text-white" : "bg-gray-400 text-gray-600"}`}
-                                            disabled={producto.sizes[0]?.stock === 0}
-                                            asChild={producto.sizes[0]?.stock > 0}
-                                        >
-                                            {producto.sizes[0]?.stock > 0 ? <Link href="/login">Comprar ahora</Link> : "Agotado"}
-                                        </Button>
+                                        <div className="space-y-2">
+                                            <Button
+                                                className={`w-full ${producto.sizes[0]?.stock > 0 ? "bg-[#922f4e] hover:bg-[#642d91] text-white" : "bg-gray-400 text-gray-600"}`}
+                                                disabled={producto.sizes[0]?.stock === 0}
+                                                asChild={producto.sizes[0]?.stock > 0}
+                                            >
+                                                {producto.sizes[0]?.stock > 0 ? <Link href="/login">Comprar ahora</Link> : "Agotado"}
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full text-[#017d74] border-[#017d74] hover:bg-[#017d74] hover:text-white"
+                                                asChild
+                                            >
+                                                <Link href={`/productos/${producto.id}`}>Ver más</Link>
+                                            </Button>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             ))}
@@ -143,10 +152,33 @@ export const Productos = () => {
                         </div>
                     </>
                 )}
-
-                {/* Sección informativa (sin cambios) */}
                 <div className="mt-16 bg-gray-50 rounded-lg p-8">
-                    {/* ... */}
+                    <div className="text-center mb-8">
+                        <h2 className="text-2xl font-bold text-[#017d74] mb-4">¿Por qué comprar productos ROOTS?</h2>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-8">
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-[#922f4e] rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Heart className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="font-semibold mb-2 text-[#922f4e]">Apoyo Cooperativo</h3>
+                            <p className="text-gray-600">Cada compra fortalece nuestro trabajo colectivo y la economía social.</p>
+                        </div>
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-[#017d74] rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Star className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="font-semibold mb-2 text-[#017d74]">Calidad Artesanal</h3>
+                            <p className="text-gray-600">Productos únicos creados con amor y dedicación por artistas locales.</p>
+                        </div>
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-[#642d91] rounded-full flex items-center justify-center mx-auto mb-4">
+                                <ShoppingBag className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="font-semibold mb-2 text-[#642d91]">Identidad Cooperativa</h3>
+                            <p className="text-gray-600">Llevá con vos los valores y la historia de ROOTS.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
