@@ -29,10 +29,10 @@ export default function LoginForm() {
       setLoading(true);
       try {
         const response = await postLogin(values);
-        const { user, token } = response.data;
+        const { user, accessToken } = response.data;
         const { credentials, ...userInfo } = user;
-
-        saveUserData({ token, user: userInfo, isAuth: true });
+        
+        saveUserData({ accessToken, user: userInfo, isAuth: true });
         toast.success("Sesión iniciada correctamente");
 
         router.push(routes.home);
@@ -47,6 +47,7 @@ export default function LoginForm() {
 
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
+    //en local reemplazar por http://localhost:3001
     window.location.href = "https://roots-api-te93.onrender.com/auth/google";
   };
 

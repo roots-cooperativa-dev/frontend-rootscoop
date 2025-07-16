@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { useAuthContext } from "@/src/context/authContext";
 import { useRouter } from "next/navigation";
 import { IoLogOut } from "react-icons/io5";
+import { Footer } from "@/src/components/landing/Footer";
 
 const Profile = () => {
   const { isAuth, resetUserData } = useAuthContext();
@@ -49,6 +50,7 @@ const Profile = () => {
         </div>
       </header>
       <DataUser />
+      <Footer/>
     </>
   );
 };
