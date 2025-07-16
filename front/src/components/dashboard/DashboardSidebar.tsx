@@ -1,12 +1,13 @@
 'use client';
 
-import { Sun, Package, Edit, Eye, Plus, LogOut } from "lucide-react";
+import { Sun, Package, ChartBarStacked , Eye, Plus, LogOut } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import Link from "next/link";
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Inicio", icon: <Sun className="w-5 h-5" /> },
+  { href: "/dashboard/categorias", label: "Categorias", icon: <ChartBarStacked className="w-5 h-5" /> },
   { href: "/dashboard/productos", label: "Productos", icon: <Package className="w-5 h-5" /> },
 ];
 

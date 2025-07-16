@@ -4,22 +4,24 @@ import { Sun, Eye, LogOut } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
 import Link from "next/link"
+import Image from "next/image"
 
 
 export const DashboardNavbar = () => {
-    return (
-        <div>
-          <header className="bg-white border-b shadow-sm">
+  return (
+    <div>
+      <header className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-[#017d74] rounded-full flex items-center justify-center shadow-lg">
-                <Sun className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <span className="text-2xl font-black text-[#017d74]">ROOTS</span>
-                <Badge className="ml-2 bg-[#922f4e] text-white">Admin</Badge>
-              </div>
+              <Image
+                src="/logos/roots.png"
+                alt="Rootscoop Logo"
+                width={300}
+                height={40}
+                className="rounded-full object-contain"
+                priority
+              />
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="outline" className="border-[#017d74] text-[#017d74] bg-transparent" asChild>
@@ -36,6 +38,6 @@ export const DashboardNavbar = () => {
           </div>
         </div>
       </header>
-        </div>
-    )
+    </div>
+  )
 }

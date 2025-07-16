@@ -41,6 +41,10 @@ export const GestionProductos = () => {
       <h1 className="text-2xl font-bold">Gestión de Productos</h1>
 
       <Card>
+        <Button className="mt-4 bg-[#017d74] hover:bg-[#015f5c] text-white">
+          <Plus className="w-4 h-4 mr-2" />
+          Agregar Producto
+        </Button>
         <CardHeader>
           <CardTitle>Productos</CardTitle>
           <CardDescription>Lista de productos disponibles</CardDescription>
@@ -94,7 +98,7 @@ export const GestionProductos = () => {
                         <Button variant="outline" size="sm" className="text-yellow-600">
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="destructive" size="sm" className="text-red-600">
+                        <Button variant="destructive" size="sm" className="text-white-600">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </TableCell>
@@ -105,10 +109,7 @@ export const GestionProductos = () => {
             </div>
           )}
 
-          <Button className="mt-4 bg-[#017d74] hover:bg-[#015f5c] text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar Producto
-          </Button>
+
         </CardContent>
       </Card>
     </div>
