@@ -12,16 +12,13 @@ export default function ClientPage() {
 
   useEffect(() => {
     const token = searchParams.get("token");
-    const id = searchParams.get("id");
-    const name = searchParams.get("name");
-    const email = searchParams.get("email");
 
-    if (token && name && email && id) {
-      const user = { name, email, id };
-      saveUserData({ token, user, isAuth: true });
+    if (token) {
+      console.log(token)
       toast.success("Inicio de sesión con Google exitoso");
       router.push("/");
     } else {
+      console.log(token)
       console.log("Error al iniciar sesión");
       toast.error("Error al iniciar sesión con Google");
       router.push("/login");
