@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 type SaveUserPayLoad = {
     user: UserGoogle;
-    token: string;
+    accessToken: string;
     isAuth: boolean
 }
 type AuthContextType = {
@@ -22,9 +22,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [isAuth, setIsAuth] = useState<AuthContextType["isAuth"]>(null);
 
+
   const saveUserData = (data: SaveUserPayLoad) => {
       setUser(data.user);
-      setToken(data.token);
+      setToken(data.accessToken);
       setIsAuth(data.isAuth);
       localStorage.setItem(USER_LOCAL_KEY, JSON.stringify(data));
   }

@@ -25,7 +25,7 @@ const DataUser = () => {
   if (!user) return null;
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4">
+    <div className="max-w-2xl mx-auto py-8 px-4 h-[80vh]">
       <h1 className="text-3xl font-bold mb-4">Datos personales</h1>
       <p>Nombre: {user.name}</p>
       <p>Email: {user.email}</p>
