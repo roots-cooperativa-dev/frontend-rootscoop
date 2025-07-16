@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Input } from "../../../components/ui/input";
@@ -6,9 +7,13 @@ import { Button } from "../../../components/ui/button";
 import { postRegister } from "@/src/services/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 importa los íconos
 
 export default function RegisterForm() {
   const router = useRouter();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -35,7 +40,7 @@ export default function RegisterForm() {
     }),
     onSubmit: async (values) => {
       try {
-        const data: RegisterDto = {
+        const data = {
           name: values.name,
           email: values.email,
           password: values.password,
@@ -44,7 +49,6 @@ export default function RegisterForm() {
           phone: Number(values.phone),
           username: values.username,
         };
-        console.log(data);
         await postRegister(data);
         toast.success("Usuario registrado correctamente");
         setTimeout(() => {
@@ -80,24 +84,42 @@ export default function RegisterForm() {
         <p className="text-red-500 text-xs">{formik.errors.email}</p>
       )}
 
-      <Input
-        type="password"
-        name="password"
-        placeholder="********"
-        value={formik.values.password}
-        onChange={formik.handleChange}
-      />
+      <div className="relative">
+        <Input
+          type={showPassword ? "text" : "password"}
+          name="password"
+          placeholder="********"
+          value={formik.values.password}
+          onChange={formik.handleChange}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+        >
+          {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+        </button>
+      </div>
       {formik.touched.password && formik.errors.password && (
         <p className="text-red-500 text-xs">{formik.errors.password}</p>
       )}
 
-      <Input
-        type="password"
-        name="confirmPassword"
-        placeholder="Repetir contraseña"
-        value={formik.values.confirmPassword}
-        onChange={formik.handleChange}
-      />
+      <div className="relative">
+        <Input
+          type={showConfirmPassword ? "text" : "password"}
+          name="confirmPassword"
+          placeholder="Repetir contraseña"
+          value={formik.values.confirmPassword}
+          onChange={formik.handleChange}
+        />
+        <button
+          type="button"
+          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+        >
+          {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+        </button>
+      </div>
       {formik.touched.confirmPassword && formik.errors.confirmPassword && (
         <p className="text-red-500 text-xs">{formik.errors.confirmPassword}</p>
       )}

@@ -3,12 +3,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 type SaveUserPayLoad = {
-    user: Iuser;
+    user: UserGoogle;
     token: string;
     isAuth: boolean
 }
 type AuthContextType = {
-  user: Iuser | null;
+  user: UserGoogle | null;
   token?: string | null;
   isAuth: boolean | null;
   saveUserData: (data: SaveUserPayLoad) => void
