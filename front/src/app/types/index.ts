@@ -4,7 +4,7 @@ export interface IProducto {
   details: string;
   isDeleted: boolean;
   sizes: Size[];
-  category: Category;
+  category: ICategory;
   files: File[]; 
 }
 
@@ -18,11 +18,6 @@ export interface Size {
   size: string;
   price: number;
   stock: number;
-}
-
-export interface Category {
-  id: string;
-  name: string;
 }
 
 export interface File {
