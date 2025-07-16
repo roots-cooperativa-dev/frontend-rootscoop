@@ -1,19 +1,21 @@
 "use client";
+import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { loginGoogle, postLogin } from "@/src/services/auth";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { routes } from "../../../routes";
 import { useAuthContext } from "@/src/context/authContext";
-import { toast } from "sonner"; // o tu librería de notificaciones
+import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Importa los iconos
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // 👀 Estado para mostrar/ocultar contraseña
   const { saveUserData } = useAuthContext();
   const router = useRouter();
 
@@ -44,6 +46,7 @@ export default function LoginForm() {
   });
 
   const handleGoogleLogin = () => {
+    setGoogleLoading(true);
     window.location.href = "https://roots-api-te93.onrender.com/auth/google";
   };
 
@@ -61,18 +64,27 @@ export default function LoginForm() {
           <p className="text-red-500 text-xs">{formik.errors.email}</p>
         )}
       </div>
-      <div>
+
+      <div className="relative">
         <Input
-          type="password"
+          type={showPassword ? "text" : "password"}
           name="password"
           placeholder="********"
           value={formik.values.password}
           onChange={formik.handleChange}
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+        >
+          {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+        </button>
         {formik.touched.password && formik.errors.password && (
           <p className="text-red-500 text-xs">{formik.errors.password}</p>
         )}
       </div>
+
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Ingresando..." : "Ingresar"}
       </Button>
@@ -83,9 +95,7 @@ export default function LoginForm() {
         className="w-full bg-gray-100 hover:bg-gray-200 text-black border border-gray-300 flex items-center justify-center gap-2"
       >
         <FcGoogle className="w-5 h-5" />
-        {googleLoading
-          ? "Conectando con Google..."
-          : "Iniciar sesión con Google"}
+        {googleLoading ? "Conectando con Google..." : "Iniciar sesión con Google"}
       </Button>
     </form>
   );

@@ -1,42 +1,36 @@
 "use client";
+
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthContext } from "@/src/context/authContext";
-import {Irole} from "../../../types"; // ajustá la ruta a donde tengas tu enum Irole
-import { number } from "yup";
+import { toast } from "sonner";
 
 export default function GoogleCallbackPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { saveUserData } = useAuthContext();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    const id = params.get("id");
-    const name = params.get("name");
-    const email = params.get("email");
+    const token = searchParams.get("token");
+    const id = searchParams.get("id");
+    const name = searchParams.get("name");
+    const email = searchParams.get("email");
+    console.log(name)
+    if (token && name && email && id) {
+      const user = { name, email, id };
 
-    if (token && id && name && email) {
-      saveUserData({
-        token,
-        user: {
-          name,
-          email,
-          birthdate: "",     // vacíos temporalmente
-          phone: 0,
-          username:"",
-          password: "",
-          confirmPassword: ""
-        },
-        isAuth: true,
-      });
+      // Guardar en el contexto
+      saveUserData({ token, user, isAuth: true });
 
-      router.push("/");
+      toast.success("Inicio de sesión con Google exitoso");
+
+      router.push("/"); // Redirige al home
     } else {
-      console.error("Faltan datos en la URL de callback");
+      console.log("error al iniciar sesion");
+      toast.error("Error al iniciar sesión con Google");
       router.push("/login");
     }
-  }, [router, saveUserData]);
+  }, [searchParams, saveUserData, router]);
 
-  return <p>Conectando con Google...</p>;
+  return <p>Conectando...</p>;
 }
