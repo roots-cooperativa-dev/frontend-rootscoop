@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
 
-export default function GoogleCallbackClient() {
+export default function ClientPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { saveUserData } = useAuthContext();
@@ -20,7 +20,7 @@ export default function GoogleCallbackClient() {
       const user = { name, email, id };
       saveUserData({ token, user, isAuth: true });
       toast.success("Inicio de sesión con Google exitoso");
-      router.push("/"); // Redirige al home
+      router.push("/");
     } else {
       console.log("Error al iniciar sesión");
       toast.error("Error al iniciar sesión con Google");
