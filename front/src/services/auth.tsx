@@ -22,7 +22,7 @@ export const postLogin = async (data: LoginDto) => {
 };
 
 export const loginGoogle = async (data: any) => {
-  const response = window.location.href = "https://roots-api-te93.onrender.com/auth/google";
+  const response = window.location.href = "http://localhost:3001/auth/google";
   console.log(response)
   if (!response) throw new Error("Error en login con Google");
   return {

@@ -26,7 +26,6 @@ export const Productos = () => {
 
     return (
         <div className="min-h-screen bg-white">
-            {/* Header (igual que antes) */}
             <header className="bg-white border-b shadow-sm">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
@@ -55,7 +54,6 @@ export const Productos = () => {
                     </div>
                 </div>
             </header>
-
             <div className="container mx-auto px-4 py-8">
                 <div className="text-center mb-12">
                     <h1 className="font-chewy text-5xl font-black text-[#017d74] mb-4">Productos ROOTS</h1>
@@ -64,15 +62,12 @@ export const Productos = () => {
                         <span className="text-[#922f4e] font-bold"> economía social</span>.
                     </p>
                 </div>
-
-                {/* Loading o Sin Productos */}
                 {loading ? (
                     <p className="text-center text-gray-500">Cargando productos...</p>
                 ) : productos.length === 0 ? (
                     <p className="text-center text-gray-500">No se encontraron productos.</p>
                 ) : (
                     <>
-                        {/* Filtros (pueden mantenerse igual) */}
                         <div className="flex flex-wrap gap-2 mb-8 justify-center">
                             <Badge className="cursor-pointer bg-[#922f4e] text-white hover:bg-[#642d91]">Todos</Badge>
                             <Badge variant="outline" className="cursor-pointer border-[#017d74] text-[#017d74] hover:bg-[#017d74] hover:text-white">Indumentaria</Badge>
@@ -80,8 +75,6 @@ export const Productos = () => {
                             <Badge variant="outline" className="cursor-pointer border-[#f39d10] text-[#f39d10] hover:bg-[#f39d10] hover:text-white">Accesorios</Badge>
                             <Badge variant="outline" className="cursor-pointer border-[#642d91] text-[#642d91] hover:bg-[#642d91] hover:text-white">Papelería</Badge>
                         </div>
-
-                        {/* Grid de productos */}
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {productos.map((producto) => (
                                 <Card
@@ -148,7 +141,6 @@ export const Productos = () => {
                                     </CardContent>
                                 </Card>
                             ))}
-
                         </div>
                     </>
                 )}

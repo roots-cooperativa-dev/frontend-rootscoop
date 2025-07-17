@@ -4,6 +4,7 @@ import { useAuthContext } from "../../../context/authContext";
 import { routes } from "../../../routes";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { Card, CardHeader, CardTitle } from "@/src/components/ui/card";
 
 const DataUser = () => {
   const { user, token } = useAuthContext();
@@ -25,10 +26,14 @@ const DataUser = () => {
   if (!user) return null;
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 h-[80vh]">
-      <h1 className="text-3xl font-bold mb-4">Datos personales</h1>
-      <p>Nombre: {user.name}</p>
-      <p>Email: {user.email}</p>
+    <div className="flex flex-col w-screen m-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Datos personales</CardTitle>
+          <p>Nombre: {user.name}</p>
+          <p>Email: {user.email}</p>
+        </CardHeader>
+      </Card>
     </div>
   );
 };

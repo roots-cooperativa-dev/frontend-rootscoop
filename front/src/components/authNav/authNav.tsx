@@ -5,12 +5,7 @@ import { IoLogOut } from "react-icons/io5";
 import { Button } from "../ui/button";
 
 const AuthNav = () => {
-  const {isAuth, resetUserData } = useAuthContext();
-  const router = useRouter();
-  const Logout = () => {
-    resetUserData();
-    router.push("/");
-  };
+  const {isAuth } = useAuthContext();
   if (isAuth === null) return <p>...cargando</p>;
   if (isAuth) {
     return (
@@ -21,12 +16,6 @@ const AuthNav = () => {
         >
           <Link href="/profile">Perfil</Link>
         </Button>
-        <button
-          className="text-sm  text-blue-600 dark:text-blue-500 hover:underline "
-          onClick={Logout}
-        >
-          <IoLogOut className="h-6 w-6" />
-        </button>
       </div>
     );
   }
