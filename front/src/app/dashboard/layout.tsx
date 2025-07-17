@@ -1,23 +1,26 @@
+"use client"
 
-import { DashboardNavbar } from '../../components/dashboard/DashboardNavbar';
-import { DashboardSidebar } from '../../components/dashboard/DashboardSidebar';
+import type React from "react"
+
+import { DashboardNavbar } from "@/src/components/dashboard/DashboardNavbar"
+import { DashboardSidebar } from "@/src/components/dashboard/DashboardSidebar"
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
-
-
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <DashboardNavbar />
-      <div className="flex flex-1">
-        <DashboardSidebar />
-        <main className="flex-1 p-6 bg-background text-foreground">{children}</main>
+    <div className="flex h-screen bg-gray-50">
+      <DashboardSidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <DashboardNavbar />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto px-6 py-8">{children}</div>
+        </main>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DashboardLayout;
+export default DashboardLayout
