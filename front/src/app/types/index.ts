@@ -22,9 +22,9 @@ export interface Size {
 
 export interface File {
 
-  id?: string;
-  url?: string;
-  name?: string;
+  id: string;
+  url: string;
+  name: string;
 }
 
 export interface ICategory {

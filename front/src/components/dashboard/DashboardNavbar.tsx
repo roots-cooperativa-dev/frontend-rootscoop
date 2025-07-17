@@ -1,43 +1,114 @@
-'use client'
+"use client"
 
-import { Sun, Eye, LogOut } from "lucide-react"
+import { Sun, Eye, LogOut, Bell, Search, User, ChevronDown } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
+import { Input } from "../../components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu"
 import Link from "next/link"
 import Image from "next/image"
 
-
 export const DashboardNavbar = () => {
   return (
-    <div>
-      <header className="bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+    <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200/60 shadow-sm sticky top-0 z-50">
+      <div className="container mx-auto px-6 py-3">
+        <div className="flex items-center justify-between">
+          {/* Logo Section */}
+          <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <Image
-                src="/logos/roots.png"
-                alt="Rootscoop Logo"
-                width={300}
-                height={40}
-                className="rounded-full object-contain"
-                priority
-              />
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" className="border-[#017d74] text-[#017d74] bg-transparent" asChild>
-                <Link href="/">
-                  <Eye className="w-4 h-4 mr-2" />
-                  Ver sitio
-                </Link>
-              </Button>
-              <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-50 bg-transparent">
-                <LogOut className="w-4 h-4 mr-2" />
-                Cerrar sesión
-              </Button>
+              <div className="hidden md:block h-6 w-px bg-gray-300"></div>
             </div>
           </div>
+
+          {/* Search Bar - Hidden on mobile */}
+          <div className="hidden lg:flex flex-1 max-w-md mx-8">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Buscar..."
+                className="pl-10 bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Right Section */}
+          <div className="flex items-center space-x-3">
+            {/* Notifications */}
+            <Button variant="ghost" size="sm" className="relative p-2 hover:bg-gray-100">
+              <Bell className="w-5 h-5 text-gray-600" />
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-red-500 text-white text-xs flex items-center justify-center">
+                3
+              </Badge>
+            </Button>
+
+            {/* View Site Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-[#017d74] text-[#017d74] bg-transparent hover:bg-[#017d74]/5 transition-all duration-200 font-medium"
+              asChild
+            >
+              <Link href="/">
+                <Eye className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Ver sitio</span>
+              </Link>
+            </Button>
+
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-2 hover:bg-gray-100 p-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Usuario" />
+                    <AvatarFallback className="bg-[#017d74] text-white text-sm">U</AvatarFallback>
+                  </Avatar>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-medium text-gray-900">Usuario</p>
+                    <p className="text-xs text-gray-500">Administrador</p>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <User className="w-4 h-4 mr-2" />
+                  Perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Sun className="w-4 h-4 mr-2" />
+                  Configuración
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Cerrar sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </header>
-    </div>
+
+        {/* Mobile Search Bar */}
+        <div className="lg:hidden mt-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Buscar..."
+              className="pl-10 bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
   )
 }

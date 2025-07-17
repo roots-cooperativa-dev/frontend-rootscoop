@@ -2,14 +2,31 @@ import { ICategory } from "../types";
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const getAuthHeader = () => {
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZTkwYmIzYS0xNDExLTQ1NGItOWY5My04OTZlZTg2OTc0ZDYiLCJlbWFpbCI6Im1hcmNvc0BnbWFpbC5jb20iLCJuYW1lIjoiTWFyY29zIiwiaXNBZG1pbiI6dHJ1ZSwiaXNEb25hdG9yIjpmYWxzZSwiaWF0IjoxNzUyNjI2MzU4fQ.t2KQx5USFp1idASvtpBSDNa6Mav6a4UwLiGZVVZjAG4";
+    const userString = localStorage.getItem("user");
+    let token = "";
+
+    if (userString) {
+        try {
+            const user = JSON.parse(userString);
+            token = user.accessToken;
+        } catch (error) {
+            console.error("Error parsing user from localStorage:", error);
+        }
+    } else {
+        console.warn("No user found in localStorage.");
+    }
+
     return {
         headers: {
             Authorization: `Bearer ${token}`,
         },
     };
 };
+
+
+
 
 export const fetchCategorias = async (): Promise<ICategory[]> => {
     try {
@@ -36,7 +53,7 @@ export const crearCategoria = async (name: string): Promise<ICategory | null> =>
 };
 
 export const actualizarCategoria = async (
-    id: number,
+    id: string,
     name: string
 ): Promise<ICategory | null> => {
     try {
@@ -53,11 +70,22 @@ export const actualizarCategoria = async (
 };
 
 export const eliminarCategoria = async (id: string): Promise<boolean> => {
+    if (!id || id === "NaN") {
+        console.error("ID inválido para eliminación de categoría:", id);
+        return false;
+    }
+
     try {
         await axios.delete(`${API_URL}/category/${id}`, getAuthHeader());
         return true;
-    } catch (error) {
-        console.error("Error deleting categoria:", error);
+    } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+            console.error("Error response:", error.response?.data);
+        } else {
+            console.error("Error deleting categoria:", error);
+        }
         return false;
     }
 };
+
+
