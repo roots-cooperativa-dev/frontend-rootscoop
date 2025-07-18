@@ -37,7 +37,6 @@ export const getUserById = async (id: string, token: string) => {
       Authorization: `Bearer ${token}`,
     },
   });
-
   if (!response.data) throw new Error("No se pudieron obtener los datos del usuario");
 
   return response.data;

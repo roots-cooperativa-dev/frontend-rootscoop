@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Input } from "../../../components/ui/input";
@@ -6,11 +7,11 @@ import { Button } from "../../../components/ui/button";
 import { postRegister } from "@/src/services/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useState } from "react";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 importa los íconos
 
 export default function RegisterForm() {
   const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -39,7 +40,7 @@ export default function RegisterForm() {
     }),
     onSubmit: async (values) => {
       try {
-        const data: RegisterDto = {
+        const data = {
           name: values.name,
           email: values.email,
           password: values.password,
@@ -48,9 +49,8 @@ export default function RegisterForm() {
           phone: Number(values.phone),
           username: values.username,
         };
-        console.log(data);
         await postRegister(data);
-        toast.success("Usuario registrado correctamente, Inicia sesion");
+        toast.success("Usuario registrado correctamente");
         setTimeout(() => {
           router.push("/login");
         }, 2000);
@@ -73,6 +73,17 @@ export default function RegisterForm() {
         <p className="text-red-500 text-xs">{formik.errors.name}</p>
       )}
 
+      <Input
+        type="email"
+        name="email"
+        placeholder="tu@email.com"
+        value={formik.values.email}
+        onChange={formik.handleChange}
+      />
+      {formik.touched.email && formik.errors.email && (
+        <p className="text-red-500 text-xs">{formik.errors.email}</p>
+      )}
+
       <div className="relative">
         <Input
           type={showPassword ? "text" : "password"}
@@ -89,10 +100,6 @@ export default function RegisterForm() {
           {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
         </button>
       </div>
-      {formik.touched.email && formik.errors.email && (
-        <p className="text-red-500 text-xs">{formik.errors.email}</p>
-      )}
-
       {formik.touched.password && formik.errors.password && (
         <p className="text-red-500 text-xs">{formik.errors.password}</p>
       )}
@@ -119,7 +126,6 @@ export default function RegisterForm() {
 
       <Input
         name="birthdate"
-        placeholder="Ingresa tu fecha de nacimiento"
         type="date"
         value={formik.values.birthdate}
         onChange={formik.handleChange}
