@@ -30,3 +30,15 @@ export const loginGoogle = async (data: any) => {
     data: response,
   };
 };
+
+export const getUserById = async (id: string, token: string) => {
+  const response = await axiosApiBack.get(`/users/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.data) throw new Error("No se pudieron obtener los datos del usuario");
+
+  return response.data;
+};
