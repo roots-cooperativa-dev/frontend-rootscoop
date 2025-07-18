@@ -30,7 +30,7 @@ import {
   DropdownMenuSeparator,
 } from "../../components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import type { IProducto } from "../../app/types/index"
+import type { IProducto } from "../../app/types"
 import Link from "next/link"
 import { cn } from "../../lib/utils"
 
