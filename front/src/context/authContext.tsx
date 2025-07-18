@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setToken(data.accessToken);
       setIsAuth(data.isAuth);
       localStorage.setItem(USER_LOCAL_KEY, JSON.stringify(data));
+      console.log(data.accessToken)
   }
   const resetUserData = () => {
       setUser(null);
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const storageType = storage as any;
     setUser(storage?.user);
     setIsAuth(storage?.isAuth);
-    setToken(storageType?.token);
+    setToken(storageType?.accessToken);
   }, [])
   return (
     <authContext.Provider value={{ user, token, isAuth, saveUserData, resetUserData }}>
