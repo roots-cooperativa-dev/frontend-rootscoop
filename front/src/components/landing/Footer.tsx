@@ -13,7 +13,7 @@ export const Footer = () => {
                             <Image
                                 src="/logos/roots.png"
                                 alt="Rootscoop Logo"
-                                width={300}
+                                width={70}
                                 height={40}
                                 className="rounded-full object-contain"
                                 priority

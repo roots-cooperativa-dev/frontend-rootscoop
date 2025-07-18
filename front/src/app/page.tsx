@@ -9,6 +9,7 @@ import { ProductoDestacado } from "../components/landing/ProductoDestacado"
 import { TopDonantes } from "../components/landing/TopDonantes"
 import { Servicios } from "../components/landing/Servicios"
 import { Footer } from "../components/landing/Footer"
+import { BotonScroll } from "../components/landing/Ui/BotonScrool"
 
 export default function Home() {
   return (
@@ -43,7 +44,8 @@ export default function Home() {
       <section className="py-16 bg-gray-50">
         <Servicios />
       </section>
-        <Footer />
+      <Footer />
+      <BotonScroll />
     </>
   )
 }

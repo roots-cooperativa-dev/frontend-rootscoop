@@ -19,48 +19,26 @@ const getAuthHeader = () => {
     }
 
     return {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
+        Authorization: `Bearer ${token}`,
     };
 };
 
-/**
- * Sube uno o varios archivos y devuelve un array con sus IDs
- * @param files FileList o array de Files
- */
-export const uploadFile = async (
-    files: FileList | File[]
-): Promise<string[]> => {
-    const uploadedIds: string[] = [];
-
-    for (const file of Array.from(files)) {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        try {
-            const response = await axios.post(
-                `${API_URL}/file-upload/uploadImg`,
-                formData,
-                getAuthHeader()
-            );
-            uploadedIds.push(response.data.id); // ← Asegurate que tu backend devuelve `id`
-        } catch (error) {
-            console.error("Error al subir imagen:", error);
-        }
-    }
-
-    return uploadedIds;
-};
-export const fetchProductos = async (): Promise<IProducto[]> => {
+export const fetchProductos = async (
+    page: number = 1,
+    limit: number = 10
+    
+): Promise<IProducto[]> => {
     try {
-        const response = await axios.get<IProducto[]>(`${API_URL}/products`);
+        const response = await axios.get<IProducto[]>(`${API_URL}/products`, {
+            params: { page, limit }
+        });
         return response.data;
     } catch (error) {
         console.error("Error fetching productos:", error);
         return [];
     }
 };
+
 
 export const fetchProductoById = async (id: string): Promise<IProducto | null> => {
     try {
@@ -77,7 +55,7 @@ export const crearProducto = async (producto: ProductoDTO): Promise<IProducto | 
         const response = await axios.post<IProducto>(
             `${API_URL}/products`,
             producto,
-            getAuthHeader()
+            { headers: getAuthHeader() }
         );
         return response.data;
     } catch (error) {
@@ -94,7 +72,7 @@ export const actualizarProducto = async (
         const response = await axios.put<IProducto>(
             `${API_URL}/products/${id}`,
             productoActualizado,
-            getAuthHeader()
+            { headers: getAuthHeader() }
         );
         return response.data;
     } catch (error) {
@@ -105,10 +83,32 @@ export const actualizarProducto = async (
 
 export const eliminarProducto = async (id: string): Promise<boolean> => {
     try {
-        await axios.delete(`${API_URL}/products/${id}`, getAuthHeader());
+        await axios.delete(`${API_URL}/products/${id}`, {
+            headers: getAuthHeader()
+        });
         return true;
     } catch (error) {
         console.error(`Error eliminando producto con ID ${id}:`, error);
         return false;
+    }
+};
+
+export const subirImagen = async (file: File, name: string): Promise<any> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("name", name);
+
+    try {
+        const headers = {
+            ...getAuthHeader(),
+            "Content-Type": "multipart/form-data",
+        };
+
+        const response = await axios.post(`${API_URL}/file-upload/uploadImg`, formData, { headers });
+
+        return response.data;
+    } catch (error) {
+        console.error("Error subiendo imagen:", error);
+        return null;
     }
 };
