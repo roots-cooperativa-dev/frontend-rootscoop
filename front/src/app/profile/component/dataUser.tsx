@@ -5,31 +5,45 @@ import { routes } from "../../../routes";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { getUserById } from "@/src/services/auth"; // ajustá el path según tu estructura
 
 const DataUser = () => {
   const { user, token } = useAuthContext();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+
+  const [extraData, setExtraData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted && !user) {
+    if (!user || !token) {
       router.push(routes.login);
+      return;
     }
-  }, [user, router, mounted]);
 
-  if (!mounted) return null; // ⚠️ no renderiza nada hasta que montó en cliente
+    const fetchUserData = async () => {
+      try {
+        const data = await getUserById(user.id, token);
+        setExtraData(data);
+        console.log(data);
+      } catch (error) {
+        console.error("Error al obtener datos adicionales del usuario:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!user) return null;
+    fetchUserData();
+  }, [user, token, router]);
+
+  if (!user || loading) return null;
 
   return (
     <div className="flex flex-col w-screen m-6">
       <Card>
         <CardHeader>
           <CardTitle>Datos personales</CardTitle>
+          <p>Nombre de usuario: {extraData.username}</p>
+          <p>Teléfono: {extraData.phone}</p>
           <p>Nombre: {user.name}</p>
           <p>Email: {user.email}</p>
         </CardHeader>
