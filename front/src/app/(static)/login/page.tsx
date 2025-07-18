@@ -47,8 +47,8 @@ export default function LoginForm() {
 
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
-    //en local reemplazar por http://localhost:3001
-    window.location.href = "http://localhost:3003/auth/google";
+    //en local reemplazar por http://localhost:3001 si o si 3000 es back
+    window.location.href = "https://roots-api-te93.onrender.com/auth/google";
   };
 
   return (

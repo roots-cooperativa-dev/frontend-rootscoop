@@ -1,23 +1,44 @@
-// src/app/auth/callback/page.tsx
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useAuthContext } from '@/src/context/authContext';
+import { getUserById } from '@/src/services/auth';
 
 export default function GoogleCallbackPage() {
-  // const searchParams = useSearchParams();
-  // const router = useRouter();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { saveUserData } = useAuthContext();
+  const hasRun = useRef(false);
 
-  // useEffect(() => {
-  //   const token = searchParams.get('token');
-  //   const userId = searchParams.get('userId');
+  useEffect(() => {
+    if (hasRun.current) return;
 
-  //   if (token) {
-  //     console.log(token, userId)
-  //     // Redirige a la página principal o dashboard
-  //     router.push('/');
-  //   }
-  // }, [searchParams, router]);
+    const accessToken = searchParams.get('token');
+    const userId = searchParams.get('userId');
+
+    if (accessToken && userId) {
+      hasRun.current = true;
+
+      const fetchUserData = async () => {
+        try {
+          const data = await getUserById(userId, accessToken);
+          
+          saveUserData({
+            user: { id: userId, name: data.name, email: data.email },
+            accessToken: accessToken,
+            isAuth: true,
+          });
+
+          router.push('/');
+        } catch (error) {
+          console.error("Error al obtener datos adicionales del usuario:", error);
+        }
+      };
+
+      fetchUserData();
+    }
+  }, [searchParams, router, saveUserData]);
 
   return <p>Procesando autenticación...</p>;
 }

@@ -53,8 +53,8 @@ export default function AuthLayout() {
             <Image
               src="/logos/roots.png"
               alt="Logo desktop"
-              width={300}
-              height={300}
+              width={100}
+              height={100}
               className="mb-4 mx-auto hidden md:block"
             />
           </Link>
