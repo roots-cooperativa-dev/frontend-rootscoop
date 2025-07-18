@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description:
     "Roots Cooperativa de Trabajo - Construyendo Soberanía Alimentaria y Economía Social desde 2013",
   generator: "Next.js",
+  icons: {
+    icon: "favicon.png",
+  },
 };
 
 export default function RootLayout({

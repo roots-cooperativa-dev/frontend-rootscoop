@@ -24,31 +24,10 @@ export const DashboardNavbar = () => {
           {/* Logo Section */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="hidden md:block h-6 w-px bg-gray-300"></div>
             </div>
           </div>
-
-          {/* Search Bar - Hidden on mobile */}
-          <div className="hidden lg:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Buscar..."
-                className="pl-10 bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
-              />
-            </div>
-          </div>
-
           {/* Right Section */}
           <div className="flex items-center space-x-3">
-            {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative p-2 hover:bg-gray-100">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-red-500 text-white text-xs flex items-center justify-center">
-                3
-              </Badge>
-            </Button>
-
             {/* View Site Button */}
             <Button
               variant="outline"
@@ -83,10 +62,6 @@ export const DashboardNavbar = () => {
                 <DropdownMenuItem>
                   <User className="w-4 h-4 mr-2" />
                   Perfil
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Sun className="w-4 h-4 mr-2" />
-                  Configuración
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">

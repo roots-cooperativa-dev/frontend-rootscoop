@@ -8,7 +8,7 @@ import { Separator } from "../../components/ui/separator"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "../../lib/utils"
-
+import Image from "next/image"
 const sidebarLinks = [
   { href: "/dashboard", label: "Inicio", icon: Home, description: "Panel principal" },
   { href: "/dashboard/categorias", label: "Categorías", icon: ChartBarStacked, description: "Gestionar categorías" },
@@ -30,19 +30,23 @@ export const DashboardSidebar = () => {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden md:flex flex-col w-72 h-screen bg-gradient-to-b from-gray-50 to-white border-r border-gray-200/60 shadow-sm">
+    <aside className="hidden md:flex flex-col w-60 h-screen bg-gradient-to-b from-gray-50 to-white border-r border-gray-200/60 shadow-sm">
       {/* Header */}
       <div className="p-6 border-b border-gray-200/60">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-[#017d74] to-[#015d54] rounded-xl flex items-center justify-center shadow-sm">
-            <Sun className="w-5 h-5 text-white" />
+          <div className="w-10 h-10  rounded-xl flex items-center justify-center shadow-sm">
+            <Image
+              src="/logos/roots.png"
+              alt="Rootscoop Logo"
+              width={70}
+              height={40}
+              className="rounded-full object-contain"
+              priority
+            />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold text-gray-900">Panel</span>
-              <Badge variant="secondary" className="bg-[#017d74]/10 text-[#017d74] border-[#017d74]/20">
-                Beta
-              </Badge>
             </div>
             <p className="text-xs text-gray-500 mt-1">Administración</p>
           </div>
