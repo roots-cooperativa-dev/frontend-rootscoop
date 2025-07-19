@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { fetchProductos } from "../../app/utils/ProductsHelper"
+import { fetchProductos, eliminarProducto } from "../../app/utils/ProductsHelper"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import {
   Plus,
@@ -13,26 +13,32 @@ import {
   Package,
   TrendingUp,
   AlertCircle,
-  MoreHorizontal,
-  Grid3X3,
   List,
+  Grid3X3,
+  MoreHorizontal,
 } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card"
 import { Badge } from "../../components/ui/badge"
 import { Input } from "../../components/ui/input"
 import { Skeleton } from "../../components/ui/skeleton"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "../../components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import type { IProducto } from "../../app/types"
 import Link from "next/link"
 import { cn } from "../../lib/utils"
+import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../components/ui/alert-dialog"
+
+import type { IProducto } from "../../app/types"
 
 export const GestionProductos = () => {
   const [productos, setProductos] = useState<IProducto[]>([])
@@ -41,18 +47,21 @@ export const GestionProductos = () => {
   const [statusFilter, setStatusFilter] = useState("all")
   const [viewMode, setViewMode] = useState<"table" | "grid">("table")
 
+  // Estado para controlar la apertura del AlertDialog y qué producto eliminar
+  const [productoAEliminar, setProductoAEliminar] = useState<IProducto | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+
   useEffect(() => {
     const obtenerProductos = async () => {
-      console.log("Llamando a fetchProductos...")
-      const data = await fetchProductos()
-      console.log("Respuesta de fetchProductos:", data)
-      if (data.length === 0) {
-        console.warn("No se recibieron productos. Verificá el backend o el endpoint.")
+      try {
+        const data = await fetchProductos()
+        setProductos(data)
+      } catch (error) {
+        toast.error("Error cargando productos")
+      } finally {
+        setLoading(false)
       }
-      setProductos(data)
-      setLoading(false)
     }
-
     obtenerProductos()
   }, [])
 
@@ -136,6 +145,20 @@ export const GestionProductos = () => {
       </Button>
     </div>
   )
+
+  const handleEliminarProducto = async () => {
+    if (!productoAEliminar) return
+
+    const eliminado = await eliminarProducto(productoAEliminar.id)
+    if (eliminado) {
+      toast.success("Producto eliminado correctamente")
+      setProductos(prev => prev.filter(p => p.id !== productoAEliminar.id))
+      setDialogOpen(false)
+      setProductoAEliminar(null)
+    } else {
+      toast.error("No se pudo eliminar el producto")
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -356,42 +379,52 @@ export const GestionProductos = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-100">
-                                <MoreHorizontal className="w-4 h-4" />
+                          <Link href={`/dashboard/productos/${producto.id}`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <Link href={`/dashboard/productos/edit/${producto.id}`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-yellow-50 hover:text-yellow-600"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setProductoAEliminar(producto)
+                                  setDialogOpen(true)
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                                title="Eliminar producto"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem className="text-blue-600">
-                                <Eye className="w-4 h-4 mr-2" />
-                                Ver detalles
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-yellow-600">
-                                <Edit className="w-4 h-4 mr-2" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600">
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Eliminar
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción no se puede deshacer. ¿Estás seguro que querés eliminar el producto <strong>{productoAEliminar?.name}</strong>?
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setDialogOpen(false)}>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleEliminarProducto}>Eliminar</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>

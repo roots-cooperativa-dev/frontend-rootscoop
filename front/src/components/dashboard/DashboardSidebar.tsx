@@ -46,7 +46,7 @@ export const DashboardSidebar = () => {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-gray-900">Panel</span>
+              <span className="text-xl font-bold text-gray-900">Panel</span>  
             </div>
             <p className="text-xs text-gray-500 mt-1">Administración</p>
           </div>

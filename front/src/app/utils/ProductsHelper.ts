@@ -23,21 +23,16 @@ const getAuthHeader = () => {
     };
 };
 
-export const fetchProductos = async (
-    page: number = 1,
-    limit: number = 10
-    
-): Promise<IProducto[]> => {
+export const fetchProductos = async (): Promise<IProducto[]> => {
     try {
-        const response = await axios.get<IProducto[]>(`${API_URL}/products`, {
-            params: { page, limit }
-        });
+        const response = await axios.get<IProducto[]>(`${API_URL}/products`);
         return response.data;
     } catch (error) {
         console.error("Error fetching productos:", error);
         return [];
     }
 };
+
 
 
 export const fetchProductoById = async (id: string): Promise<IProducto | null> => {
