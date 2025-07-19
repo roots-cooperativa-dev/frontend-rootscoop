@@ -3,9 +3,9 @@
 import { useAuthContext } from "../../../context/authContext";
 import { routes } from "../../../routes";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Card, CardHeader, CardTitle } from "@/src/components/ui/card";
-import { getUserById } from "@/src/services/auth"; // ajustá el path según tu estructura
+
 
 const DataUser = () => {
   const { user, token } = useAuthContext();
