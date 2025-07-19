@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
-import { loginGoogle, postLogin } from "@/src/services/auth";
+import { postLogin } from "@/src/services/auth";
 import { useRouter } from "next/navigation";
 import { routes } from "../../../routes";
 import { useAuthContext } from "@/src/context/authContext";
