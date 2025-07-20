@@ -1,9 +1,7 @@
 'use client'
-import { Sun, X, Menu } from "lucide-react"
+import { X, Menu } from "lucide-react"
 import { useState, useEffect } from "react"
-import { Badge } from "../ui/badge"
 import Link from "next/link"
-import { Button } from "../ui/button"
 import Image from "next/image"
 import AuthNav from "../authNav/authNav"
 
@@ -94,13 +92,7 @@ export const Navbar = () => {
                     >
                         Contacto
                     </Link>
-                    <Button
-                        className="font-bebas w-full bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg mt-4"
-                        asChild
-                        onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                        <Link href="/login">Iniciar sesión</Link>
-                    </Button>
+                    <AuthNav/>
                 </div>
             )}
         </div>

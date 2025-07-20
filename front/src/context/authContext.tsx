@@ -3,16 +3,16 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 type SaveUserPayLoad = {
-    user: UserGoogle;
-    accessToken: string;
-    isAuth: boolean
-}
+  user: UserGoogle;
+  accessToken: string;
+  isAuth: boolean;
+};
 type AuthContextType = {
   user: UserGoogle | null;
   token?: string | null;
   isAuth: boolean | null;
-  saveUserData: (data: SaveUserPayLoad) => void
-  resetUserData: () => void
+  saveUserData: (data: SaveUserPayLoad) => void;
+  resetUserData: () => void;
 };
 
 const authContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,23 +22,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [isAuth, setIsAuth] = useState<AuthContextType["isAuth"]>(null);
 
-
   const saveUserData = (data: SaveUserPayLoad) => {
-      setUser(data.user);
-      setToken(data.accessToken);
-      setIsAuth(data.isAuth);
-      localStorage.setItem(USER_LOCAL_KEY, JSON.stringify(data));
-      console.log(data.accessToken)
-  }
+    setUser(data.user);
+    setToken(data.accessToken);
+    setIsAuth(data.isAuth);
+    localStorage.setItem(USER_LOCAL_KEY, JSON.stringify(data));
+  };
   const resetUserData = () => {
-      setUser(null);
-      setToken(null);
-      setIsAuth(false);
-      localStorage.removeItem(USER_LOCAL_KEY);
-  }
+    setUser(null);
+    setToken(null);
+    setIsAuth(false);
+    localStorage.removeItem(USER_LOCAL_KEY);
+  };
   useEffect(() => {
     const storage = JSON.parse(localStorage.getItem(USER_LOCAL_KEY) || "{}");
-    if(storage === undefined || !Object.keys(storage).length){
+    if (storage === undefined || !Object.keys(storage).length) {
       setIsAuth(false);
       return;
     }
@@ -46,9 +44,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(storage?.user);
     setIsAuth(storage?.isAuth);
     setToken(storageType?.accessToken);
-  }, [])
+  }, []);
   return (
-    <authContext.Provider value={{ user, token, isAuth, saveUserData, resetUserData }}>
+    <authContext.Provider
+      value={{
+        user,
+        token,
+        isAuth,
+        saveUserData,
+        resetUserData,
+      }}
+    >
       {children}
     </authContext.Provider>
   );
