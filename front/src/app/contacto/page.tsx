@@ -12,9 +12,9 @@ const Contacto = () => {
             <Image
               src="/logos/roots.png"
               alt="Rootscoop Logo"
-              width={350}
+              width={60}
               height={40}
-              className="rounded-full object-contain -ml-20"
+              className="rounded-full object-cover -ml-20"
               priority
             />
             <div className="flex items-center space-x-4">
