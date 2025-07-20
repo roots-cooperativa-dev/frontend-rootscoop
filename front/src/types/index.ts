@@ -16,6 +16,8 @@ interface UserGoogle {
   id: string;
   email: string;
   name: string;
+  isAdmin?: boolean;
+  isDonator?:boolean;
 }
 enum Irole {
   ADMIN = "admin",

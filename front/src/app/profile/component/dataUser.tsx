@@ -10,16 +10,14 @@ import { Card, CardHeader, CardTitle } from "@/src/components/ui/card";
 const DataUser = () => {
   const { user, token } = useAuthContext();
   const router = useRouter();
-
   useEffect(() => {
     if (!user || !token) {
       router.push(routes.login);
       return;
     }
-    console.log(user)
   }, [user, token, router]);
 
-
+  console.log(user)
   return (
     <div className="flex flex-col w-screen m-6">
       <Card>
