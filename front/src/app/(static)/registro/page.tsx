@@ -38,8 +38,10 @@ export default function RegisterForm() {
       phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
       username: Yup.string().required("Requerido"),
     }),
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
+        setSubmitting(true); // activa bandera de envío
+
         const data = {
           name: values.name,
           email: values.email,
@@ -49,14 +51,19 @@ export default function RegisterForm() {
           phone: Number(values.phone),
           username: values.username,
         };
+
         await postRegister(data);
         toast.success("Usuario registrado correctamente");
+
         setTimeout(() => {
           router.push("/login");
         }, 2000);
-        formik.resetForm();
+
+        resetForm(); // limpia los campos
       } catch (error: any) {
         toast.error(error?.message || "Error al registrar el usuario");
+      } finally {
+        setSubmitting(false); // desactiva bandera
       }
     },
   });
@@ -154,8 +161,13 @@ export default function RegisterForm() {
         <p className="text-red-500 text-xs">{formik.errors.username}</p>
       )}
 
-      <Button type="submit" className="w-full">
-        Registrarse
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={formik.isSubmitting}
+        onClick={() => console.log("Botón clickeado")}
+      >
+        {formik.isSubmitting ? "Registrando..." : "Registrarse"}
       </Button>
     </form>
   );

@@ -15,8 +15,15 @@ import {
 } from "../../components/ui/dropdown-menu"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useAuthContext } from "@/src/context/authContext"
 
 export const DashboardNavbar = () => {
+  const {resetUserData } = useAuthContext();
+    const router = useRouter();
+    const Logout = () => {
+      resetUserData();
+      router.push("/");}
   return (
     <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200/60 shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-6 py-3">
@@ -59,12 +66,14 @@ export const DashboardNavbar = () => {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <Link href="/profile">
                 <DropdownMenuItem>
                   <User className="w-4 h-4 mr-2" />
                   Perfil
                 </DropdownMenuItem>
+                </Link>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                <DropdownMenuItem onClick={Logout} className="text-red-600 focus:text-red-600 focus:bg-red-50">
                   <LogOut className="w-4 h-4 mr-2" />
                   Cerrar sesión
                 </DropdownMenuItem>

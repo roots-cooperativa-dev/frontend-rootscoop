@@ -25,6 +25,8 @@ const DataUser = () => {
           <CardTitle>Datos personales</CardTitle>
           <p>Nombre: {user?.name}</p>
           <p>Email: {user?.email}</p>
+          <p>Telefono: {}</p>
+          
         </CardHeader>
       </Card>
     </div>
