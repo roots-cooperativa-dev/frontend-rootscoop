@@ -3,7 +3,7 @@ const urlBack = "https://roots-api-te93.onrender.com";
 const urlLocal = "http://localhost:3000"
 
 const axiosApiBack = axios.create({
-  baseURL: urlBack,
+  baseURL: urlLocal,
   headers: {
     "Content-Type": "application/json",
   },
