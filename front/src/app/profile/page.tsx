@@ -32,7 +32,6 @@ const Profile = () => {
         </div>
       </header>
       <div className="flex">
-        <Sidebar/>
         <DataUser />
       </div>
       <Footer/>
