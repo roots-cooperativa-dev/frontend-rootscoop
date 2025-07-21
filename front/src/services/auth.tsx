@@ -32,3 +32,20 @@ export const getUserById = async (id: string, token: string) => {
 
   return response.data;
 };
+
+export const updateUser = async (
+  id: string,
+  token: string,
+  data: Partial<UserGoogle>
+) => {
+  const response = await axiosApiBack.put(`/users/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.data) throw new Error("No se pudo actualizar el usuario");
+
+  return response.data;
+};
+
