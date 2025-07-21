@@ -1,4 +1,7 @@
 "use client";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
+import { es } from "date-fns/locale";
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -34,7 +37,20 @@ export default function RegisterForm() {
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
         .required("Requerido"),
-      birthdate: Yup.string().required("Requerido"),
+      birthdate: Yup.date()
+        .required("Requerido")
+        .test("is-18", "Debes tener al menos 18 años", function (value) {
+          if (!value) return false;
+          const today = new Date();
+          const birthDate = new Date(value);
+          const age = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          return (
+            age > 18 ||
+            (age === 18 && m >= 0 && today.getDate() >= birthDate.getDate())
+          );
+        }),
+
       phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
       username: Yup.string().required("Requerido"),
     }),
@@ -51,9 +67,11 @@ export default function RegisterForm() {
           phone: Number(values.phone),
           username: values.username,
         };
-        console.log(data)
+        console.log(data);
         await postRegister(data);
-        toast.success("Usuario registrado correctamente inicia sesion para continuar");
+        toast.success(
+          "Usuario registrado correctamente inicia sesion para continuar"
+        );
 
         setTimeout(() => {
           router.push("/login");
@@ -131,12 +149,32 @@ export default function RegisterForm() {
         <p className="text-red-500 text-xs">{formik.errors.confirmPassword}</p>
       )}
 
-      <Input
-        name="birthdate"
-        type="date"
-        value={formik.values.birthdate}
-        onChange={formik.handleChange}
-      />
+      <div>
+        <DatePicker
+          selected={
+            formik.values.birthdate ? new Date(formik.values.birthdate) : null
+          }
+          onChange={(date: Date | null) =>
+            formik.setFieldValue(
+              "birthdate",
+              date?.toISOString().split("T")[0] || ""
+            )
+          }
+          dateFormat="yyyy-MM-dd"
+          placeholderText="Ingresar fecha de nacimiento"
+          maxDate={new Date()}
+          showYearDropdown
+          scrollableYearDropdown
+          yearDropdownItemNumber={100}
+          locale={es}
+          className="w-full p-2 border border-gray-300 rounded-md text-sm"
+          wrapperClassName="w-full"
+        />
+        {formik.touched.birthdate && formik.errors.birthdate && (
+          <p className="text-red-500 text-xs">{formik.errors.birthdate}</p>
+        )}
+      </div>
+
       {formik.touched.birthdate && formik.errors.birthdate && (
         <p className="text-red-500 text-xs">{formik.errors.birthdate}</p>
       )}
@@ -161,12 +199,7 @@ export default function RegisterForm() {
         <p className="text-red-500 text-xs">{formik.errors.username}</p>
       )}
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={formik.isSubmitting}
-        onClick={() => console.log("Botón clickeado")}
-      >
+      <Button type="submit" className="w-full" disabled={formik.isSubmitting}>
         {formik.isSubmitting ? "Registrando..." : "Registrarse"}
       </Button>
     </form>
