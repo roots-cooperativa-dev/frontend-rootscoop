@@ -51,9 +51,9 @@ export default function RegisterForm() {
           phone: Number(values.phone),
           username: values.username,
         };
-
+        console.log(data)
         await postRegister(data);
-        toast.success("Usuario registrado correctamente");
+        toast.success("Usuario registrado correctamente inicia sesion para continuar");
 
         setTimeout(() => {
           router.push("/login");

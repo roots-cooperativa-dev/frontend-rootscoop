@@ -32,12 +32,15 @@ export default function LoginForm() {
         const userId = response.data.user.id;
         const Token = response.data.accessToken;
         const dataUser = await getUserById(userId, Token);
-      
+    
         saveUserData({
           accessToken: Token,
           user: {
             id: userId,
             name: dataUser.name,
+            username: dataUser.username,
+            birthdate: dataUser.birthdate,
+            phone: dataUser.phone,
             email: dataUser.email,
             isAdmin: dataUser.isAdmin,
             isDonator: dataUser.isDonator
