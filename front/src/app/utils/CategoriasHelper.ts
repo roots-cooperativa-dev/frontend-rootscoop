@@ -29,8 +29,8 @@ const getAuthHeader = () => {
 
 
 export const fetchCategorias = async (
-    page: number = 0,
-    limit: number = 0
+    page: number = 1,
+    limit: number = 10
 ): Promise<{ categories: ICategory[]; total: number; pages: number }> => {
     try {
         const response = await axios.get(`${API_URL}/category`, {
