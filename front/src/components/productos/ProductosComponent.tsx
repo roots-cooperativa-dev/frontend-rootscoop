@@ -194,7 +194,7 @@ export const Productos = () => {
                       asChild={producto.sizes[0]?.stock > 0}
                     >
                       {producto.sizes[0]?.stock > 0 ? (
-                        <Link href="/login">Comprar ahora</Link>
+                        <Link href="/paginaError">Comprar ahora</Link>
                       ) : (
                         "Agotado"
                       )}
