@@ -28,15 +28,29 @@ const getAuthHeader = () => {
 
 
 
-export const fetchCategorias = async (): Promise<ICategory[]> => {
+export const fetchCategorias = async (
+    page: number = 1,
+    limit: number = 10
+): Promise<{ categories: ICategory[]; total: number; pages: number }> => {
     try {
-        const response = await axios.get<ICategory[]>(`${API_URL}/category`);
-        return response.data;
+        const response = await axios.get(`${API_URL}/category`, {
+            params: { page, limit },
+        });
+        return {
+            categories: response.data.categories,
+            total: response.data.total,
+            pages: response.data.pages,
+        };
     } catch (error) {
         console.error("Error fetching categorias:", error);
-        return [];
+        return {
+            categories: [],
+            total: 0,
+            pages: 0,
+        };
     }
 };
+
 
 export const crearCategoria = async (name: string): Promise<ICategory | null> => {
     try {

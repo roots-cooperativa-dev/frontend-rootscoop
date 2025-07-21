@@ -4,33 +4,14 @@ import InfoBox from "./components/InfoBox";
 import TestimoniosBox from "./components/TestimoniosBox";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import AuthNav from "@/src/components/authNav/authNav";
+import HeaderBasic from "@/src/components/headers/EncabezadoSencillo";
 
 export default function DonacionPage() {
   return (
     <>
-      <header className="bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Image
-              src="/logos/roots.png"
-              alt="Rootscoop Logo"
-              width={100}
-              height={100}
-              className="rounded-full object-contain -ml-20"
-              priority
-            />
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/"
-                className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span className="font-chewy">Volver</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <HeaderBasic />
+
       <div className="py-12 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold">

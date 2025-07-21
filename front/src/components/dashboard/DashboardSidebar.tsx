@@ -1,17 +1,41 @@
-"use client"
+"use client";
 
-import { Sun, Package, BarChartIcon as ChartBarStacked, Plus, LogOut, Home, Settings, HelpCircle } from "lucide-react"
-import { Button } from "../../components/ui/button"
-import { Badge } from "../../components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
-import { Separator } from "../../components/ui/separator"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "../../lib/utils"
-import Image from "next/image"
+import {
+  Sun,
+  Package,
+  BarChartIcon as ChartBarStacked,
+  Plus,
+  LogOut,
+  Home,
+  Settings,
+  HelpCircle,
+} from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../components/ui/avatar";
+import { Separator } from "../../components/ui/separator";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { cn } from "../../lib/utils";
+import Image from "next/image";
+import { useAuthContext } from "@/src/context/authContext";
 const sidebarLinks = [
-  { href: "/dashboard", label: "Inicio", icon: Home, description: "Panel principal" },
-  { href: "/dashboard/categorias", label: "Categorías", icon: ChartBarStacked, description: "Gestionar categorías" },
+  {
+    href: "/dashboard",
+    label: "Inicio",
+    icon: Home,
+    description: "Panel principal",
+  },
+  {
+    href: "/dashboard/categorias",
+    label: "Categorías",
+    icon: ChartBarStacked,
+    description: "Gestionar categorías",
+  },
   {
     href: "/dashboard/productos",
     label: "Productos",
@@ -19,15 +43,21 @@ const sidebarLinks = [
     description: "Inventario y productos",
     badge: "12",
   },
-]
+];
 
 const secondaryLinks = [
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
   { href: "/dashboard/ayuda", label: "Ayuda", icon: HelpCircle },
-]
+];
 
 export const DashboardSidebar = () => {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const { resetUserData } = useAuthContext();
+  const router = useRouter();
+  const Logout = () => {
+    resetUserData();
+    router.push("/");
+  };
 
   return (
     <aside className="hidden md:flex flex-col w-60 h-screen bg-gradient-to-b from-gray-50 to-white border-r border-gray-200/60 shadow-sm">
@@ -56,11 +86,13 @@ export const DashboardSidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
         <div className="mb-4">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">Principal</h3>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+            Principal
+          </h3>
           <div className="space-y-1">
             {sidebarLinks.map((link) => {
-              const isActive = pathname === link.href
-              const Icon = link.icon
+              const isActive = pathname === link.href;
+              const Icon = link.icon;
 
               return (
                 <Link
@@ -70,13 +102,15 @@ export const DashboardSidebar = () => {
                     "group flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 relative",
                     isActive
                       ? "bg-[#017d74] text-white shadow-md shadow-[#017d74]/25"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                   )}
                 >
                   <Icon
                     className={cn(
                       "w-5 h-5 transition-colors",
-                      isActive ? "text-white" : "text-gray-500 group-hover:text-gray-700",
+                      isActive
+                        ? "text-white"
+                        : "text-gray-500 group-hover:text-gray-700"
                     )}
                   />
                   <div className="flex-1 min-w-0">
@@ -87,20 +121,26 @@ export const DashboardSidebar = () => {
                           variant="secondary"
                           className={cn(
                             "ml-2 h-5 px-2 text-xs",
-                            isActive ? "bg-white/20 text-white border-white/30" : "bg-gray-200 text-gray-600",
+                            isActive
+                              ? "bg-white/20 text-white border-white/30"
+                              : "bg-gray-200 text-gray-600"
                           )}
                         >
                           {link.badge}
                         </Badge>
                       )}
                     </div>
-                    {!isActive && <p className="text-xs text-gray-500 mt-0.5 truncate">{link.description}</p>}
+                    {!isActive && (
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                        {link.description}
+                      </p>
+                    )}
                   </div>
                   {isActive && (
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full" />
                   )}
                 </Link>
-              )
+              );
             })}
           </div>
         </div>
@@ -108,10 +148,12 @@ export const DashboardSidebar = () => {
         <Separator className="my-4" />
 
         <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">Herramientas</h3>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+            Herramientas
+          </h3>
           <div className="space-y-1">
             {secondaryLinks.map((link) => {
-              const Icon = link.icon
+              const Icon = link.icon;
 
               return (
                 <Link
@@ -122,7 +164,7 @@ export const DashboardSidebar = () => {
                   <Icon className="w-4 h-4 text-gray-500 group-hover:text-gray-700" />
                   <span>{link.label}</span>
                 </Link>
-              )
+              );
             })}
           </div>
         </div>
@@ -140,6 +182,7 @@ export const DashboardSidebar = () => {
 
         <Button
           variant="ghost"
+          onClick={Logout}
           className="w-full flex items-center gap-2 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200"
         >
           <LogOut className="w-4 h-4" />
@@ -147,5 +190,5 @@ export const DashboardSidebar = () => {
         </Button>
       </div>
     </aside>
-  )
-}
+  );
+};

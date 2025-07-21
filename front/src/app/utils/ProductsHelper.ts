@@ -4,111 +4,115 @@ import { IProducto } from "../types";
 import { ProductoDTO } from "../dto/ProductoDTO";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const backend_url = "https://roots-api-te93.onrender.com";
 
 const getAuthHeader = () => {
-    const userString = localStorage.getItem("user");
-    let token = "";
+  const userString = localStorage.getItem("user");
+  let token = "";
 
-    if (userString) {
-        try {
-            const user = JSON.parse(userString);
-            token = user.accessToken;
-        } catch (error) {
-            console.error("Error parsing token:", error);
-        }
+  if (userString) {
+    try {
+      const user = JSON.parse(userString);
+      token = user.accessToken;
+    } catch (error) {
+      console.error("Error parsing token:", error);
     }
+  }
 
-    return {
-        Authorization: `Bearer ${token}`,
-    };
+  return {
+    Authorization: `Bearer ${token}`,
+  };
 };
 
-export const fetchProductos = async (
-    page: number = 1,
-    limit: number = 10
-    
-): Promise<IProducto[]> => {
-    try {
-        const response = await axios.get<IProducto[]>(`${API_URL}/products`, {
-            params: { page, limit }
-        });
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching productos:", error);
-        return [];
-    }
+export const fetchProductos = async (): Promise<IProducto[]> => {
+  try {
+    const response = await axios.get<IProducto[]>(`${API_URL}/products`, {
+      params: { page: 1, limit: 10 },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching productos:", error);
+    return [];
+  }
 };
 
-
-export const fetchProductoById = async (id: string): Promise<IProducto | null> => {
-    try {
-        const response = await axios.get<IProducto>(`${API_URL}/products/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error(`Error fetching producto con ID ${id}:`, error);
-        return null;
-    }
+export const fetchProductoById = async (
+  id: string
+): Promise<IProducto | null> => {
+  try {
+    const response = await axios.get<IProducto>(`${API_URL}/products/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching producto con ID ${id}:`, error);
+    return null;
+  }
 };
 
-export const crearProducto = async (producto: ProductoDTO): Promise<IProducto | null> => {
-    try {
-        const response = await axios.post<IProducto>(
-            `${API_URL}/products`,
-            producto,
-            { headers: getAuthHeader() }
-        );
-        return response.data;
-    } catch (error) {
-        console.error("Error al crear producto:", error);
-        return null;
-    }
+export const crearProducto = async (
+  producto: ProductoDTO
+): Promise<IProducto | null> => {
+  try {
+    const response = await axios.post<IProducto>(
+      `${API_URL}/products`,
+      producto,
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear producto:", error);
+    return null;
+  }
 };
 
 export const actualizarProducto = async (
-    id: string,
-    productoActualizado: ProductoDTO
+  id: string,
+  productoActualizado: ProductoDTO
 ): Promise<IProducto | null> => {
-    try {
-        const response = await axios.put<IProducto>(
-            `${API_URL}/products/${id}`,
-            productoActualizado,
-            { headers: getAuthHeader() }
-        );
-        return response.data;
-    } catch (error) {
-        console.error(`Error actualizando producto con ID ${id}:`, error);
-        return null;
-    }
+  try {
+    const response = await axios.put<IProducto>(
+      `${API_URL}/products/${id}`,
+      productoActualizado,
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Error actualizando producto con ID ${id}:`, error);
+    return null;
+  }
 };
 
 export const eliminarProducto = async (id: string): Promise<boolean> => {
-    try {
-        await axios.delete(`${API_URL}/products/${id}`, {
-            headers: getAuthHeader()
-        });
-        return true;
-    } catch (error) {
-        console.error(`Error eliminando producto con ID ${id}:`, error);
-        return false;
-    }
+  try {
+    await axios.delete(`${API_URL}/products/${id}`, {
+      headers: getAuthHeader(),
+    });
+    return true;
+  } catch (error) {
+    console.error(`Error eliminando producto con ID ${id}:`, error);
+    return false;
+  }
 };
 
 export const subirImagen = async (file: File, name: string): Promise<any> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("name", name);
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("name", name);
 
-    try {
-        const headers = {
-            ...getAuthHeader(),
-            "Content-Type": "multipart/form-data",
-        };
+  try {
+    const headers = {
+      ...getAuthHeader(),
+      "Content-Type": "multipart/form-data",
+    };
 
-        const response = await axios.post(`${API_URL}/file-upload/uploadImg`, formData, { headers });
+    const response = await axios.post(
+      `${API_URL}/file-upload/uploadImg`,
+      formData,
+      { headers }
+    );
 
-        return response.data;
-    } catch (error) {
-        console.error("Error subiendo imagen:", error);
-        return null;
-    }
+    return response.data;
+  } catch (error) {
+    console.error("Error subiendo imagen:", error);
+    return null;
+  }
 };
