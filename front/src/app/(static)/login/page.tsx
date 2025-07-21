@@ -1,4 +1,6 @@
 "use client";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -63,7 +65,7 @@ export default function LoginForm() {
     setGoogleLoading(true);
     //en local reemplazar por http://localhost:3000 si o si 3000 es back
     // https://roots-api-te93.onrender.com esta es la url del back deployado
-    window.location.href = "http://localhost:3000/auth/google";
+    window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
   return (
