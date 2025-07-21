@@ -98,7 +98,7 @@ const ProductoDetalle = ({ producto }: Props) => {
                             disabled={stock === 0}
                             asChild={stock > 0}
                         >
-                            {stock > 0 ? <Link href="/login">Comprar ahora</Link> : "Agotado"}
+                            {stock > 0 ? <Link href="/paginaError">Comprar ahora</Link> : "Agotado"}
                         </Button>
                     </div>
                 </div>
