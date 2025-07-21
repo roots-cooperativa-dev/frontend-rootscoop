@@ -1,11 +1,14 @@
 "use client";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 import { useEffect, useState } from "react";
-import { Formik, Form, ErrorMessage, useFormik } from "formik";
+import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { useAuthContext } from "@/src/context/authContext";
+import { toast } from "sonner";
 
 type Slot = {
   id: string;
@@ -21,6 +24,7 @@ type Visita = {
 };
 
 export default function ReservaForm() {
+  const { user, token } = useAuthContext();
   const [visitas, setVisitas] = useState<Visita[]>([]);
   const [fechaSeleccionada, setFechaSeleccionada] = useState<
     Date | undefined
@@ -31,7 +35,11 @@ export default function ReservaForm() {
   useEffect(() => {
     const fetchVisitas = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/visits");
+        const res = await axios.get(`${BACKEND_URL}/visits`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setVisitas(res.data);
       } catch (error) {
         console.error("Error al obtener visitas:", error);
@@ -40,8 +48,6 @@ export default function ReservaForm() {
 
     fetchVisitas();
   }, []);
-
-  // Generar las fechas que tienen slots disponibles
   useEffect(() => {
     const fechasDisponibles: Date[] = [];
 
@@ -49,7 +55,7 @@ export default function ReservaForm() {
       visita.availableSlots.forEach((slot) => {
         if (!slot.isBooked) {
           const fecha = new Date(slot.date + "T00:00:00");
-          // Evitar duplicados
+          const id = slot.id;
           if (
             !fechasDisponibles.some(
               (f) => f.toDateString() === fecha.toDateString()
@@ -87,23 +93,40 @@ export default function ReservaForm() {
   const formik = useFormik({
     initialValues: {
       nombre: "",
-      email: "",
+      cantidad: "",
       slotId: "",
     },
     validationSchema: Yup.object({
       nombre: Yup.string().required("Campo obligatorio"),
-      email: Yup.string().email("Email inválido").required("Campo obligatorio"),
+      cantidad: Yup.number()
+        .required("Campo obligatorio")
+        .min(1, "Mínimo 1 persona")
+        .max(15, "Máximo 15 personas"),
       slotId: Yup.string().required("Selecciona un horario"),
     }),
     onSubmit: async (values) => {
+      if (!values.slotId || !values.cantidad) {
+        alert("Faltan datos obligatorios");
+        return;
+      }
+      const payload = {
+        visitSlotId: values.slotId,
+        numberOfPeople: parseInt(values.cantidad),
+      };
       try {
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/reservas`, values);
-        alert("Reserva enviada con éxito");
+        console.log(payload);
+        await axios.post(`${BACKEND_URL}/visits/appointments`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        toast.success("Reserva enviada con éxito");
         formik.resetForm();
         setFechaSeleccionada(undefined);
       } catch (err) {
         console.error("Error al enviar reserva", err);
-        alert("Ocurrió un error al enviar la reserva");
+        toast.success("Ocurrió un error al enviar la reserva");
       }
     },
   });
@@ -129,25 +152,23 @@ export default function ReservaForm() {
             <p className="text-red-500 text-sm">{formik.errors.nombre}</p>
           )}
         </div>
-
-        {/* Email */}
         <div>
           <label className="block text-m font-bebas font-semibold text-gray-700">
-            Email
+            Cantidad de personas (max. 15)
           </label>
           <input
-            name="email"
-            type="email"
-            value={formik.values.email}
+            name="cantidad"
+            type="number"
+            min="1"
+            max="15"
+            value={formik.values.cantidad}
             onChange={formik.handleChange}
             className="w-full mt-1 p-2 border rounded-lg"
           />
-          {formik.touched.email && formik.errors.email && (
-            <p className="text-red-500 text-sm">{formik.errors.email}</p>
+          {formik.touched.cantidad && formik.errors.cantidad && (
+            <p className="text-red-500 text-sm">{formik.errors.cantidad}</p>
           )}
         </div>
-
-        {/* Selección de fecha */}
         <div>
           <label className="block text-m font-semibold font-bebas text-gray-700 mb-2">
             Selecciona una fecha
@@ -170,7 +191,6 @@ export default function ReservaForm() {
                 available: "fecha-disponible",
               }}
               disabled={(date) => {
-                // Deshabilitar fechas que no tienen slots disponibles
                 return !fechasConSlots.some(
                   (fecha) => fecha.toDateString() === date.toDateString()
                 );
@@ -213,8 +233,6 @@ export default function ReservaForm() {
             }}
           />
         </div>
-
-        {/* Mensaje si se selecciona fecha sin slots */}
         {fechaSeleccionada && slotsDisponibles.length === 0 && (
           <div className="p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
             <p className="text-yellow-700 text-sm">
@@ -222,8 +240,6 @@ export default function ReservaForm() {
             </p>
           </div>
         )}
-
-        {/* Horarios disponibles */}
         {slotsDisponibles.length > 0 && (
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -232,7 +248,10 @@ export default function ReservaForm() {
             <select
               name="slotId"
               value={formik.values.slotId}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                console.log("Slot ID seleccionado:", e.target.value); // ✅ log correcto
+                formik.handleChange(e);
+              }}
               className="w-full p-2 border rounded-lg"
             >
               <option value="">-- Seleccionar horario --</option>
