@@ -3,32 +3,41 @@
 import { useAuthContext } from "../../../context/authContext";
 import { routes } from "../../../routes";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { Card, CardHeader, CardTitle } from "@/src/components/ui/card";
 
 const DataUser = () => {
-  const { user, token } = useAuthContext();
+  const { user, token, loading } = useAuthContext();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted && !user) {
+    if (!loading && (!user || !token)) {
       router.push(routes.login);
+      return;
     }
-  }, [user, router, mounted]);
+  }, [user, token, loading, router]);
 
-  if (!mounted) return null; // ⚠️ no renderiza nada hasta que montó en cliente
-
-  if (!user) return null;
-
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center w-screen min-h-screen bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#017d74] border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-700 text-sm">Cargando datos de usuario</p>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 h-[80vh]">
-      <h1 className="text-3xl font-bold mb-4">Datos personales</h1>
-      <p>Nombre: {user.name}</p>
-      <p>Email: {user.email}</p>
+    <div className="flex flex-col w-screen m-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Datos personales</CardTitle>
+          <p>Nombre: {user?.name}</p>
+          <p>Nombre de usuario: {user?.username}</p>
+          <p>Email: {user?.email}</p>
+          {(user?.phone) && <p>Telefono: {user?.phone}</p>}
+          {(user?.birthdate) && <p>Fecha de nacimiento: {user?.birthdate}</p>}
+        </CardHeader>
+      </Card>
     </div>
   );
 };

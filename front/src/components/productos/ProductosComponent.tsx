@@ -1,32 +1,33 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from "react"
-import { fetchProductos } from "../../app/utils/ProductsHelper"
-import { IProducto } from "../../app/types/index"
-import { ShoppingBag, ArrowLeft, Heart, Star } from "lucide-react"
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "../ui/card"
-import { Badge } from "../ui/badge"
-import Link from "next/link"
-import { Button } from "../ui/button"
-import Image from "next/image"
+import { useEffect, useState } from "react";
+import { fetchProductos } from "../../app/utils/ProductsHelper";
+import { IProducto } from "../../app/types/index";
+import { ShoppingBag, ArrowLeft, Heart, Star } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "../ui/card";
+import { Badge } from "../ui/badge";
+import Link from "next/link";
+import { Button } from "../ui/button";
+import Image from "next/image";
+import AuthProducts from "../authNav/authProductos";
 
 export const Productos = () => {
-    const [productos, setProductos] = useState<IProducto[]>([])
-    const [loading, setLoading] = useState(true)
+    const [productos, setProductos] = useState<IProducto[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const loadProductos = async () => {
-            const data = await fetchProductos()
-            setProductos(data)
-            setLoading(false)
-        }
+            const data = await fetchProductos(); // Usa page y limit si los implementás
+            setProductos(data);
+            setLoading(false);
+        };
 
-        loadProductos()
-    }, [])
+        loadProductos();
+    }, []);
 
     return (
         <div className="min-h-screen bg-white">
-            {/* Header (igual que antes) */}
+            {/* Header */}
             <header className="bg-white border-b shadow-sm">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
@@ -34,20 +35,15 @@ export const Productos = () => {
                             <Image
                                 src="/logos/roots.png"
                                 alt="Rootscoop Logo"
-                                width={300}
+                                width={70}
                                 height={40}
                                 className="rounded-full object-contain"
                                 priority
                             />
                         </Link>
                         <div className="flex items-center space-x-4">
-                            <Button className="bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg" asChild>
-                                <Link href="/login">Ingresar para comprar</Link>
-                            </Button>
-                            <Link
-                                href="/"
-                                className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
-                            >
+                            <AuthProducts/>
+                            <Link href="/" className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors">
                                 <ArrowLeft className="w-4 h-4" />
                                 <span>Volver</span>
                             </Link>
@@ -56,6 +52,7 @@ export const Productos = () => {
                 </div>
             </header>
 
+            {/* Contenido */}
             <div className="container mx-auto px-4 py-8">
                 <div className="text-center mb-12">
                     <h1 className="font-chewy text-5xl font-black text-[#017d74] mb-4">Productos ROOTS</h1>
@@ -65,14 +62,14 @@ export const Productos = () => {
                     </p>
                 </div>
 
-                {/* Loading o Sin Productos */}
+                {/* Estado de carga */}
                 {loading ? (
                     <p className="text-center text-gray-500">Cargando productos...</p>
                 ) : productos.length === 0 ? (
                     <p className="text-center text-gray-500">No se encontraron productos.</p>
                 ) : (
                     <>
-                        {/* Filtros (pueden mantenerse igual) */}
+                        {/* Filtros (estáticos) */}
                         <div className="flex flex-wrap gap-2 mb-8 justify-center">
                             <Badge className="cursor-pointer bg-[#922f4e] text-white hover:bg-[#642d91]">Todos</Badge>
                             <Badge variant="outline" className="cursor-pointer border-[#017d74] text-[#017d74] hover:bg-[#017d74] hover:text-white">Indumentaria</Badge>
@@ -81,7 +78,7 @@ export const Productos = () => {
                             <Badge variant="outline" className="cursor-pointer border-[#642d91] text-[#642d91] hover:bg-[#642d91] hover:text-white">Papelería</Badge>
                         </div>
 
-                        {/* Grid de productos */}
+                        {/* Cards */}
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {productos.map((producto) => (
                                 <Card
@@ -112,7 +109,9 @@ export const Productos = () => {
                                                 </Badge>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-2xl font-bold text-[#017d74]">${producto.sizes[0]?.price ?? '-'}</p>
+                                                <p className="text-2xl font-bold text-[#017d74]">
+                                                    ${producto.sizes[0]?.price ?? "-"}
+                                                </p>
                                             </div>
                                         </div>
                                     </CardHeader>
@@ -135,7 +134,11 @@ export const Productos = () => {
                                                 disabled={producto.sizes[0]?.stock === 0}
                                                 asChild={producto.sizes[0]?.stock > 0}
                                             >
-                                                {producto.sizes[0]?.stock > 0 ? <Link href="/login">Comprar ahora</Link> : "Agotado"}
+                                                {producto.sizes[0]?.stock > 0 ? (
+                                                    <Link href="/login">Comprar ahora</Link>
+                                                ) : (
+                                                    "Agotado"
+                                                )}
                                             </Button>
                                             <Button
                                                 variant="outline"
@@ -148,10 +151,11 @@ export const Productos = () => {
                                     </CardContent>
                                 </Card>
                             ))}
-
                         </div>
                     </>
                 )}
+
+                {/* Sección informativa */}
                 <div className="mt-16 bg-gray-50 rounded-lg p-8">
                     <div className="text-center mb-8">
                         <h2 className="text-2xl font-bold text-[#017d74] mb-4">¿Por qué comprar productos ROOTS?</h2>
@@ -182,5 +186,5 @@ export const Productos = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};

@@ -4,7 +4,7 @@ export interface IProducto {
   details: string;
   isDeleted: boolean;
   sizes: Size[];
-  category: Category;
+  category: ICategory;
   files: File[]; 
 }
 
@@ -20,24 +20,14 @@ export interface Size {
   stock: number;
 }
 
-export interface Category {
-  id: string;
-  name: string;
-}
-
 export interface File {
 
-  id?: string;
-  url?: string;
-  name?: string;
+  id: string;
+  url: string;
+  name: string;
 }
 
-export interface JwtPayload {
-  sub: string;
-  email: string;
+export interface ICategory {
+  id: string;
   name: string;
-  isAdmin: boolean;
-  isDonator?: boolean;
-  exp: number;
-  iat?: number;
 }

@@ -1,10 +1,12 @@
 "use client";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
-import { loginGoogle, postLogin } from "@/src/services/auth";
+import { getUserById, postLogin } from "@/src/services/auth";
 import { useRouter } from "next/navigation";
 import { routes } from "../../../routes";
 import { useAuthContext } from "@/src/context/authContext";
@@ -29,10 +31,24 @@ export default function LoginForm() {
       setLoading(true);
       try {
         const response = await postLogin(values);
-        const { user, accessToken } = response.data;
-        const { credentials, ...userInfo } = user;
-        
-        saveUserData({ accessToken, user: userInfo, isAuth: true });
+        const userId = response.data.user.id;
+        const Token = response.data.accessToken;
+        const dataUser = await getUserById(userId, Token);
+    
+        saveUserData({
+          accessToken: Token,
+          user: {
+            id: userId,
+            name: dataUser.name,
+            username: dataUser.username,
+            birthdate: dataUser.birthdate,
+            phone: dataUser.phone,
+            email: dataUser.email,
+            isAdmin: dataUser.isAdmin,
+            isDonator: dataUser.isDonator
+          },
+          isAuth: true,
+        });
         toast.success("Sesión iniciada correctamente");
 
         router.push(routes.home);
@@ -47,8 +63,10 @@ export default function LoginForm() {
 
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
-    //en local reemplazar por http://localhost:3001
-    window.location.href = "https://roots-api-te93.onrender.com/auth/google";
+    console.log("BACKEND_URL en prod:", process.env.NEXT_PUBLIC_API_URL);
+    //en local reemplazar por http://localhost:3000 si o si 3000 es back
+    // https://roots-api-te93.onrender.com esta es la url del back deployado
+    window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
   return (
@@ -96,7 +114,9 @@ export default function LoginForm() {
         className="w-full bg-gray-100 hover:bg-gray-200 text-black border border-gray-300 flex items-center justify-center gap-2"
       >
         <FcGoogle className="w-5 h-5" />
-        {googleLoading ? "Conectando con Google..." : "Iniciar sesión con Google"}
+        {googleLoading
+          ? "Conectando con Google..."
+          : "Iniciar sesión con Google"}
       </Button>
     </form>
   );
