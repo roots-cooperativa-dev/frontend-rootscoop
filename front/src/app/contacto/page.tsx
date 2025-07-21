@@ -2,33 +2,12 @@ import { ArrowLeft, Mail, Phone } from "lucide-react";
 import ContactoFormulario from "./component/formContacto";
 import Link from "next/link";
 import Image from "next/image";
+import HeaderBasic from "@/src/components/headers/EncabezadoSencillo";
 
 const Contacto = () => {
   return (
     <>
-      <header className="bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Image
-              src="/logos/roots.png"
-              alt="Rootscoop Logo"
-              width={60}
-              height={40}
-              className="rounded-full object-cover -ml-20"
-              priority
-            />
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/"
-                className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span className="font-chewy">Volver al inicio</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <HeaderBasic/>
       <div className="flex flex-col lg:flex-row justify-center items-center h-screen p-10 gap-8 ">
         <div className="flex flex-col w-1/2">
           <div className="text-center">
@@ -40,8 +19,10 @@ const Contacto = () => {
               Completa el formulario y nos pondremos en contacto contigo lo
               antes posible. También puedes enviarnos un mensaje directamente
               por <span className="text-[#ff6b35] font-semibold">WhatsApp</span>{" "}
-              o escribirnos a nuestro
-              {" "}<span className="text-[#2d9cdb] font-semibold">correo electrónico.</span>{" "}
+              o escribirnos a nuestro{" "}
+              <span className="text-[#2d9cdb] font-semibold">
+                correo electrónico.
+              </span>{" "}
               ¡Estamos aquí para ayudarte!
             </p>
           </div>

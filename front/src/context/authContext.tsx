@@ -11,6 +11,7 @@ type AuthContextType = {
   user: UserGoogle | null;
   token?: string | null;
   isAuth: boolean | null;
+  loading: boolean | null;
   saveUserData: (data: SaveUserPayLoad) => void;
   resetUserData: () => void;
 };
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthContextType["user"]>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isAuth, setIsAuth] = useState<AuthContextType["isAuth"]>(null);
+  const [loading, setLoading] = useState(true); // 👈 nuevo estado
 
   const saveUserData = (data: SaveUserPayLoad) => {
     setUser(data.user);
@@ -44,6 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(storage?.user);
     setIsAuth(storage?.isAuth);
     setToken(storageType?.accessToken);
+    setLoading(false); // ✅ ya cargamos los datos
   }, []);
   return (
     <authContext.Provider
@@ -51,6 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         user,
         token,
         isAuth,
+        loading,
         saveUserData,
         resetUserData,
       }}
