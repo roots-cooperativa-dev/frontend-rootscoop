@@ -9,6 +9,7 @@ import { Badge } from "../ui/badge";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import AuthProducts from "../authNav/authProductos";
 
 export const Productos = () => {
     const [productos, setProductos] = useState<IProducto[]>([]);
@@ -41,9 +42,7 @@ export const Productos = () => {
                             />
                         </Link>
                         <div className="flex items-center space-x-4">
-                            <Button className="bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg" asChild>
-                                <Link href="/login">Ingresar para comprar</Link>
-                            </Button>
+                            <AuthProducts/>
                             <Link href="/" className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors">
                                 <ArrowLeft className="w-4 h-4" />
                                 <span>Volver</span>

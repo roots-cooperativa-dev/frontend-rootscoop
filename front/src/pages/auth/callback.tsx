@@ -22,15 +22,17 @@ export default function Callback() {
     const fetchUser = async () => {
       try {
         const userData = await getUserById(userId, accessToken);
-        console.log(userData);
 
         saveUserData({
           user: {
             id: userId,
             name: userData.name,
+            username: userData.username,
+            birthdate: userData.birthdate,
+            phone: userData.phone,
             email: userData.email,
-            isDonator: userData.isDonator,
-            isAdmin: userData.isAdmin
+            isAdmin: userData.isAdmin,
+            isDonator: userData.isDonator
           },
           accessToken: accessToken,
           isAuth: true,
