@@ -63,6 +63,7 @@ export default function LoginForm() {
 
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
+    console.log("BACKEND_URL en prod:", process.env.NEXT_PUBLIC_API_URL);
     //en local reemplazar por http://localhost:3000 si o si 3000 es back
     // https://roots-api-te93.onrender.com esta es la url del back deployado
     window.location.href = `${BACKEND_URL}/auth/google`;
