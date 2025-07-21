@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthContextType["user"]>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isAuth, setIsAuth] = useState<AuthContextType["isAuth"]>(null);
-  const [loading, setLoading] = useState(true); // 👈 nuevo estado
+  const [loading, setLoading] = useState(true);
 
   const saveUserData = (data: SaveUserPayLoad) => {
     setUser(data.user);
@@ -37,17 +37,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem(USER_LOCAL_KEY);
   };
   useEffect(() => {
-    const storage = JSON.parse(localStorage.getItem(USER_LOCAL_KEY) || "{}");
-    if (storage === undefined || !Object.keys(storage).length) {
+    try {
+      const storage = JSON.parse(localStorage.getItem(USER_LOCAL_KEY) || "{}");
+      if (storage === undefined || !Object.keys(storage).length) {
+        setIsAuth(false);
+      } else {
+        const storageType = storage as any;
+        setUser(storage?.user);
+        setIsAuth(storage?.isAuth);
+        setToken(storageType?.accessToken);
+      }
+    } catch (err) {
+      console.error("Error leyendo localStorage:", err);
       setIsAuth(false);
-      return;
+    } finally {
+      setLoading(false); // ✅ siempre se ejecuta
     }
-    const storageType = storage as any;
-    setUser(storage?.user);
-    setIsAuth(storage?.isAuth);
-    setToken(storageType?.accessToken);
-    setLoading(false); // ✅ ya cargamos los datos
   }, []);
+
   return (
     <authContext.Provider
       value={{
