@@ -35,3 +35,19 @@ interface RegisterDto {
   password: string;
   confirmPassword: string;
 }
+
+interface Iproduct {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  image: string;
+  categoryId: number;
+  category: Icategory;
+}
+interface Icategory {
+    id: number;
+    name: string;
+    products?: Iproduct[];
+}
