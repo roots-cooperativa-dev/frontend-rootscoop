@@ -46,12 +46,6 @@ export const Footer = () => {
                             >
                                 Donaciones
                             </Link>
-                            <Link
-                                href="/contacto"
-                                className="font-bebas block text-gray-300 hover:text-[#642d91] transition-colors font-medium text-lg"
-                            >
-                                Contacto
-                            </Link>
                         </div>
                     </div>
 
