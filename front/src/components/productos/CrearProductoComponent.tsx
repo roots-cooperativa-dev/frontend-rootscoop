@@ -43,7 +43,8 @@ type SizeInput = {
 const sizeOptions = ["S", "M", "L", "XL"]
 
 const ProductoForm = () => {
-    const { id } = useParams()
+    const params = useParams()
+    const id = params && typeof params.id === "string" ? params.id : undefined
     const router = useRouter()
 
     const [producto, setProducto] = useState<IProducto | null>(null)
@@ -246,8 +247,17 @@ const ProductoForm = () => {
                                 </div>
 
                                 <div className="space-y-4">
+                                    {/* Encabezados */}
+                                    <div className="grid grid-cols-4 gap-4 font-semibold text-sm text-gray-600">
+                                        <span>Talle</span>
+                                        <span>Precio</span>
+                                        <span>{id ? "Stock" : "Cantidad"}</span>
+                                        <span className="sr-only">Acciones</span>
+                                    </div>
+
+                                    {/* Inputs por talle */}
                                     {sizes.map((s, i) => (
-                                        <div key={i} className="grid grid-cols-4 gap-4">
+                                        <div key={i} className="grid grid-cols-4 gap-4 items-center">
                                             <Select
                                                 value={s.size}
                                                 onValueChange={val => handleSizeChange(i, "size", val)}
@@ -263,18 +273,21 @@ const ProductoForm = () => {
                                                     ))}
                                                 </SelectContent>
                                             </Select>
+
                                             <Input
                                                 type="number"
                                                 value={s.price}
                                                 onChange={e => handleSizeChange(i, "price", e.target.value)}
                                                 placeholder="Precio"
                                             />
+
                                             <Input
                                                 type="number"
                                                 value={s.stock}
                                                 onChange={e => handleSizeChange(i, "stock", e.target.value)}
-                                                placeholder="Stock"
+                                                placeholder={id ? "Stock" : "Cantidad"}
                                             />
+
                                             {sizes.length > 1 && (
                                                 <Button type="button" variant="ghost" onClick={() => removeSize(i)}>
                                                     <X className="w-4 h-4 text-red-500" />
@@ -282,31 +295,45 @@ const ProductoForm = () => {
                                             )}
                                         </div>
                                     ))}
+
                                     {errors.sizes && <p className="text-sm text-red-600">{errors.sizes}</p>}
                                 </div>
+
                             </div>
 
                             <Separator />
-                            <div className="space-y-5">
-                                <Label>Imágenes</Label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    onChange={handleFileChange}
-                                    className="border rounded px-4 py-2"
-                                />
+                            <div className="space-y-3">
+                                <Label className="text-base font-medium">Imágenes</Label>
+
+                                <div
+                                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-500 transition"
+                                    onClick={() => document.getElementById("fileUpload")?.click()}
+                                >
+                                    <input
+                                        id="fileUpload"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                    <p className="text-gray-500 text-sm">Haz clic o arrastra imágenes aquí</p>
+                                    <p className="text-gray-400 text-xs mt-1">Formatos aceptados: JPG, PNG, WEBP</p>
+                                </div>
+
                                 {errors.images && <p className="text-sm text-red-600">{errors.images}</p>}
 
+                                {/* Imágenes existentes */}
                                 {existingFiles.length > 0 && (
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         {existingFiles.map(({ id, url }) => (
-                                            <div key={id} className="relative group">
-                                                <img src={url} className="rounded object-cover w-full h-32" />
+                                            <div key={id} className="relative group rounded overflow-hidden shadow">
+                                                <img src={url} className="object-cover w-full h-32" />
                                                 <Button
                                                     type="button"
                                                     onClick={() => removeExistingImage(id)}
                                                     variant="destructive"
+                                                    size="icon"
                                                     className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full"
                                                 >
                                                     <X className="w-3 h-3" />
@@ -316,15 +343,17 @@ const ProductoForm = () => {
                                     </div>
                                 )}
 
+                                {/* Previews nuevas */}
                                 {imagePreviews.length > 0 && (
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         {imagePreviews.map((url, i) => (
-                                            <div key={i} className="relative group">
-                                                <img src={url} className="rounded object-cover w-full h-32" />
+                                            <div key={i} className="relative group rounded overflow-hidden shadow">
+                                                <img src={url} className="object-cover w-full h-32" />
                                                 <Button
                                                     type="button"
                                                     onClick={() => removeImage(i)}
                                                     variant="destructive"
+                                                    size="icon"
                                                     className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full"
                                                 >
                                                     <X className="w-3 h-3" />
@@ -334,7 +363,6 @@ const ProductoForm = () => {
                                     </div>
                                 )}
                             </div>
-
                             <div className="pt-6">
                                 <Button type="submit" className="w-full h-14 text-lg font-semibold">
                                     {id ? "Actualizar Producto" : "Crear Producto"}
@@ -344,7 +372,7 @@ const ProductoForm = () => {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </div >
     )
 }
 
