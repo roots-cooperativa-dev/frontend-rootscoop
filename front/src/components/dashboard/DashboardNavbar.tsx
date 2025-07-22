@@ -19,11 +19,12 @@ import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/src/context/authContext"
 
 export const DashboardNavbar = () => {
-  const {resetUserData } = useAuthContext();
-    const router = useRouter();
-    const Logout = () => {
-      resetUserData();
-      router.push("/");}
+  const { resetUserData, user } = useAuthContext();
+  const router = useRouter();
+  const Logout = () => {
+    resetUserData();
+    router.push("/");
+  }
   return (
     <header className="bg-white/95 backdrop-blur-sm border-b border-gray-200/60 shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-6 py-3">
@@ -54,10 +55,10 @@ export const DashboardNavbar = () => {
                 <Button variant="ghost" className="flex items-center space-x-2 hover:bg-gray-100 p-2">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Usuario" />
-                    <AvatarFallback className="bg-[#017d74] text-white text-sm">U</AvatarFallback>
+                    <AvatarFallback className="bg-[#017d74] text-white text-sm"> {user?.name?.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                   <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-gray-900">Usuario</p>
+                    <p className="text-sm font-medium text-gray-900">{user?.name || "Usuario"}</p>
                     <p className="text-xs text-gray-500">Administrador</p>
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -67,10 +68,10 @@ export const DashboardNavbar = () => {
                 <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <Link href="/profile">
-                <DropdownMenuItem>
-                  <User className="w-4 h-4 mr-2" />
-                  Perfil
-                </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <User className="w-4 h-4 mr-2" />
+                    Perfil
+                  </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={Logout} className="text-red-600 focus:text-red-600 focus:bg-red-50">

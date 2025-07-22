@@ -31,3 +31,12 @@ export interface ICategory {
   id: string;
   name: string;
 }
+
+export interface ProductoQueryParams {
+  page?: number
+  limit?: number
+  name?: string
+  categoryId?: string
+  minPrice?: number
+  maxPrice?: number
+}

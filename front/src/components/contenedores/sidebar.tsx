@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar, ChartBarStacked, HelpCircle, Home, LogOut, Package, Plus, Settings, UserRound, UserRoundPen } from "lucide-react";
+import { Banknote, Calendar, ChartBarStacked, ClipboardPaste, HelpCircle, Home, LogOut, Package, Plus, Settings, ShoppingCart, UserRound, UserRoundPen } from "lucide-react";
 
 import Link from "next/link";
 import { Badge } from "../ui/badge";
@@ -26,6 +26,28 @@ const sidebarLinks = [
     label: "Visitas programadas",
     icon: Calendar,
     description: "agenda",
+    badge: "",
+  },
+  {
+    href: "/profile/ordenes",
+    label: "Ordenes",
+    icon: ClipboardPaste,
+    description: "Visualiza tus ordenes",
+    badge: "",
+  },
+  {
+    href: "/profile/donaciones",
+    label: "Donaciones",
+    icon: Banknote,
+    description: "Donaciones realizadas",
+    badge: "",
+    
+  },
+  {
+    href: "/profile/carrito",
+    label: "Carrito",
+    icon: ShoppingCart,
+    description: "Listo para comprar",
     badge: "",
   },
 ];

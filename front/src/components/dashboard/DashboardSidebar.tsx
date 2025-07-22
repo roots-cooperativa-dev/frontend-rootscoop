@@ -41,7 +41,6 @@ const sidebarLinks = [
     label: "Productos",
     icon: Package,
     description: "Inventario y productos",
-    badge: "12",
   },
 ];
 
@@ -116,19 +115,6 @@ export const DashboardSidebar = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="truncate">{link.label}</span>
-                      {link.badge && (
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            "ml-2 h-5 px-2 text-xs",
-                            isActive
-                              ? "bg-white/20 text-white border-white/30"
-                              : "bg-gray-200 text-gray-600"
-                          )}
-                        >
-                          {link.badge}
-                        </Badge>
-                      )}
                     </div>
                     {!isActive && (
                       <p className="text-xs text-gray-500 mt-0.5 truncate">
@@ -172,14 +158,6 @@ export const DashboardSidebar = () => {
 
       {/* Footer Actions */}
       <div className="p-4 border-t border-gray-200/60 space-y-2">
-        <Button
-          variant="outline"
-          className="w-full flex items-center gap-2 border-[#017d74]/20 text-[#017d74] hover:bg-[#017d74]/5 hover:border-[#017d74]/30 transition-all duration-200 bg-transparent"
-        >
-          <Plus className="w-4 h-4" />
-          Crear nuevo
-        </Button>
-
         <Button
           variant="ghost"
           onClick={Logout}
