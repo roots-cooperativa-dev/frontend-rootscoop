@@ -1,9 +1,8 @@
 import axios from "axios";
-const urlBack = "https://roots-api-te93.onrender.com";
-const urlLocal = "http://localhost:3000"
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const axiosApiBack = axios.create({
-  baseURL: urlBack,
+  baseURL: BACKEND_URL,
   headers: {
     "Content-Type": "application/json",
   },

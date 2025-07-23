@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Sidebar from "@/src/components/contenedores/sidebar";
-import HeaderProfile from "@/src/components/headers/EncabezadoPerfil";
 import { Card, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { useAuthContext } from "@/src/context/authContext";
-import { updateUser, getUserById } from "@/src/services/auth"; // ajusta ruta
+import { updateUser, getUserById } from "@/src/services/auth"; 
 import Loading from "@/src/components/loading/pantallaCargando";
-//import { UserGoogle } from "@/src/interfaces/userGoogle"; // ajusta ruta
 
 const EditUser = () => {
   const { user, token, saveUserData } = useAuthContext();
