@@ -1,6 +1,6 @@
 "use client";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -13,6 +13,7 @@ import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Importa los iconos
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
@@ -63,8 +64,6 @@ export default function LoginForm() {
 
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
-    //en local reemplazar por http://localhost:3000 si o si 3000 es back
-    // https://roots-api-te93.onrender.com esta es la url del back deployado
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
