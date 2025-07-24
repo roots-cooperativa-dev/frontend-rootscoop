@@ -1,15 +1,12 @@
-interface Slot {
+export interface Slot {
   id: string;
   date: string;
   startTime: string;
   isBooked: boolean;
 }
 
-interface Visita {
+export interface Visita {
+  id: string; // si lo usás, podés sacarlo si no
+  title: string; // este es el que usamos como descripción de la cita
   availableSlots: Slot[];
-  // otros campos si los hay
 }
-type VisitaDisponible = {
-  fecha: string;
-  hora: string;
-};
