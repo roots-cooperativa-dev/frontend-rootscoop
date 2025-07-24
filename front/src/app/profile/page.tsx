@@ -10,7 +10,7 @@ const Profile = () => {
   return (
     <>
       <HeaderProfile/>
-      <main className="flex">
+      <main className="flex bg-slate-50">
         <Sidebar/>
         <DataUser />
       </main>

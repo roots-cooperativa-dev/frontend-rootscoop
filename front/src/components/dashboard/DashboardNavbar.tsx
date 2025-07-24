@@ -17,12 +17,15 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/src/context/authContext"
+import { useCartContext } from "@/src/context/cartContext"
 
 export const DashboardNavbar = () => {
   const { resetUserData, user } = useAuthContext();
+  const {resetCart} = useCartContext();
   const router = useRouter();
   const Logout = () => {
     resetUserData();
+    resetCart();
     router.push("/");
   }
   return (

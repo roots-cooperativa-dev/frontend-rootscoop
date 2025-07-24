@@ -8,6 +8,15 @@ export interface IProducto {
   files: File[]; 
 }
 
+export interface CartProduct{
+  id: string,
+  name: string,
+  details: string,
+  size: string,
+  price: number,
+  quantity: number,
+}
+
 export enum Irole {
     ADMIN = "admin",
     USER = "user"
@@ -39,4 +48,19 @@ export interface ProductoQueryParams {
   categoryId?: string
   minPrice?: number
   maxPrice?: number
+}
+export interface RegisterDto {
+  name: string;
+  email: string;
+  birthdate: string;
+  phone: number;
+  username: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface Icart{
+  productId: string,
+  productSizeId: string,
+  quantity: number
 }

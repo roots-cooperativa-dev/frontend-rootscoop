@@ -82,7 +82,7 @@ const EditUser = () => {
 
   return (
     <>
-        <div className="flex flex-col w-screen m-6">
+        <div className="flex flex-col w-screen m-6 bg-slate-50">
           <Card>
             <CardHeader>
               <CardTitle>Cambiar datos personales</CardTitle>

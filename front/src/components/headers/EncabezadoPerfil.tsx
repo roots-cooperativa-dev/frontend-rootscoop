@@ -12,15 +12,18 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { ChevronDown, LogOut, User } from "lucide-react";
+import { ChevronDown, Home, LogOut, User } from "lucide-react";
 import { useAuthContext } from "@/src/context/authContext";
 import { useRouter } from "next/navigation";
+import { useCartContext } from "@/src/context/cartContext";
 
 const HeaderProfile = () => {
   const { resetUserData, user, isAuth } = useAuthContext();
+  const {resetCart} = useCartContext();
   const router = useRouter();
   const Logout = () => {
     resetUserData();
+    resetCart();
     router.push("/");
   };
   return (
@@ -80,7 +83,7 @@ const HeaderProfile = () => {
                   ) : (
                     <Link href="/">
                       <DropdownMenuItem>
-                        <User className="w-4 h-4 mr-2" />
+                        <Home className="w-4 h-4 mr-2" />
                         Inicio
                       </DropdownMenuItem>
                     </Link>

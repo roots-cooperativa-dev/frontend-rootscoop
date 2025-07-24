@@ -10,7 +10,6 @@ interface PageProps {
 
 const ProductoPage = async ({ params }: PageProps) => {
     const producto = await fetchProductoById(params.id);
-
     if (!producto) {
         notFound();
     }

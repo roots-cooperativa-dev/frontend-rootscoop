@@ -1,15 +1,16 @@
 "use client";
 
-
 import { createContext, useContext, useEffect, useState } from "react";
+import { CartProduct } from "../app/types";
 
 type CartContextType = {
-  cart: Partial<Iproduct>[];
+  cart: CartProduct[];
   total: number;
-  addToCart: (product: Partial<Iproduct>) => void;
-  removeFromCart: (productId: number) => void;
-  isProductInCart: (productId: number) => boolean;
+  addToCart: (product: CartProduct) => void;
+  removeFromCart: (productId: string) => void;
+  isProductInCart: (productId: string) => boolean;
   resetCart: () => void;
+  setCartFromServer: (items: CartProduct[], totalAmount: string) => void;
 };
 
 const cartContext = createContext<CartContextType | undefined>(undefined);
@@ -20,11 +21,29 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartContextType["cart"] | null>(null);
   const [total, setTotal] = useState<number>(0);
 
-  const addToCart = (product: Partial<Iproduct>) => {
+  const setCartFromServer = (items: any[]) => {
+    const adaptedCart: CartProduct[] = items.map((item) => ({
+      id: item.product.id,
+      name: item.product.name,
+      details: item.product.details,
+      size: item.productSize?.size,
+      price: parseFloat(item.priceAtAddition),
+      quantity: item.quantity,
+    }));
+
+    setCart(adaptedCart);
+    const totalQuantity = items.reduce(
+      (acc, item) => acc + (item.quantity || 0),
+      0
+    );
+    setTotal(parseFloat(totalQuantity));
+  };
+
+  const addToCart = (product: CartProduct) => {
     setCart((prevCart) => [...(prevCart || []), product]);
     setTotal((prevTotal) => (prevTotal || 0) + 1);
   };
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (productId: string) => {
     setCart((prevCart) => {
       if (!prevCart) return [];
       const updateCart = prevCart.filter((item) => item.id !== productId);
@@ -37,15 +56,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return prevTotal - 1;
     });
   };
-  const isProductInCart = (productId: number) => {
-    return cart? cart.some((item) => item.id === productId) : false;
-  }
+  const isProductInCart = (productId: string) => {
+    return cart ? cart.some((item) => item.id === productId) : false;
+  };
   const resetCart = () => {
     setCart([]);
     setTotal(0);
     localStorage.removeItem(CART_LOCAL_STORANGE_KEY);
     localStorage.removeItem(CART_LOCAL_STORANGE_KEY_TOTAL);
-  }
+  };
   useEffect(() => {
     if (!cart) return;
     localStorage.setItem(CART_LOCAL_STORANGE_KEY, JSON.stringify(cart));
@@ -73,7 +92,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         addToCart,
         removeFromCart,
         isProductInCart,
-        resetCart
+        resetCart,
+        setCartFromServer,
       }}
     >
       {children}
