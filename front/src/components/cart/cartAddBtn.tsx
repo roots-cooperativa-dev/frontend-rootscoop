@@ -21,15 +21,16 @@ const CartAddBtn = ({ product }: { product: IProducto }) => {
   };
 
   const onAddElement = async() => {
-    const datos = {
-      productId: product.id,
-      productSizeId: product.sizes[0].id,
-      quantity: 1
-    }
-    const productCart = await addProductToCart(datos, token);
-    console.log(productCart);
-    toast.success("Producto añadido al carrito");
-    return addToCart(productCart);
+    // console.log("id producto" + product.id)
+    // const datos = {
+    //   productId: product.id,
+    //   productSizeId: product.sizes[0].id,
+    //   quantity: 1
+    // }
+    // const productCart = await addProductToCart(datos, token);
+    // console.log(productCart);
+    // toast.success("Producto añadido al carrito");
+    // return addToCart(productCart);
   };
 
   if (!isAuth) {
