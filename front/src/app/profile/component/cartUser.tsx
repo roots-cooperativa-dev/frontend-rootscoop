@@ -1,79 +1,93 @@
 "use client";
 
-import CreateOrder from "../../../components/createOrder/CreateOrder";
-import { useCartContext } from "../../../context/cartContext";
-import React, { useEffect } from "react";
-import Image from "next/image";
-import { routes } from "../../../routes";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { routes } from "../../../routes";
 import { useAuthContext } from "../../../context/authContext";
+import { useCartContext } from "../../../context/cartContext";
+import { getCart, deleteCartItem } from "../../../services/cart";
+import Loading from "@/src/components/loading/pantallaCargando";
 
 const CartPage = () => {
   const { user, token, loading } = useAuthContext();
+  const { cart, total, setCartFromServer } = useCartContext();
   const router = useRouter();
 
-  const { cart, removeFromCart } = useCartContext();
-   useEffect(() => {
-      if (!loading && (!user || !token)) {
-        router.push(routes.login);
-        return;
-      }
-    }, [user, token, loading, router]);
+  const [isLoadingCart, setIsLoadingCart] = useState(true);
 
-  const showCartItems = cart && cart.length > 0;
-
-  const calculateTotal = (items: Partial<Iproduct>[]) => {
-    return items.reduce(
-      (total: number, item: Partial<Iproduct>) => total + (item.price || 0),
-      0
-    );
+  const fetchCart = async () => {
+    try {
+      const data = await getCart(token);
+      setCartFromServer(data.items, data.total); // ✅ actualiza el context
+      console.log(cart)
+    } catch (error) {
+      console.error("Error al obtener el carrito:", error);
+    } finally {
+      setIsLoadingCart(false);
+    }
   };
 
+  useEffect(() => {
+    if (!loading && (!user || !token)) {
+      router.push(routes.login);
+      return;
+    }
+
+    if (token) fetchCart();
+  }, [user, token, loading, router]);
+
+  const handleDelete = async (itemId: string, token: string) => {
+    try {
+      await deleteCartItem(itemId, token);
+      fetchCart(); // ✅ vuelve a sincronizar el contexto
+    } catch (error) {
+      console.error("Error al eliminar el producto:", error);
+      alert("No se pudo eliminar el producto del carrito.");
+    }
+  };
+
+  if (isLoadingCart) {
+    return <Loading/>;
+  }
+
+  const showItems = cart && cart.length > 0;
+
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
+    <div className="flex flex-col items-center w-screen px-5 ">
       <h1 className="text-2xl font-bold mb-6">Carrito de compras</h1>
 
-      {showCartItems ? (
+      {showItems ? (
         <>
-          <ul className="space-y-4">
+          <ul className="space-y-4 w-full">
             {cart.map((item, index) => (
               <li
-                key={index}
-                className="flex items-center justify-between p-4 border rounded-md"
+                key={item.id || index}
+                className="flex items-center justify-between p-4 border rounded-md bg-white"
               >
-                <div className="flex items-center gap-4">
-                  {item.image && (
-                    <div className="w-24 h-24 relative">
-                      <Image
-                        src={item.image}
-                        alt={item.name || "Producto"}
-                        layout="fill"
-                        objectFit="contain"
-                        className="rounded"
-                      />
-                    </div>
-                  )}
-                  <div>
-                    <h2 className="text-lg font-semibold">{item.name}</h2>
-                    <p className="text-gray-500">${item.price?.toFixed(2)}</p>
-                  </div>
+                <div>
+                  <h2 className="text-lg font-semibold">{item.name}</h2>
+                  <p className="text-sm">Talla: <strong>{item.size}</strong></p>
+                  <p className="text-sm">Precio unitario: ${item.price?.toFixed(2)}</p>
+                  <p className="text-sm">Cantidad: {item.quantity}</p>
+                  <p className="text-sm font-semibold">
+                    Subtotal: ${(item.price! * (item.quantity || 1)).toFixed(2)}
+                  </p>
                 </div>
-                <button
-                  onClick={() => item.id && removeFromCart(item.id)}
+                {/* <button
+                  onClick={() => item.id && handleDelete(item.id, token)}
                   className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                 >
                   Eliminar
-                </button>
+                </button> */}
               </li>
             ))}
           </ul>
 
-          <div className="mt-6 text-right">
-            <CreateOrder />
-            <h3 className="text-xl font-bold">
-              Total: ${calculateTotal(cart).toFixed(2)}
+          {/* <div className="mt-6 text-right">
+            <h3 className="text-xl font-bold mt-4">
+              Total: ${total.toFixed(2)}
             </h3>
-          </div>
+          </div> */}
         </>
       ) : (
         <p className="text-gray-500">Tu carrito está vacío.</p>

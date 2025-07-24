@@ -7,7 +7,7 @@ const Visitanos = () => {
   return (
     <>
       <HeaderProfile />
-      <div className="flex">
+      <div className="flex bg-slate-50">
         <Sidebar />
         <VisitasAgendadas/>
       </div>

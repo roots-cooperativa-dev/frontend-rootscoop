@@ -7,6 +7,7 @@ import { Star, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import CartAddBtn from "../cart/cartAddBtn";
 
 interface Props {
     producto: IProducto;
@@ -16,6 +17,7 @@ const ProductoDetalle = ({ producto }: Props) => {
     const stock = producto.sizes[0]?.stock ?? 0;
     const price = producto.sizes[0]?.price ?? "-";
     const imagenes = producto.files || [];
+    console.log(producto.sizes[0].id)
     const [imagenSeleccionada, setImagenSeleccionada] = useState(imagenes[0]?.url || "/img/image-not-found.jpg");
 
     return (
@@ -100,6 +102,7 @@ const ProductoDetalle = ({ producto }: Props) => {
                         >
                             {stock > 0 ? <Link href="/paginaError">Comprar ahora</Link> : "Agotado"}
                         </Button>
+                        <CartAddBtn product={producto} />
                     </div>
                 </div>
             </div>
