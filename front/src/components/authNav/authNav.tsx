@@ -40,14 +40,6 @@ const AuthNav = () => {
           <ShoppingCart className="h-6 w-6 text-white" />
         </div>
         </Link>
-        <Link href="/cart">
-        <div className="relative w-fit h-8 flex items-center justify-center">
-          {Boolean(total) && <span className="absolute -top-2 -right-2 w-4 h-4 flex items-center justify-center text-xs text-white bg-red-500 rounded-full">
-            {total}
-          </span>}
-          <ShoppingCart className="h-6 w-6 text-white" />
-        </div>
-        </Link>
         <Button
           className="font-bebas bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg"
           asChild
