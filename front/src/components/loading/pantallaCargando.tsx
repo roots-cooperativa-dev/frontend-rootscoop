@@ -1,10 +1,10 @@
 const Loading = () => {
   return (
     <>
-      <div className="flex items-center justify-center h-[70vh] bg-white w-screen">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-[#017d74] border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-700 text-sm">Cargando informacion</p>
+      <div className="flex justify-center items-center py-20 w-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#017d74] mx-auto"></div>
+          <p className="text-gray-500">Cargando</p>
         </div>
       </div>
     </>

@@ -7,7 +7,7 @@ const Cart = () => {
   return (
     <>
       <HeaderProfile />
-      <div className="flex">
+      <div className="flex bg-slate-50">
         <Sidebar />
         <CartPage/>
       </div>
