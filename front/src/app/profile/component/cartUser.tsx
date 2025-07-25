@@ -10,7 +10,7 @@ import Loading from "@/src/components/loading/pantallaCargando";
 
 const CartPage = () => {
   const { user, token, loading } = useAuthContext();
-  const { cart, total, setCartFromServer } = useCartContext();
+  const { cart, totalAmount, setCartFromServer } = useCartContext();
   const router = useRouter();
 
   const [isLoadingCart, setIsLoadingCart] = useState(true);
@@ -18,6 +18,7 @@ const CartPage = () => {
   const fetchCart = async () => {
     try {
       const data = await getCart(token);
+      console.log(data.total)
       setCartFromServer(data.items, data.total); // ✅ actualiza el context
       console.log(cart)
     } catch (error) {
@@ -83,11 +84,11 @@ const CartPage = () => {
             ))}
           </ul>
 
-          {/* <div className="mt-6 text-right">
+          <div className="mt-6 text-right">
             <h3 className="text-xl font-bold mt-4">
-              Total: ${total.toFixed(2)}
+              Total: ${totalAmount}
             </h3>
-          </div> */}
+          </div>
         </>
       ) : (
         <p className="text-gray-500">Tu carrito está vacío.</p>

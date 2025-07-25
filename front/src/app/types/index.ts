@@ -112,6 +112,7 @@ export interface RegisterDto {
   username: string;
   password: string;
   confirmPassword: string;
+  address: string;
 }
 
 export interface Icart{

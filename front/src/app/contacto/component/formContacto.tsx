@@ -1,41 +1,25 @@
 "use client";
 
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { CalendarDays } from "lucide-react";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Button } from "@/src/components/ui/button";
 import { Label } from "@/src/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
+import { toast } from "sonner";
 
 const ContactoFormulario = () => {
   const initialValues = {
     contactName: "",
     email: "",
     phone: "",
-    numberOfPeople: "",
-    preferredDate: "",
-    preferredTime: "",
-    groupType: "",
     interests: "",
-    additionalComments: "",
   };
 
   const validationSchema = Yup.object({
     contactName: Yup.string().required("Campo requerido"),
     email: Yup.string().email("Email inválido").required("Campo requerido"),
     phone: Yup.string().required("Campo requerido"),
-    numberOfPeople: Yup.string().required("Campo requerido"),
-    preferredDate: Yup.string().required("Campo requerido"),
-    preferredTime: Yup.string().required("Campo requerido"),
-    groupType: Yup.string().required("Campo requerido"),
   });
 
   return (
@@ -43,9 +27,28 @@ const ContactoFormulario = () => {
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={(values) => console.log(values)}
+        onSubmit={async (values, { resetForm }) => {
+          try {
+            const res = await fetch("/api/contact", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(values),
+            });
+
+            if (res.ok) {
+              toast.success("Mensaje enviado con éxito.");
+              resetForm();
+            } else {
+              toast.error("Hubo un error al enviar el mensaje.");
+            }
+          } catch (error) {
+            toast.error("Hubo un error al enviar el mensaje.");
+            console.error("Error al enviar:", error);
+            alert("Error al enviar el mensaje.");
+          }
+        }}
       >
-        {({ handleChange, setFieldValue }) => (
+        {({ handleChange }) => (
           <Form className="space-y-4 font-bebas">
             <div>
               <Label>Nombre *</Label>
@@ -77,7 +80,7 @@ const ContactoFormulario = () => {
             </div>
 
             <div>
-              <Label>Teléfono</Label>
+              <Label>Teléfono *</Label>
               <Input
                 name="phone"
                 onChange={handleChange}
