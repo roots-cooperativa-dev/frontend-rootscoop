@@ -10,7 +10,7 @@ import { Button } from "../../../components/ui/button";
 import { postRegister } from "@/src/services/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 importa los íconos
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -27,13 +27,12 @@ export default function RegisterForm() {
       birthdate: "",
       phone: "",
       username: "",
+      address: "",
     },
     validationSchema: Yup.object({
       name: Yup.string().required("Requerido"),
       email: Yup.string().email("Email inválido").required("Requerido"),
-      password: Yup.string()
-        .min(6, "Mínimo 6 caracteres")
-        .required("Requerido"),
+      password: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
         .required("Requerido"),
@@ -50,14 +49,13 @@ export default function RegisterForm() {
             (age === 18 && m >= 0 && today.getDate() >= birthDate.getDate())
           );
         }),
-
       phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
       username: Yup.string().required("Requerido"),
+      address: Yup.string().required("Requerido"),
     }),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        setSubmitting(true); // activa bandera de envío
-
+        setSubmitting(true);
         const data = {
           name: values.name,
           email: values.email,
@@ -66,22 +64,21 @@ export default function RegisterForm() {
           birthdate: values.birthdate,
           phone: Number(values.phone),
           username: values.username,
+          address: values.address,
         };
         await postRegister(data);
-        toast.success(
-          "Usuario registrado correctamente inicia sesion para continuar"
-        );
+        toast.success("Usuario registrado correctamente. Inicia sesión para continuar");
 
         setTimeout(() => {
           router.push("/login");
         }, 2000);
 
-        resetForm(); // limpia los campos
+        resetForm();
       } catch (error: any) {
-        console.log(error.response.data.message)
-        toast.error(error?.response.data.message || "Error al registrar el usuario");
+        console.log(error.response?.data?.message);
+        toast.error(error?.response?.data?.message || "Error al registrar el usuario");
       } finally {
-        setSubmitting(false); // desactiva bandera
+        setSubmitting(false);
       }
     },
   });
@@ -175,10 +172,6 @@ export default function RegisterForm() {
         )}
       </div>
 
-      {formik.touched.birthdate && formik.errors.birthdate && (
-        <p className="text-red-500 text-xs">{formik.errors.birthdate}</p>
-      )}
-
       <Input
         name="phone"
         placeholder="Teléfono"
@@ -197,6 +190,16 @@ export default function RegisterForm() {
       />
       {formik.touched.username && formik.errors.username && (
         <p className="text-red-500 text-xs">{formik.errors.username}</p>
+      )}
+
+      <Input
+        name="address"
+        placeholder="Dirección"
+        value={formik.values.address}
+        onChange={formik.handleChange}
+      />
+      {formik.touched.address && formik.errors.address && (
+        <p className="text-red-500 text-xs">{formik.errors.address}</p>
       )}
 
       <Button type="submit" className="w-full" disabled={formik.isSubmitting}>

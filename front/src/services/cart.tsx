@@ -35,7 +35,7 @@ export const getCart = async ( token: string | null | undefined) => {
     });
 
     if (!response.data) throw new Error("No se pudo recuperar datos del carrito");
-
+    console.log(response)
     return response.data;
   } catch (e: any) {
     console.warn(e.message);

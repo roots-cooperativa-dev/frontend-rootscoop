@@ -6,6 +6,7 @@ import { CartProduct } from "../app/types";
 type CartContextType = {
   cart: CartProduct[];
   total: number;
+  totalAmount: string;
   addToCart: (product: CartProduct) => void;
   removeFromCart: (productId: string) => void;
   isProductInCart: (productId: string) => boolean;
@@ -20,8 +21,9 @@ const CART_LOCAL_STORANGE_KEY_TOTAL = "cartTotal";
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartContextType["cart"] | null>(null);
   const [total, setTotal] = useState<number>(0);
+  const [totalAmount, setTotalAmount] = useState<string>('');
 
-  const setCartFromServer = (items: any[]) => {
+  const setCartFromServer = (items: any[], totalAmount: string ) => {
     const adaptedCart: CartProduct[] = items.map((item) => ({
       id: item.product.id,
       name: item.product.name,
@@ -31,6 +33,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       quantity: item.quantity,
     }));
 
+    setTotalAmount(totalAmount)
     setCart(adaptedCart);
     const totalQuantity = items.reduce(
       (acc, item) => acc + (item.quantity || 0),
@@ -89,6 +92,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         cart: cart || [],
         total: total || 0,
+        totalAmount: totalAmount || '0',
         addToCart,
         removeFromCart,
         isProductInCart,
