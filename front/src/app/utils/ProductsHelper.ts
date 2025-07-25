@@ -44,17 +44,23 @@ export const fetchProductos = async ({
     try {
         const response = await axios.get(`${API_URL}/products`, {
             params: { page, limit, name, categoryId, minPrice, maxPrice }
-        })
+        });
+
+        // Filtrar productos donde deleted_at sea null (no eliminados)
+        const filteredProducts = (response.data.products || []).filter(
+            (product: IProducto & { deleted_at?: string | null }) => product.deleted_at === null || product.deleted_at === undefined
+        );
 
         return {
-            products: response.data.products || [],
+            products: filteredProducts,
             pages: response.data.pages || 1
-        }
+        };
     } catch (error) {
-        console.error("Error al obtener productos:", error)
-        return { products: [], pages: 1 }
+        console.error("Error al obtener productos:", error);
+        return { products: [], pages: 1 };
     }
 }
+
 
 
 
@@ -97,8 +103,9 @@ export const actualizarProducto = async (
             { headers: getAuthHeader() }
         );
         return response.data;
-    } catch (error) {
-        console.error(`Error actualizando producto con ID ${id}:`, error);
+    } catch (error: any) {
+        console.error(`Error actualizando producto con ID ${id}:`, error.response?.data);
+        console.error(error.response?.data?.message || "Error desconocido al actualizar producto");
         return null;
     }
 };

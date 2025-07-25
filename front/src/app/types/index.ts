@@ -8,6 +8,15 @@ export interface IProducto {
   files: File[];
 }
 
+export interface CartProduct{
+  id: string,
+  name: string,
+  details: string,
+  size: string,
+  price: number,
+  quantity: number,
+}
+
 export enum Irole {
   ADMIN = "admin",
   USER = "user"
@@ -40,6 +49,7 @@ export interface ProductoQueryParams {
   minPrice?: number
   maxPrice?: number
 }
+
 
 
 export interface IUsuario {
@@ -93,4 +103,41 @@ export interface IOrder {
 export interface IOrdersResponse {
   data: IOrder[];
   total: number;
+}
+<<<<<<< HEAD
+
+export interface ISlot {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  isBooked: boolean;
+  maxAppointments: number;
+  currentAppointmentsCount: number;
+  visitId: string;
+}
+
+export interface IVisita {
+  id: string;
+  title: string;
+  description: string;
+  people: number;
+  status: string;
+  availableSlots: ISlot[];
+=======
+export interface RegisterDto {
+  name: string;
+  email: string;
+  birthdate: string;
+  phone: number;
+  username: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface Icart{
+  productId: string,
+  productSizeId: string,
+  quantity: number
+>>>>>>> f38542eccdf4482a707960aa6371f6697e8df89d
 }

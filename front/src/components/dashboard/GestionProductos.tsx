@@ -4,9 +4,7 @@ import { useEffect, useState } from "react"
 import { fetchProductos, eliminarProducto } from "../../app/utils/ProductsHelper"
 import { fetchCategorias } from "../../app/utils/CategoriasHelper"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
-import {
-  Plus, Eye, Edit, Trash2, Search, Filter, Package
-} from "lucide-react"
+import { Plus, Eye, Edit, Trash2, Search, Filter, Package, ShoppingBag } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card"
 import { Badge } from "../../components/ui/badge"
@@ -16,8 +14,15 @@ import Link from "next/link"
 import { cn } from "../../lib/utils"
 import { toast } from "sonner"
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "../../components/ui/alert-dialog"
 import type { IProducto, ICategory } from "../../app/types"
 
@@ -26,7 +31,7 @@ export const GestionProductos = () => {
   const [categorias, setCategorias] = useState<ICategory[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState<"all" | "available" | "deleted">("all")
   const [categoryIdFilter, setCategoryIdFilter] = useState("")
   const [minPrice, setMinPrice] = useState("")
   const [maxPrice, setMaxPrice] = useState("")
@@ -57,10 +62,18 @@ export const GestionProductos = () => {
           limit,
           name: searchTerm || undefined,
           categoryId: categoryIdFilter || undefined,
-          minPrice: minPrice ? parseFloat(minPrice) : undefined,
-          maxPrice: maxPrice ? parseFloat(maxPrice) : undefined
+          minPrice: minPrice ? Number.parseFloat(minPrice) : undefined,
+          maxPrice: maxPrice ? Number.parseFloat(maxPrice) : undefined,
         })
-        setProductos(data.products)
+        // Filtrar según el estado seleccionado
+        let filteredProducts = data.products
+        if (statusFilter === "available") {
+          filteredProducts = filteredProducts.filter((p) => !p.isDeleted)
+        } else if (statusFilter === "deleted") {
+          filteredProducts = filteredProducts.filter((p) => p.isDeleted)
+        }
+        setProductos(filteredProducts)
+        // Ajustamos totalPages para que refleje cantidad real según filtro (puede ser aproximado)
         setTotalPages(data.pages)
       } catch (error) {
         toast.error("Error cargando productos")
@@ -69,22 +82,14 @@ export const GestionProductos = () => {
       }
     }
     obtenerProductos()
-  }, [searchTerm, categoryIdFilter, minPrice, maxPrice, currentPage])
-
-  const filteredProductos = productos.filter((producto) => {
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "available" && !producto.isDeleted) ||
-      (statusFilter === "deleted" && producto.isDeleted)
-    return matchesStatus
-  })
+  }, [searchTerm, categoryIdFilter, minPrice, maxPrice, currentPage, statusFilter])
 
   const handleEliminarProducto = async () => {
     if (!productoAEliminar) return
     const eliminado = await eliminarProducto(productoAEliminar.id)
     if (eliminado) {
       toast.success("Producto eliminado correctamente")
-      setProductos(prev => prev.filter(p => p.id !== productoAEliminar.id))
+      setProductos((prev) => prev.filter((p) => p.id !== productoAEliminar.id))
       setDialogOpen(false)
       setProductoAEliminar(null)
     } else {
@@ -126,18 +131,18 @@ export const GestionProductos = () => {
                 className="pl-10 w-64"
               />
             </div>
-
             <Select value={categoryIdFilter} onValueChange={setCategoryIdFilter}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filtrar por categoría" />
               </SelectTrigger>
               <SelectContent>
-                {categorias.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                {categorias.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-
             <Input
               type="number"
               placeholder="Precio mínimo"
@@ -145,7 +150,6 @@ export const GestionProductos = () => {
               onChange={(e) => setMinPrice(e.target.value)}
               className="w-32"
             />
-
             <Input
               type="number"
               placeholder="Precio máximo"
@@ -153,10 +157,12 @@ export const GestionProductos = () => {
               onChange={(e) => setMaxPrice(e.target.value)}
               className="w-32"
             />
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <Filter className="w-4 h-4 mr-2" />
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => setStatusFilter(value as "all" | "available" | "deleted")}
+            >
+              <SelectTrigger className="w-48 flex items-center gap-2">
+                <Filter className="w-4 h-4" />
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>
@@ -165,7 +171,6 @@ export const GestionProductos = () => {
                 <SelectItem value="deleted">Eliminados</SelectItem>
               </SelectContent>
             </Select>
-
             <Button
               variant="outline"
               onClick={() => {
@@ -187,89 +192,114 @@ export const GestionProductos = () => {
       <Card>
         <CardHeader>
           <CardTitle>Productos</CardTitle>
-          <CardDescription>
-            Mostrando {filteredProductos.length} de {productos.length} productos
-          </CardDescription>
+          <CardDescription>Mostrando {productos.length} productos</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Imagen</TableHead>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Precio</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProductos.map(producto => (
-                <TableRow key={producto.id}>
-                  <TableCell>
-                    {producto.files?.[0]?.url ? (
-                      <img src={producto.files[0].url} className="w-12 h-12 object-cover rounded-lg" />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <Package className="w-5 h-5 text-gray-400" />
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>{producto.name}</TableCell>
-                  <TableCell>${producto.sizes?.[0]?.price ?? "N/A"}</TableCell>
-                  <TableCell>
-                    <Badge className={cn(
-                      "font-medium",
-                      !producto.isDeleted ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                    )}>
-                      {!producto.isDeleted ? "Disponible" : "Eliminado"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Link href={`/dashboard/productos/${producto.id}`}>
-                        <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
-                      </Link>
-                      <Link href={`/dashboard/productos/edit/${producto.id}`}>
-                        <Button variant="ghost" size="sm"><Edit className="w-4 h-4" /></Button>
-                      </Link>
-                      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setProductoAEliminar(producto)
-                              setDialogOpen(true)
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta acción no se puede deshacer. ¿Eliminar {producto.name}?
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleEliminarProducto}>Eliminar</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
+          {!loading && productos.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <ShoppingBag className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No hay productos disponibles</h3>
+              <p className="text-gray-500 text-center mb-4">
+                No se encontraron productos que coincidan con los filtros aplicados.
+              </p>
+              <Link href="/dashboard/productos/crear">
+                <Button className="bg-[#017d74] hover:bg-[#015d54] text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Agregar Producto
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Imagen</TableHead>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Precio</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
+              </TableHeader>
+              <TableBody>
+                {productos.map((producto) => (
+                  <TableRow key={producto.id}>
+                    <TableCell>
+                      {producto.files?.[0]?.url ? (
+                        <img
+                          src={producto.files[0].url || "/placeholder.svg"}
+                          className="w-12 h-12 object-cover rounded-lg"
+                          alt={producto.name}
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <Package className="w-5 h-5 text-gray-400" />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>{producto.name}</TableCell>
+                    <TableCell>${producto.sizes?.[0]?.price ?? "N/A"}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={cn(
+                          "font-medium",
+                          !producto.isDeleted ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800",
+                        )}
+                      >
+                        {!producto.isDeleted ? "Disponible" : "Eliminado"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Link href={`/dashboard/productos/${producto.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <Link href={`/dashboard/productos/edit/${producto.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setProductoAEliminar(producto)
+                                setDialogOpen(true)
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción no se puede deshacer. ¿Eliminar {producto.name}?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleEliminarProducto}>Eliminar</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
           {/* PAGINACIÓN */}
           {totalPages > 1 && (
             <div className="flex justify-between items-center mt-6">
               <Button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 variant="outline"
               >
@@ -279,7 +309,7 @@ export const GestionProductos = () => {
                 Página {currentPage} de {totalPages}
               </span>
               <Button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
                 variant="outline"
               >

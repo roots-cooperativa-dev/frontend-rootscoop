@@ -57,7 +57,14 @@ const sidebarLinks = [
     icon: User,
     description: "Gestión de usuarios",
   },
+  {
+    href: "/dashboard/visitas", 
+    label: "Visitas",
+    icon: Sun, 
+    description: "Registro de visitas",
+  },
 ];
+
 
 const secondaryLinks = [
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },

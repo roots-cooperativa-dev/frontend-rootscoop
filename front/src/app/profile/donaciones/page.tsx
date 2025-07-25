@@ -1,19 +1,19 @@
 import Sidebar from "@/src/components/contenedores/sidebar";
 import HeaderProfile from "@/src/components/headers/EncabezadoPerfil";
 import { Footer } from "@/src/components/landing/Footer";
-import VisitasAgendadas from "../component/visitUser";
+import DonateUser from "../component/donateUser";
 
-const Visitanos = () => {
+const Donate = () => {
   return (
     <>
       <HeaderProfile />
       <div className="flex bg-slate-50">
         <Sidebar />
-        <VisitasAgendadas/>
+        <DonateUser/>
       </div>
       <Footer />
     </>
   );
 };
 
-export default Visitanos;
+export default Donate;

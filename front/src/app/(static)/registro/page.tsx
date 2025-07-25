@@ -67,7 +67,6 @@ export default function RegisterForm() {
           phone: Number(values.phone),
           username: values.username,
         };
-        console.log(data);
         await postRegister(data);
         toast.success(
           "Usuario registrado correctamente inicia sesion para continuar"
@@ -79,7 +78,8 @@ export default function RegisterForm() {
 
         resetForm(); // limpia los campos
       } catch (error: any) {
-        toast.error(error?.message || "Error al registrar el usuario");
+        console.log(error.response.data.message)
+        toast.error(error?.response.data.message || "Error al registrar el usuario");
       } finally {
         setSubmitting(false); // desactiva bandera
       }
