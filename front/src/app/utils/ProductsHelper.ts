@@ -24,24 +24,39 @@ const getAuthHeader = () => {
     };
 };
 
-export const fetchProductos = async (params: ProductoQueryParams = {}): Promise<IProducto[]> => {
+
+
+export const fetchProductos = async ({
+    page = 1,
+    limit = 10,
+    name,
+    categoryId,
+    minPrice,
+    maxPrice
+}: {
+    page?: number
+    limit?: number
+    name?: string
+    categoryId?: string
+    minPrice?: number
+    maxPrice?: number
+}): Promise<{ products: IProducto[]; pages: number }> => {
     try {
-        const response = await axios.get<IProducto[]>(`${API_URL}/products`, {
-            params: {
-                page: params.page ?? 1,
-                limit: params.limit ?? 10,
-                name: params.name,
-                categoryId: params.categoryId,
-                minPrice: params.minPrice,
-                maxPrice: params.maxPrice
-            }
+        const response = await axios.get(`${API_URL}/products`, {
+            params: { page, limit, name, categoryId, minPrice, maxPrice }
         })
-        return response.data
+
+        return {
+            products: response.data.products || [],
+            pages: response.data.pages || 1
+        }
     } catch (error) {
-        console.error("Error fetching productos:", error)
-        return []
+        console.error("Error al obtener productos:", error)
+        return { products: [], pages: 1 }
     }
 }
+
+
 
 export const fetchProductoById = async (
     id: string

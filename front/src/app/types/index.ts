@@ -5,12 +5,12 @@ export interface IProducto {
   isDeleted: boolean;
   sizes: Size[];
   category: ICategory;
-  files: File[]; 
+  files: File[];
 }
 
 export enum Irole {
-    ADMIN = "admin",
-    USER = "user"
+  ADMIN = "admin",
+  USER = "user"
 }
 
 export interface Size {
@@ -39,4 +39,58 @@ export interface ProductoQueryParams {
   categoryId?: string
   minPrice?: number
   maxPrice?: number
+}
+
+
+export interface IUsuario {
+  id: string;
+  name: string;
+  email: string;
+  birthdate: string;
+  phone: string;
+  username: string;
+  isAdmin: boolean;
+  isDonator: boolean;
+  donates: any[];
+  password?: string;
+}
+
+export interface IOrder {
+  id: string;
+  date: string;
+  status: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    birthdate: string;
+    username: string;
+    password: string;
+    phone: string;
+    isAdmin: boolean;
+    isDonator: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+  orderDetail: {
+    id: string;
+    total: string;
+    products: {
+      id: string;
+      name: string;
+      details: string;
+      isDeleted: boolean;
+      sizes: {
+        id: string;
+        size: string;
+        price: number;
+        stock: number;
+      }[];
+    }[];
+  };
+}
+
+export interface IOrdersResponse {
+  data: IOrder[];
+  total: number;
 }
