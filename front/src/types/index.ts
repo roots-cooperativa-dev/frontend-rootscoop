@@ -1,4 +1,4 @@
-interface LoginDto {
+export interface LoginDto {
   email: string;
   password: string;
 }
@@ -12,7 +12,7 @@ interface Iuser {
   password: string;
   confirmPassword: string;
 }
-interface UserGoogle {
+export interface UserGoogle {
   id: string;
   email: string;
   name: string;
@@ -26,7 +26,7 @@ enum Irole {
   ADMIN = "admin",
   USER = "user",
 }
-interface RegisterDto {
+export interface RegisterDto {
   name: string;
   email: string;
   birthdate: string;
@@ -36,3 +36,21 @@ interface RegisterDto {
   confirmPassword: string;
 }
 
+<<<<<<< HEAD
+=======
+export interface Iproduct {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  image: string;
+  categoryId: number;
+  category: Icategory;
+}
+interface Icategory {
+    id: number;
+    name: string;
+    products?: Iproduct[];
+}
+>>>>>>> f38542eccdf4482a707960aa6371f6697e8df89d

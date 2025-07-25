@@ -105,6 +105,7 @@ export interface IOrdersResponse {
   total: number;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 export interface ISlot {
   id: string;
@@ -125,6 +126,8 @@ export interface IVisita {
   status: string;
   availableSlots: ISlot[];
 =======
+=======
+>>>>>>> f38542eccdf4482a707960aa6371f6697e8df89d
 export interface RegisterDto {
   name: string;
   email: string;
@@ -139,5 +142,8 @@ export interface Icart{
   productId: string,
   productSizeId: string,
   quantity: number
+<<<<<<< HEAD
+>>>>>>> f38542eccdf4482a707960aa6371f6697e8df89d
+=======
 >>>>>>> f38542eccdf4482a707960aa6371f6697e8df89d
 }
