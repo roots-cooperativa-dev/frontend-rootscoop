@@ -8,6 +8,7 @@ import { Button } from "../../../../components/ui/button";
 import { useState } from "react";
 import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
+const { token } = useAuthContext();
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DonarFormulario() {
@@ -28,6 +29,10 @@ export default function DonarFormulario() {
         .min(3, "El mensaje debe tener al menos 3 caracteres"),
     }),
     onSubmit: async (values) => {
+      if (!token) {
+        toast.error("No hay token de autenticación. Por favor iniciá sesión.");
+        return;
+      }
       try {
         setLoading(true);
         const res = await axios.post(
@@ -39,6 +44,7 @@ export default function DonarFormulario() {
           {
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
           }
         );
