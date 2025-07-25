@@ -55,9 +55,9 @@ export default function LoginForm() {
         });
         const fetchCart = async () => {
           try {
-            console.log(Token)
+
             const data = await getCart(Token);
-            console.log(data);
+            console.log(data.items);
             setCartFromServer(data.items, data.total); // ✅ actualiza el context
             console.log(cart);
             router.push("/");
