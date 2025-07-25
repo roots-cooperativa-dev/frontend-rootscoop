@@ -1,4 +1,3 @@
-// IMPORTS
 "use client"
 
 import { useEffect, useState } from "react"
@@ -6,13 +5,12 @@ import { fetchProductos, eliminarProducto } from "../../app/utils/ProductsHelper
 import { fetchCategorias } from "../../app/utils/CategoriasHelper"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import {
-  Plus, Eye, Edit, Trash2, Search, Filter, Package, TrendingUp, AlertCircle, List, Grid3X3
+  Plus, Eye, Edit, Trash2, Search, Filter, Package
 } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card"
 import { Badge } from "../../components/ui/badge"
 import { Input } from "../../components/ui/input"
-import { Skeleton } from "../../components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import Link from "next/link"
 import { cn } from "../../lib/utils"
@@ -34,6 +32,9 @@ export const GestionProductos = () => {
   const [maxPrice, setMaxPrice] = useState("")
   const [productoAEliminar, setProductoAEliminar] = useState<IProducto | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [limit] = useState(10)
 
   useEffect(() => {
     const obtenerCategorias = async () => {
@@ -52,14 +53,15 @@ export const GestionProductos = () => {
       setLoading(true)
       try {
         const data = await fetchProductos({
-          page: 1,
-          limit: 50,
+          page: currentPage,
+          limit,
           name: searchTerm || undefined,
           categoryId: categoryIdFilter || undefined,
           minPrice: minPrice ? parseFloat(minPrice) : undefined,
           maxPrice: maxPrice ? parseFloat(maxPrice) : undefined
         })
-        setProductos(data)
+        setProductos(data.products)
+        setTotalPages(data.pages)
       } catch (error) {
         toast.error("Error cargando productos")
       } finally {
@@ -67,7 +69,7 @@ export const GestionProductos = () => {
       }
     }
     obtenerProductos()
-  }, [searchTerm, categoryIdFilter, minPrice, maxPrice])
+  }, [searchTerm, categoryIdFilter, minPrice, maxPrice, currentPage])
 
   const filteredProductos = productos.filter((producto) => {
     const matchesStatus =
@@ -92,6 +94,7 @@ export const GestionProductos = () => {
 
   return (
     <div className="space-y-6">
+      {/* HEADER */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
@@ -129,15 +132,10 @@ export const GestionProductos = () => {
                 <SelectValue placeholder="Filtrar por categoría" />
               </SelectTrigger>
               <SelectContent>
-                {categorias
-                  .filter(c => c.id && c.id.trim() !== "") // Filtramos categorías inválidas
-                  .map(c => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
+                {categorias.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
               </SelectContent>
-
             </Select>
 
             <Input
@@ -162,7 +160,7 @@ export const GestionProductos = () => {
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="available">Disponibles</SelectItem>
                 <SelectItem value="deleted">Eliminados</SelectItem>
               </SelectContent>
@@ -176,6 +174,7 @@ export const GestionProductos = () => {
                 setMinPrice("")
                 setMaxPrice("")
                 setStatusFilter("all")
+                setCurrentPage(1)
               }}
             >
               Limpiar filtros
@@ -204,7 +203,7 @@ export const GestionProductos = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProductos.map((producto) => (
+              {filteredProductos.map(producto => (
                 <TableRow key={producto.id}>
                   <TableCell>
                     {producto.files?.[0]?.url ? (
@@ -220,9 +219,7 @@ export const GestionProductos = () => {
                   <TableCell>
                     <Badge className={cn(
                       "font-medium",
-                      !producto.isDeleted
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                      !producto.isDeleted ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                     )}>
                       {!producto.isDeleted ? "Disponible" : "Eliminado"}
                     </Badge>
@@ -230,14 +227,10 @@ export const GestionProductos = () => {
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Link href={`/dashboard/productos/${producto.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
                       </Link>
                       <Link href={`/dashboard/productos/edit/${producto.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        <Button variant="ghost" size="sm"><Edit className="w-4 h-4" /></Button>
                       </Link>
                       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
                         <AlertDialogTrigger asChild>
@@ -256,7 +249,7 @@ export const GestionProductos = () => {
                           <AlertDialogHeader>
                             <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Esta acción no se puede deshacer. ¿Seguro que deseas eliminar {producto.name}?
+                              Esta acción no se puede deshacer. ¿Eliminar {producto.name}?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -271,6 +264,29 @@ export const GestionProductos = () => {
               ))}
             </TableBody>
           </Table>
+
+          {/* PAGINACIÓN */}
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center mt-6">
+              <Button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                variant="outline"
+              >
+                Anterior
+              </Button>
+              <span className="text-sm text-gray-600">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                variant="outline"
+              >
+                Siguiente
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

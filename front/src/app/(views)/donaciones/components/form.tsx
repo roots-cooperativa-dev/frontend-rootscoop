@@ -27,15 +27,20 @@ export default function DonarFormulario() {
       try {
         setLoading(true);
         const res = await axios.post(
-          `http://localhost:3000/payments/preference/:${user?.id}`,
+          `http://localhost:3000/payments/create-preference/${user?.id}`,
           {
-            amount: Number(values.amount),
-            Message: values.message,
+            amount: values.amount,
+            message: values.message,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
         );
 
-        if (res.data && res.data.init_point) {
-          window.location.href = res.data.init_point;
+        if (res.data && res.data.sandboxInitPoint) {
+          window.location.href = res.data.sandboxInitPoint;
         } else {
           toast("Error al generar el pago.");
         }
