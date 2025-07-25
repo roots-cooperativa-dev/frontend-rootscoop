@@ -10,7 +10,7 @@ import Loading from "@/src/components/loading/pantallaCargando";
 
 const CartPage = () => {
   const { user, token, loading } = useAuthContext();
-  const { cart, total, setCartFromServer } = useCartContext();
+  const { cart, setCartFromServer } = useCartContext();
   const router = useRouter();
 
   const [isLoadingCart, setIsLoadingCart] = useState(true);

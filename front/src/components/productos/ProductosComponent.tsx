@@ -36,6 +36,7 @@ export const Productos = () => {
                 page: 1,
                 limit: 100,
             })
+            console.log(data)
             setProductos(data)
         } catch (error) {
             console.error("Error al filtrar productos:", error)
