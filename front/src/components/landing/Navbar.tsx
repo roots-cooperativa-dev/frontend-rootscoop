@@ -41,9 +41,6 @@ export const Navbar = () => {
                     <Link href="/contacto" className="font-bebas text-white/90 hover:text-white transition-colors font-medium">
                         Contacto
                     </Link>
-                    {/* <Button className="font-bebas bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg" asChild>
-                        <Link href="/login">Iniciar sesión</Link>
-                    </Button> */}
                     <AuthNav/>
                 </div>
                 {/* Mobile Menu Button */}

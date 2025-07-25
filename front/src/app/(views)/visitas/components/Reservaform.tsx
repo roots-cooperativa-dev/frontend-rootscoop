@@ -1,6 +1,5 @@
 "use client";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 import { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -9,19 +8,9 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
+import { Slot, Visita } from "../types/index";
 
-type Slot = {
-  id: string;
-  date: string;
-  startTime: string;
-  isBooked: boolean;
-};
-
-type Visita = {
-  id: string;
-  title: string;
-  availableSlots: Slot[];
-};
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ReservaForm() {
   const { user, token } = useAuthContext();
@@ -48,6 +37,7 @@ export default function ReservaForm() {
 
     fetchVisitas();
   }, []);
+
   useEffect(() => {
     const fechasDisponibles: Date[] = [];
 
@@ -55,7 +45,6 @@ export default function ReservaForm() {
       visita.availableSlots.forEach((slot) => {
         if (!slot.isBooked) {
           const fecha = new Date(slot.date + "T00:00:00");
-          const id = slot.id;
           if (
             !fechasDisponibles.some(
               (f) => f.toDateString() === fecha.toDateString()
@@ -68,33 +57,36 @@ export default function ReservaForm() {
     });
 
     setFechasConSlots(fechasDisponibles);
-    console.log(
-      "Fechas con slots disponibles:",
-      fechasDisponibles.map((f) => f.toDateString())
-    );
   }, [visitas]);
 
   useEffect(() => {
     if (fechaSeleccionada) {
       const fechaStr = fechaSeleccionada.toISOString().split("T")[0];
-
       const slots = visitas.flatMap((visita) =>
         visita.availableSlots.filter(
           (slot) => slot.date === fechaStr && !slot.isBooked
         )
       );
-
       setSlotsDisponibles(slots);
     } else {
       setSlotsDisponibles([]);
     }
   }, [fechaSeleccionada, visitas]);
 
+  const visitaSeleccionada = visitas.find((visita) =>
+    visita.availableSlots.some(
+      (slot) =>
+        !slot.isBooked &&
+        fechaSeleccionada?.toISOString().split("T")[0] === slot.date
+    )
+  );
+
   const formik = useFormik({
     initialValues: {
       nombre: "",
       cantidad: "",
       slotId: "",
+      description: "",
     },
     validationSchema: Yup.object({
       nombre: Yup.string().required("Campo obligatorio"),
@@ -103,18 +95,18 @@ export default function ReservaForm() {
         .min(1, "Mínimo 1 persona")
         .max(15, "Máximo 15 personas"),
       slotId: Yup.string().required("Selecciona un horario"),
+      description: Yup.string().required("Campo obligatorio"),
     }),
     onSubmit: async (values) => {
-      if (!values.slotId || !values.cantidad) {
-        alert("Faltan datos obligatorios");
-        return;
-      }
+      if (!values.slotId || !values.cantidad) return;
+
       const payload = {
         visitSlotId: values.slotId,
         numberOfPeople: parseInt(values.cantidad),
+        description: values.description,
       };
+      console.log("Payload a enviar:", payload);
       try {
-        console.log(payload);
         await axios.post(`${BACKEND_URL}/visits/appointments`, payload, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -126,7 +118,7 @@ export default function ReservaForm() {
         setFechaSeleccionada(undefined);
       } catch (err) {
         console.error("Error al enviar reserva", err);
-        toast.success("Ocurrió un error al enviar la reserva");
+        toast.error("Ocurrió un error al enviar la reserva");
       }
     },
   });
@@ -152,6 +144,7 @@ export default function ReservaForm() {
             <p className="text-red-500 text-sm">{formik.errors.nombre}</p>
           )}
         </div>
+
         <div>
           <label className="block text-m font-bebas font-semibold text-gray-700">
             Cantidad de personas (max. 15)
@@ -169,6 +162,7 @@ export default function ReservaForm() {
             <p className="text-red-500 text-sm">{formik.errors.cantidad}</p>
           )}
         </div>
+
         <div>
           <label className="block text-m font-semibold font-bebas text-gray-700 mb-2">
             Selecciona una fecha
@@ -179,17 +173,14 @@ export default function ReservaForm() {
             <span className="inline-block w-4 h-4 bg-[#017d74] ml-4 mr-2 rounded"></span>
             Fecha seleccionada
           </div>
+
           <div className="calendar-wrapper">
             <DayPicker
               mode="single"
               selected={fechaSeleccionada}
               onSelect={setFechaSeleccionada}
-              modifiers={{
-                available: fechasConSlots,
-              }}
-              modifiersClassNames={{
-                available: "fecha-disponible",
-              }}
+              modifiers={{ available: fechasConSlots }}
+              modifiersClassNames={{ available: "fecha-disponible" }}
               disabled={(date) => {
                 return !fechasConSlots.some(
                   (fecha) => fecha.toDateString() === date.toDateString()
@@ -198,41 +189,45 @@ export default function ReservaForm() {
               className="bg-gray-50 p-4 rounded-lg"
             />
           </div>
+
           <style
             dangerouslySetInnerHTML={{
               __html: `
-              .calendar-wrapper .fecha-disponible {
-                background-color: #bbf7d0 !important;
-                border: 2px solid #16a34a !important;
-                color: #166534 !important;
-                font-weight: 600 !important;
-                border-radius: 4px !important;
-              }
-              
-              .calendar-wrapper .fecha-disponible:hover {
-                background-color: #86efac !important;
-              }
-              
-              .calendar-wrapper [aria-selected="true"] {
-                background-color: #017d74 !important;
-                color: white !important;
-                font-weight: bold !important;
-                border-radius: 4px !important;
-              }
-              
-              .calendar-wrapper [aria-selected="true"]:hover {
-                background-color: #016c64 !important;
-              }
-              
-              .calendar-wrapper [aria-disabled="true"] {
-                color: #9ca3af !important;
-                cursor: not-allowed !important;
-                opacity: 0.5 !important;
-              }
-            `,
+                .calendar-wrapper .fecha-disponible {
+                  background-color: #bbf7d0 !important;
+                  border: 2px solid #16a34a !important;
+                  color: #166534 !important;
+                  font-weight: 600 !important;
+                  border-radius: 4px !important;
+                }
+                .calendar-wrapper .fecha-disponible:hover {
+                  background-color: #86efac !important;
+                }
+                .calendar-wrapper [aria-selected="true"] {
+                  background-color: #017d74 !important;
+                  color: white !important;
+                  font-weight: bold !important;
+                  border-radius: 4px !important;
+                }
+                .calendar-wrapper [aria-selected="true"]:hover {
+                  background-color: #016c64 !important;
+                }
+                .calendar-wrapper [aria-disabled="true"] {
+                  color: #9ca3af !important;
+                  cursor: not-allowed !important;
+                  opacity: 0.5 !important;
+                }
+              `,
             }}
           />
         </div>
+
+        {visitaSeleccionada && (
+          <div className="bg-[#e6f4f1] p-3 rounded-lg border border-[#017d74] text-[#017d74] font-semibold text-center">
+            🧭 Cita seleccionada: {visitaSeleccionada.title}
+          </div>
+        )}
+
         {fechaSeleccionada && slotsDisponibles.length === 0 && (
           <div className="p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
             <p className="text-yellow-700 text-sm">
@@ -240,6 +235,7 @@ export default function ReservaForm() {
             </p>
           </div>
         )}
+
         {slotsDisponibles.length > 0 && (
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -248,10 +244,7 @@ export default function ReservaForm() {
             <select
               name="slotId"
               value={formik.values.slotId}
-              onChange={(e) => {
-                console.log("Slot ID seleccionado:", e.target.value); // ✅ log correcto
-                formik.handleChange(e);
-              }}
+              onChange={formik.handleChange}
               className="w-full p-2 border rounded-lg"
             >
               <option value="">-- Seleccionar horario --</option>
@@ -266,7 +259,22 @@ export default function ReservaForm() {
             )}
           </div>
         )}
-
+        <div>
+          <label className="block text-m font-bebas font-semibold text-gray-700">
+            Descripcion de la visita
+          </label>
+          <textarea
+            name="description"
+            rows={3}
+            placeholder="Especifica motivo de la visita o detalles adicionales..."
+            value={formik.values.description}
+            onChange={formik.handleChange}
+            className="w-full mt-1 p-2 border rounded-lg"
+          />
+          {formik.touched.description && formik.errors.description && (
+            <p className="text-red-500 text-sm">{formik.errors.description}</p>
+          )}
+        </div>
         <button
           type="submit"
           disabled={!formik.values.slotId}
