@@ -28,7 +28,7 @@ export const Productos = () => {
     ) => {
         setLoading(true)
         try {
-            const data = await fetchProductos({
+            const { products } = await fetchProductos({
                 categoryId: filters.categorias?.length ? filters.categorias.join(",") : undefined,
                 name: filters.name || undefined,
                 minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
@@ -36,13 +36,14 @@ export const Productos = () => {
                 page: 1,
                 limit: 100,
             })
-            setProductos(data)
+            setProductos(products)
         } catch (error) {
             console.error("Error al filtrar productos:", error)
         } finally {
             setLoading(false)
         }
     }
+
 
     useEffect(() => {
         const loadInitialData = async () => {

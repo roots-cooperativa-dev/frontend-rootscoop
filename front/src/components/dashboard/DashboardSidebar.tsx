@@ -9,6 +9,8 @@ import {
   Home,
   Settings,
   HelpCircle,
+  User,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -23,6 +25,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "../../lib/utils";
 import Image from "next/image";
 import { useAuthContext } from "@/src/context/authContext";
+
 const sidebarLinks = [
   {
     href: "/dashboard",
@@ -41,6 +44,18 @@ const sidebarLinks = [
     label: "Productos",
     icon: Package,
     description: "Inventario y productos",
+  },
+  {
+    href: "/dashboard/ordenes",
+    label: "Órdenes",
+    icon: ClipboardList,
+    description: "Historial de pedidos",
+  },
+  {
+    href: "/dashboard/usuarios",
+    label: "Usuarios",
+    icon: User,
+    description: "Gestión de usuarios",
   },
 ];
 
@@ -63,7 +78,7 @@ export const DashboardSidebar = () => {
       {/* Header */}
       <div className="p-6 border-b border-gray-200/60">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10  rounded-xl flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm">
             <Image
               src="/logos/roots.png"
               alt="Rootscoop Logo"
