@@ -104,3 +104,34 @@ export interface IOrdersResponse {
   data: IOrder[];
   total: number;
 }
+
+export interface IVisita {
+    id: string
+    title: string
+    description: string
+    people: number
+    status: string
+    availableSlots?: any[] 
+}
+export interface ISlot {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  maxAppointments: number;
+  appointments: IAppointment[];
+}
+export interface IAppointment {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    birthdate: string;
+    phone: string;
+    username: string;
+    isAdmin: boolean;
+    isDonator: boolean;
+  };
+  slot: ISlot;
+}

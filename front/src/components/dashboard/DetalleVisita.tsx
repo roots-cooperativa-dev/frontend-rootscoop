@@ -4,8 +4,7 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { fetchVisitas } from "../../app/utils/VisitasHelper"
-import { agregarTurnoAVisita } from "../../app/utils/VisitasHelper"
+import { fetchVisitas, agregarTurnoAVisita } from "../../app/utils/VisitasHelper"
 import type { IVisita } from "../../app/types"
 import { Loader2, Calendar, Clock, Users, Plus, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
@@ -16,19 +15,29 @@ import { Label } from "../../components/ui/label"
 import { toast } from "sonner"
 import Link from "next/link"
 import { cn } from "../../lib/utils"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogTrigger,
+    DialogFooter,
+} from "../../components/ui/dialog"
 
 export const DetalleVisita = () => {
     const params = useParams()
     const visitaId = params?.id as string
     const [visita, setVisita] = useState<IVisita | null>(null)
     const [loading, setLoading] = useState(true)
+    const [submitting, setSubmitting] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false) // State for modal
     const [formData, setFormData] = useState({
         date: "",
         startTime: "",
         endTime: "",
         maxAppointments: 1,
     })
-    const [submitting, setSubmitting] = useState(false)
 
     useEffect(() => {
         const cargarVisita = async () => {
@@ -66,10 +75,11 @@ export const DetalleVisita = () => {
                 endTime: "",
                 maxAppointments: 1,
             })
-            // Recargar la visita para actualizar los turnos
+            // Refrescar los datos de la visita
             const visitas = await fetchVisitas()
             const encontrada = visitas.find((v) => v.id === visitaId)
             setVisita(encontrada || null)
+            setIsModalOpen(false) // Close modal on success
         } catch (error) {
             toast.error("Error al agregar el turno")
         } finally {
@@ -129,6 +139,93 @@ export const DetalleVisita = () => {
                     </h1>
                     <p className="text-gray-600 mt-1">Gestiona los turnos y horarios de la visita</p>
                 </div>
+                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Agregar Turno
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Agregar Nuevo Turno</DialogTitle>
+                            <DialogDescription>Completa los datos para agregar un nuevo turno a esta visita.</DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="date">Fecha del turno</Label>
+                                <Input
+                                    id="date"
+                                    type="date"
+                                    name="date"
+                                    value={formData.date}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="maxAppointments">Cantidad máxima de citas</Label>
+                                <Input
+                                    id="maxAppointments"
+                                    type="number"
+                                    name="maxAppointments"
+                                    value={formData.maxAppointments}
+                                    onChange={handleChange}
+                                    required
+                                    min={1}
+                                    className="w-full"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="startTime">Hora de inicio</Label>
+                                <Input
+                                    id="startTime"
+                                    type="time"
+                                    name="startTime"
+                                    value={formData.startTime}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="endTime">Hora de finalización</Label>
+                                <Input
+                                    id="endTime"
+                                    type="time"
+                                    name="endTime"
+                                    value={formData.endTime}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full"
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md"
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Guardando turno...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Plus className="w-4 h-4 mr-2" />
+                                            Agregar Turno
+                                        </>
+                                    )}
+                                </Button>
+                                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+                                    Cancelar
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             {/* STATS CARDS */}
@@ -238,101 +335,136 @@ export const DetalleVisita = () => {
                 </CardContent>
             </Card>
 
-            {/* FORMULARIO DE TURNOS */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Plus className="w-5 h-5" />
-                        Agregar Nuevo Turno
-                    </CardTitle>
-                    <CardDescription>Completa los datos para agregar un nuevo turno a esta visita</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="date" className="text-sm font-medium text-gray-700">
-                                    Fecha del turno
-                                </Label>
-                                <Input
-                                    id="date"
-                                    type="date"
-                                    name="date"
-                                    value={formData.date}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full"
-                                />
+            {/* LISTADO DE TURNOS */}
+            {visita.availableSlots && visita.availableSlots.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Clock className="w-5 h-5" />
+                            Turnos Cargados
+                        </CardTitle>
+                        <CardDescription>Lista de turnos agregados a esta visita</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {visita.availableSlots.map((slot, idx) => (
+                            <div key={idx} className="p-4 border rounded-lg bg-gray-50 shadow-sm space-y-2">
+                                <div className="flex items-center gap-2 text-gray-700">
+                                    <Calendar className="w-4 h-4 text-gray-500" />
+                                    <span className="font-semibold">Fecha:</span> {slot.date}
+                                </div>
+                                <div className="flex items-center gap-2 text-gray-700">
+                                    <Clock className="w-4 h-4 text-gray-500" />
+                                    <span className="font-semibold">Hora:</span> {slot.startTime} - {slot.endTime}
+                                </div>
+                                <div className="flex items-center gap-2 text-gray-700">
+                                    <Users className="w-4 h-4 text-gray-500" />
+                                    <span className="font-semibold">Máx. citas:</span> {slot.maxAppointments}
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="maxAppointments" className="text-sm font-medium text-gray-700">
-                                    Cantidad máxima de citas
-                                </Label>
-                                <Input
-                                    id="maxAppointments"
-                                    type="number"
-                                    name="maxAppointments"
-                                    value={formData.maxAppointments}
-                                    onChange={handleChange}
-                                    required
-                                    min={1}
-                                    className="w-full"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="startTime" className="text-sm font-medium text-gray-700">
-                                    Hora de inicio
-                                </Label>
-                                <Input
-                                    id="startTime"
-                                    type="time"
-                                    name="startTime"
-                                    value={formData.startTime}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="endTime" className="text-sm font-medium text-gray-700">
-                                    Hora de finalización
-                                </Label>
-                                <Input
-                                    id="endTime"
-                                    type="time"
-                                    name="endTime"
-                                    value={formData.endTime}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full"
-                                />
-                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            )}
+            {visita.availableSlots && visita.availableSlots.length === 0 && !loading && (
+                <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <Clock className="w-8 h-8 text-gray-400" />
                         </div>
-                        <div className="flex gap-4 pt-4">
-                            <Button
-                                type="submit"
-                                disabled={submitting}
-                                className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md"
-                            >
-                                {submitting ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Guardando turno...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Plus className="w-4 h-4 mr-2" />
-                                        Agregar Turno
-                                    </>
-                                )}
-                            </Button>
-                            <Link href="/dashboard/visitas">
-                                <Button variant="outline">Cancelar</Button>
-                            </Link>
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No hay turnos cargados</h3>
+                        <p className="text-gray-500 text-center mb-4">
+                            Agrega el primer turno para esta visita usando el botón "Agregar Turno".
+                        </p>
+                        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="bg-[#017d74] hover:bg-[#015d54] text-white">
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Agregar Turno
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>Agregar Nuevo Turno</DialogTitle>
+                                    <DialogDescription>Completa los datos para agregar un nuevo turno a esta visita.</DialogDescription>
+                                </DialogHeader>
+                                <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="date">Fecha del turno</Label>
+                                        <Input
+                                            id="date"
+                                            type="date"
+                                            name="date"
+                                            value={formData.date}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="maxAppointments">Cantidad máxima de citas</Label>
+                                        <Input
+                                            id="maxAppointments"
+                                            type="number"
+                                            name="maxAppointments"
+                                            value={formData.maxAppointments}
+                                            onChange={handleChange}
+                                            required
+                                            min={1}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="startTime">Hora de inicio</Label>
+                                        <Input
+                                            id="startTime"
+                                            type="time"
+                                            name="startTime"
+                                            value={formData.startTime}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="endTime">Hora de finalización</Label>
+                                        <Input
+                                            id="endTime"
+                                            type="time"
+                                            name="endTime"
+                                            value={formData.endTime}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <DialogFooter>
+                                        <Button
+                                            type="submit"
+                                            disabled={submitting}
+                                            className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md"
+                                        >
+                                            {submitting ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                    Guardando turno...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Plus className="w-4 h-4 mr-2" />
+                                                    Agregar Turno
+                                                </>
+                                            )}
+                                        </Button>
+                                        <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+                                            Cancelar
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     )
 }
