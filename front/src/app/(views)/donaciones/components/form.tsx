@@ -8,12 +8,11 @@ import { Button } from "../../../../components/ui/button";
 import { useState } from "react";
 import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
-const { token } = useAuthContext();
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DonarFormulario() {
   const [loading, setLoading] = useState(false);
-  const { user } = useAuthContext();
+  const { user, token } = useAuthContext();
 
   const formik = useFormik({
     initialValues: {
