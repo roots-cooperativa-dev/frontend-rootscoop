@@ -8,6 +8,7 @@ import { Button } from "../../../../components/ui/button";
 import { useState } from "react";
 import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DonarFormulario() {
   const [loading, setLoading] = useState(false);
@@ -22,12 +23,15 @@ export default function DonarFormulario() {
       amount: Yup.number()
         .required("El monto es obligatorio")
         .min(1, "El monto mínimo es $1"),
+      message: Yup.string()
+        .required("El mensaje es obligatorio")
+        .min(3, "El mensaje debe tener al menos 3 caracteres"),
     }),
     onSubmit: async (values) => {
       try {
         setLoading(true);
         const res = await axios.post(
-          `http://localhost:3000/payments/create-preference/${user?.id}`,
+          `${BACKEND_URL}/payments/create-preference/${user?.id}`,
           {
             amount: values.amount,
             message: values.message,
@@ -82,7 +86,7 @@ export default function DonarFormulario() {
           id="message"
           name="message"
           type="text"
-          placeholder="Mensaje o motivo (opcional)"
+          placeholder="Mensaje o motivo"
           value={formik.values.message}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
