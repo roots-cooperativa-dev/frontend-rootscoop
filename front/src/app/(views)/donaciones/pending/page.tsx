@@ -1,16 +1,29 @@
 "use client";
 
-export default function PendingPage() {
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+function PendingContent() {
+  const searchParams = useSearchParams();
+  const status = searchParams?.get("status");
+
   return (
     <div className="p-8 text-center">
-      <h1 className="text-3xl font-bold text-yellow-600">¡Pago en proceso!</h1>
-      <p className="mt-4 text-gray-700">
-        Tu donación está siendo procesada por Mercado Pago. Te avisaremos por
-        mail una vez que se acredite.
+      <h1 className="text-3xl font-bold text-yellow-600">
+        Tu pago está pendiente ⏳
+      </h1>
+      {status && <p className="mt-4 text-yellow-500">Estado: {status}</p>}
+      <p className="mt-2 text-gray-600">
+        Te avisaremos cuando se confirme. ¡Gracias por tu paciencia!
       </p>
-      <a href="/" className="mt-6 inline-block text-yellow-600 underline">
-        Volver al inicio
-      </a>
     </div>
+  );
+}
+
+export default function PendingPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <PendingContent />
+    </Suspense>
   );
 }
