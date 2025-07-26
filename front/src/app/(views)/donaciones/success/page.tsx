@@ -1,10 +1,11 @@
 "use client";
+
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function SuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams();
-
-  const paymentId = searchParams?.get("payment_id") ?? null;
+  const paymentId = searchParams?.get("payment_id");
 
   return (
     <div className="p-8 text-center">
@@ -16,5 +17,13 @@ export default function SuccessPage() {
         Tu aporte ayuda a sostener ROOTS de manera autogestiva.
       </p>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <SuccessContent />
+    </Suspense>
   );
 }
