@@ -48,8 +48,8 @@ export default function DonarFormulario() {
           }
         );
 
-        if (res.data && res.data.sandboxInitPoint) {
-          window.location.href = res.data.sandboxInitPoint;
+        if (res.data && res.data.initPoint) {
+          window.location.href = res.data.initPoint;
         } else {
           toast("Error al generar el pago.");
         }
