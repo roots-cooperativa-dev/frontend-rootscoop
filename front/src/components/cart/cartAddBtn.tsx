@@ -20,17 +20,33 @@ const CartAddBtn = ({ product }: { product: IProducto }) => {
     }, 3600);
   };
 
-  const onAddElement = async() => {
+  const onAddElement = async () => {
+    if (!product?.sizes?.[0]?.id) {
+      toast.error("Este producto no tiene una talla válida.");
+      return;
+    }
+
     const datos = {
       productId: product.id,
       productSizeId: product.sizes[0].id,
-      quantity: 1
+      quantity: 1,
+    };
+
+    try {
+      const productCart = await addProductToCart(datos, token);
+
+      if (!productCart) {
+        toast.error("No se pudo agregar el producto al carrito.");
+        return;
+      }
+
+      addToCart(productCart); // sincroniza localStorage internamente
+      toast.success("Producto añadido al carrito");
+
+    } catch (error) {
+      console.error("Error al agregar al carrito:", error);
+      toast.error("Hubo un error al agregar el producto.");
     }
-    console.log(datos)
-    const productCart = await addProductToCart(datos, token);
-    console.log(productCart);
-    toast.success("Producto añadido al carrito");
-    return addToCart(productCart);
   };
 
   if (!isAuth) {
@@ -39,7 +55,7 @@ const CartAddBtn = ({ product }: { product: IProducto }) => {
         <a
           href={routes.login}
           onClick={redirigirLogin}
-          className="w-full text-lg font-bold shadow-md mt-4 text-white bg-[#017d74] hover:bg-[#015D54] focus:ring-4 focus:outline-none rounded-lg px-5 py-2.5 text-center "
+          className="w-full text-lg font-bold shadow-md mt-4 text-white bg-[#017d74] hover:bg-[#015D54] focus:ring-4 focus:outline-none rounded-lg px-5 py-2.5 text-center"
         >
           Debes iniciar sesión para añadir al carrito
         </a>
@@ -50,10 +66,12 @@ const CartAddBtn = ({ product }: { product: IProducto }) => {
   return (
     <button
       onClick={onAddElement}
-      disabled={isProductInCart(product.id || "0")}
-      className="text-white mt-4 w-full bg-[#017d74] hover:bg-[#015D54] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      disabled={isProductInCart(product.id)}
+      className={`text-white mt-4 w-full ${
+        isProductInCart(product.id) ? "bg-gray-400 cursor-not-allowed" : "bg-[#017d74] hover:bg-[#015D54]"
+      } focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center`}
     >
-      Agregar al carrito
+      {isProductInCart(product.id) ? "Ya en el carrito" : "Agregar al carrito"}
     </button>
   );
 };
