@@ -36,7 +36,8 @@ export const getCart = async ( token: string | null | undefined) => {
       },
     });
 
-    if (!response.data) throw new Error("No hay productos en el carrito");
+    console.log("RESPONSE DATA:", response.data); // 👈 esto es clave
+    if (!response.data) throw new Error("No hay productos en carrito");
     console.log(response)
     return response.data;
   } catch (e: any) {
