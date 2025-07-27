@@ -11,6 +11,8 @@ const axiosApiBack = axios.create({
 
 export const addProductToCart = async (data: Icart, token: string | null | undefined) => {
   try {
+    console.log(data)
+    console.log(token)
     const response = await axiosApiBack.post("/orders/cart/add", data, {
       headers: {
         Authorization: `Bearer ${token}`,

@@ -21,12 +21,12 @@ const CartAddBtn = ({ product }: { product: IProducto }) => {
   };
 
   const onAddElement = async() => {
-    console.log("id producto" + product.id)
     const datos = {
       productId: product.id,
       productSizeId: product.sizes[0].id,
       quantity: 1
     }
+    console.log(datos)
     const productCart = await addProductToCart(datos, token);
     console.log(productCart);
     toast.success("Producto añadido al carrito");
