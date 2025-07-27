@@ -2,27 +2,59 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { Button } from "../../../../components/ui/button";
+import { useRouter } from "next/navigation";
 
 function PendingContent() {
   const searchParams = useSearchParams();
-  const status = searchParams?.get("status");
+  const paymentId = searchParams?.get("payment_id");
+  const router = useRouter();
 
   return (
-    <div className="p-8 text-center">
-      <h1 className="text-3xl font-bold text-yellow-600">
-        Tu pago está pendiente ⏳
-      </h1>
-      {status && <p className="mt-4 text-yellow-500">Estado: {status}</p>}
-      <p className="mt-2 text-gray-600">
-        Te avisaremos cuando se confirme. ¡Gracias por tu paciencia!
-      </p>
+    <div className="min-h-screen flex flex-col justify-center items-center bg-yellow-50 px-4">
+      <div className="bg-white shadow-xl rounded-2xl p-8 max-w-md text-center space-y-6">
+        <h1 className="text-3xl font-bold text-yellow-600">
+          Tu donación está en proceso ⏳
+        </h1>
+
+        {paymentId && (
+          <p className="text-sm text-gray-700">ID de pago: {paymentId}</p>
+        )}
+
+        <p className="text-gray-600">
+          Estamos verificando tu pago. Si querés, podés escribirnos por
+          WhatsApp.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+          <Button
+            onClick={() => router.push("/")}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white"
+          >
+            Ir al inicio
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="border-yellow-600 text-yellow-600 hover:bg-yellow-100"
+          >
+            <a
+              href="https://wa.link/b4wyji"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Consultar por WhatsApp
+            </a>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function PendingPage() {
   return (
-    <Suspense fallback={<div>Cargando...</div>}>
+    <Suspense fallback={<div className="text-center mt-10">Cargando...</div>}>
       <PendingContent />
     </Suspense>
   );
