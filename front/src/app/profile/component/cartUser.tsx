@@ -17,6 +17,7 @@ const CartPage = () => {
 
   const fetchCart = async () => {
     try {
+      console.log(token)
       const data = await getCart(token);
       console.log(data)
       setCartFromServer(data.items, data.total); // ✅ actualiza el context
