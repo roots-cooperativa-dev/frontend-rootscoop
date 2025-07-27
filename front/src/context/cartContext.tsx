@@ -3,6 +3,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { CartProduct } from "../app/types";
 
+type SaveCartLoad = {
+  cart: {
+    items: any[];
+    total: string;
+  };
+};
+
 type CartContextType = {
   cart: CartProduct[];
   total: number;
@@ -11,7 +18,8 @@ type CartContextType = {
   removeFromCart: (productId: string) => void;
   isProductInCart: (productId: string) => boolean;
   resetCart: () => void;
-  setCartFromServer: (items: CartProduct[], totalAmount: string) => void;
+  saveCartData: (data: SaveCartLoad)=> void;
+  //setCartFromServer: (items: CartProduct[], totalAmount: string) => void;
 };
 
 const cartContext = createContext<CartContextType | undefined>(undefined);
@@ -21,10 +29,10 @@ const CART_LOCAL_STORANGE_KEY_TOTAL = "cartTotal";
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartContextType["cart"] | null>(null);
   const [total, setTotal] = useState<number>(0);
-  const [totalAmount, setTotalAmount] = useState<string>('');
+  const [totalAmount, setTotalAmount] = useState<string>("");
 
-  const setCartFromServer = (items: any[], totalAmount: string ) => {
-    const adaptedCart: CartProduct[] = items.map((item) => ({
+  const saveCartData = (data: SaveCartLoad) => {
+    const adaptedCart: CartProduct[] = data.cart.items.map((item) => ({
       id: item.product.id,
       name: item.product.name,
       details: item.product.details,
@@ -33,13 +41,21 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       quantity: item.quantity,
     }));
 
-    setTotalAmount(totalAmount)
     setCart(adaptedCart);
-    const totalQuantity = items.reduce(
+    setTotalAmount(data.cart.total);
+
+    const totalQuantity = data.cart.items.reduce(
       (acc, item) => acc + (item.quantity || 0),
       0
     );
-    setTotal(parseFloat(totalQuantity));
+
+    setTotal(totalQuantity);
+
+    localStorage.setItem(CART_LOCAL_STORANGE_KEY, JSON.stringify(adaptedCart));
+    localStorage.setItem(
+      CART_LOCAL_STORANGE_KEY_TOTAL,
+      JSON.stringify(totalQuantity)
+    );
   };
 
   const addToCart = (product: CartProduct) => {
@@ -92,12 +108,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         cart: cart || [],
         total: total || 0,
-        totalAmount: totalAmount || '0',
+        totalAmount: totalAmount || "0",
         addToCart,
         removeFromCart,
         isProductInCart,
         resetCart,
-        setCartFromServer,
+        saveCartData
+        //setCartFromServer,
       }}
     >
       {children}
