@@ -168,6 +168,7 @@ const ProductoForm = () => {
         if (!name.trim()) newErrors.name = "El nombre es obligatorio";
         if (!details.trim()) newErrors.details = "Los detalles son obligatorios";
         if (!categoryId) newErrors.categoryId = "Debe seleccionar una categoría";
+        if (!esUUID(categoryId)) newErrors.categoryId = "La categoría debe ser un UUID válido";
         if (sizes.length === 0) newErrors.sizes = "Debe agregar al menos un talle";
         if (sizes.some((s) => !s.size || s.price <= 0 || s.stock < 0)) {
             newErrors.sizes = "Todos los talles deben tener datos válidos";
@@ -179,26 +180,20 @@ const ProductoForm = () => {
         if (Object.keys(newErrors).length > 0) return;
 
         try {
+            // Subir nuevas imágenes
             const subidas = await Promise.all(files.map((f) => subirImagen(f, name)));
             const nuevosIds = subidas.filter((i) => i?.id).map((i) => i.id);
             const existentesIds = existingFiles.map((f) => f.id);
             const file_Ids = [...existentesIds, ...nuevosIds];
 
-            // Validar IDs de archivos
-            const { invalidos, noExistentes } = validarFileIds(file_Ids, existentesIds);
-
+            // Validar que los nuevos IDs sean UUID válidos
+            const invalidos = nuevosIds.filter(id => !esUUID(id));
             if (invalidos.length > 0) {
-                toast.error("IDs inválidos: " + invalidos.join(", "));
-                console.log("IDs inválidos: ", invalidos);
+                toast.error("IDs inválidos en las nuevas imágenes: " + invalidos.join(", "));
                 return;
             }
 
-            if (noExistentes.length > 0) {
-                toast.error("IDs que no existen: " + noExistentes.join(", "));
-                console.log("IDs que no existen: ", noExistentes);
-                return;
-            }
-
+            // Armar objeto final
             const productoData = {
                 name,
                 details,
@@ -215,7 +210,7 @@ const ProductoForm = () => {
                 file_Ids,
             };
 
-            console.log("📦 JSON enviado al PUT:", JSON.stringify(productoData, null, 2));
+            console.log("📦 JSON enviado al PUT/POST:", JSON.stringify(productoData, null, 2));
 
             const resultado = id
                 ? await actualizarProducto(id as string, productoData)
@@ -227,10 +222,12 @@ const ProductoForm = () => {
             } else {
                 toast.error("Error al guardar el producto");
             }
-        } catch {
+        } catch (err) {
+            console.error("Error en handleSubmit:", err);
             toast.error("Error en el proceso");
         }
     };
+
 
     if (loading) return <p className="text-center mt-10 text-gray-600">Cargando...</p>;
 

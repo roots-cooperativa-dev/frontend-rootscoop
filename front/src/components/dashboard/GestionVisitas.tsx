@@ -108,7 +108,7 @@ export const GestionVisitas = () => {
                                 <Clock className="w-6 h-6 text-purple-600" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Total Turnos</p>
+                                <p className="text-sm font-medium text-gray-600">Slots</p>
                                 <p className="text-2xl font-bold text-gray-900">
                                     {visitas.reduce((acc, v) => acc + (v.availableSlots?.length || 0), 0)}
                                 </p>
@@ -140,7 +140,7 @@ export const GestionVisitas = () => {
                                     <TableHead>Descripción</TableHead>
                                     <TableHead>Personas</TableHead>
                                     <TableHead>Estado</TableHead>
-                                    <TableHead>Turnos</TableHead>
+                                    <TableHead>Slots</TableHead>
                                     <TableHead className="text-right">Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -160,23 +160,16 @@ export const GestionVisitas = () => {
                                                 {visita.status === "active" ? "Activa" : "Inactiva"}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>{visita.availableSlots?.length || 0} turnos</TableCell>
+                                        <TableCell>{visita.availableSlots?.length || 0} slots</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
                                                 {visita.availableSlots && visita.availableSlots.length > 0 && (
-                                                    <Link href={`/dashboard/visitas/${visita.id}/turnos`}>
+                                                    <Link href={`/dashboard/visitas/${visita.id}/slots`}>
                                                         <Button size="sm" variant="outline">
                                                             <Eye className="w-4 h-4 mr-1" />
-                                                            Ver turnos
                                                         </Button>
                                                     </Link>
                                                 )}
-                                                <Link href={`/dashboard/visitas/${visita.id}/turnos/nuevo`}>
-                                                    <Button size="sm" className="bg-[#017d74] text-white hover:bg-[#015d54]">
-                                                        <Plus className="w-4 h-4 mr-1" />
-                                                        Agregar turno
-                                                    </Button>
-                                                </Link>
                                             </div>
                                         </TableCell>
                                     </TableRow>

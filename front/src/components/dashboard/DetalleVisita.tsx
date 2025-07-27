@@ -137,7 +137,7 @@ export const DetalleVisita = () => {
                         </div>
                         Detalle de Visita
                     </h1>
-                    <p className="text-gray-600 mt-1">Gestiona los turnos y horarios de la visita</p>
+                    <p className="text-gray-600 mt-1">Gestiona los Slots y horarios de la visita</p>
                 </div>
                 <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                     <DialogTrigger asChild>
@@ -251,7 +251,7 @@ export const DetalleVisita = () => {
                                 <Clock className="w-6 h-6 text-purple-600" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Turnos Disponibles</p>
+                                <p className="text-sm font-medium text-gray-600">Slots Disponibles</p>
                                 <p className="text-2xl font-bold text-gray-900">{visita.availableSlots?.length || 0}</p>
                             </div>
                         </div>
@@ -312,7 +312,7 @@ export const DetalleVisita = () => {
                             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-2">
                                     <Clock className="w-4 h-4 text-gray-500" />
-                                    <span className="text-sm font-medium text-gray-700">Turnos:</span>
+                                    <span className="text-sm font-medium text-gray-700">Slots:</span>
                                     <span className="font-semibold text-gray-900">{visita.availableSlots?.length || 0}</span>
                                 </div>
                             </div>
@@ -335,15 +335,15 @@ export const DetalleVisita = () => {
                 </CardContent>
             </Card>
 
-            {/* LISTADO DE TURNOS */}
+            {/* LISTADO DE Slots */}
             {visita.availableSlots && visita.availableSlots.length > 0 && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Clock className="w-5 h-5" />
-                            Turnos Cargados
+                            Slots Cargados
                         </CardTitle>
-                        <CardDescription>Lista de turnos agregados a esta visita</CardDescription>
+                        <CardDescription>Lista de Slots agregados a esta visita</CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {visita.availableSlots.map((slot, idx) => (
@@ -371,7 +371,7 @@ export const DetalleVisita = () => {
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                             <Clock className="w-8 h-8 text-gray-400" />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No hay turnos cargados</h3>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No hay Slots cargados</h3>
                         <p className="text-gray-500 text-center mb-4">
                             Agrega el primer turno para esta visita usando el botón "Agregar Turno".
                         </p>

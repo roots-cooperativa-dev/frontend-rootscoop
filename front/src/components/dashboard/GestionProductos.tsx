@@ -65,13 +65,13 @@ export const GestionProductos = () => {
           minPrice: minPrice ? Number.parseFloat(minPrice) : undefined,
           maxPrice: maxPrice ? Number.parseFloat(maxPrice) : undefined,
         })
-        // Filtrar según el estado seleccionado
-        let filteredProducts = data.products
+        let filteredProducts = data.products;
         if (statusFilter === "available") {
-          filteredProducts = filteredProducts.filter((p) => !p.isDeleted)
+          filteredProducts = filteredProducts.filter((p) => !p.deletedAt);
         } else if (statusFilter === "deleted") {
-          filteredProducts = filteredProducts.filter((p) => p.isDeleted)
+          filteredProducts = filteredProducts.filter((p) => !!p.deletedAt);
         }
+
         setProductos(filteredProducts)
         // Ajustamos totalPages para que refleje cantidad real según filtro (puede ser aproximado)
         setTotalPages(data.pages)
@@ -244,11 +244,12 @@ export const GestionProductos = () => {
                       <Badge
                         className={cn(
                           "font-medium",
-                          !producto.isDeleted ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800",
+                          !producto.deletedAt ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                         )}
                       >
-                        {!producto.isDeleted ? "Disponible" : "Eliminado"}
+                        {!producto.deletedAt ? "Disponible" : "Eliminado"}
                       </Badge>
+
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">

@@ -2,13 +2,14 @@ export interface IProducto {
   id: string;
   name: string;
   details: string;
-  isDeleted: boolean;
+  deletedAt?: string | null; // ✅ importante
   sizes: Size[];
   category: ICategory;
   files: File[];
 }
 
-export interface CartProduct{
+
+export interface CartProduct {
   id: string,
   name: string,
   details: string,
@@ -39,6 +40,7 @@ export interface File {
 export interface ICategory {
   id: string;
   name: string;
+  deletedAt?: string | null; 
 }
 
 export interface ProductoQueryParams {
@@ -106,12 +108,12 @@ export interface IOrdersResponse {
 }
 
 export interface IVisita {
-    id: string
-    title: string
-    description: string
-    people: number
-    status: string
-    availableSlots?: any[] 
+  id: string
+  title: string
+  description: string
+  people: number
+  status: string
+  availableSlots?: any[]
 }
 export interface ISlot {
   id: string;
@@ -134,4 +136,41 @@ export interface IAppointment {
     isDonator: boolean;
   };
   slot: ISlot;
+}
+
+export interface IOrderDetailProduct {
+  isDeleted: any;
+  id: string;
+  name: string;
+  details: string;
+  isActive: boolean;
+  sizes: Size[];
+}
+
+export interface IOrderDetail {
+  id: string;
+  total: string;
+  products: IOrderDetailProduct[];
+}
+
+export interface IUserInOrder {
+  id: string;
+  name: string;
+  email: string;
+  birthdate: string;
+  username: string;
+  password: string;
+  phone: string;
+  isAdmin: boolean;
+  isDonator: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IOrderById {
+  id: string;
+  date: string;
+  status: string;
+  user: IUserInOrder;
+  orderDetail: IOrderDetail;
 }

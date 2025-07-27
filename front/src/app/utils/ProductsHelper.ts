@@ -32,34 +32,30 @@ export const fetchProductos = async ({
     name,
     categoryId,
     minPrice,
-    maxPrice
+    maxPrice,
 }: {
-    page?: number
-    limit?: number
-    name?: string
-    categoryId?: string
-    minPrice?: number
-    maxPrice?: number
+    page?: number;
+    limit?: number;
+    name?: string;
+    categoryId?: string;
+    minPrice?: number;
+    maxPrice?: number;
 }): Promise<{ products: IProducto[]; pages: number }> => {
     try {
         const response = await axios.get(`${API_URL}/products`, {
-            params: { page, limit, name, categoryId, minPrice, maxPrice }
+            params: { page, limit, name, categoryId, minPrice, maxPrice },
         });
 
-        // Filtrar productos donde deleted_at sea null (no eliminados)
-        const filteredProducts = (response.data.products || []).filter(
-            (product: IProducto & { deleted_at?: string | null }) => product.deleted_at === null || product.deleted_at === undefined
-        );
-
         return {
-            products: filteredProducts,
-            pages: response.data.pages || 1
+            products: response.data.products || [],
+            pages: response.data.pages || 1,
         };
     } catch (error) {
         console.error("Error al obtener productos:", error);
         return { products: [], pages: 1 };
     }
-}
+};
+
 
 
 
