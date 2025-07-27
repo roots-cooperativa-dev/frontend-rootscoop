@@ -112,11 +112,16 @@ export interface RegisterDto {
   username: string;
   password: string;
   confirmPassword: string;
-  address: string;
 }
 
 export interface Icart{
   productId: string,
   productSizeId: string,
   quantity: number
+}
+export interface IContactanos{
+  name: string,
+  email: string,
+  phone: string,
+  reason: string
 }

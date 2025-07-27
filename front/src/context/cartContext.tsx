@@ -60,7 +60,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
   const isProductInCart = (productId: string) => {
-    return cart ? cart.some((item) => item.id === productId) : false;
+    return cart ? cart.some((item) => item && item.id === productId) : false;
   };
   const resetCart = () => {
     setCart([]);
