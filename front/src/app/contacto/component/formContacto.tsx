@@ -41,14 +41,14 @@ const handleSubmit = async (
 
 const ContactoFormulario = () => {
   return (
-    <div className="bg-white w-1/2 p-6 rounded-xl shadow-md space-y-6">
+    <div className="bg-white w-full p-6 rounded-xl shadow-md space-y-6 mx-auto">
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
         {({ handleChange, isSubmitting }) => (
-          <Form className="space-y-4 font-bebas">
+          <Form className="space-y-4 font-popular">
             <div>
               <Label>Nombre *</Label>
               <Input
