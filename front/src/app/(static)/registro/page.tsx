@@ -51,7 +51,6 @@ export default function RegisterForm() {
         }),
       phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
       username: Yup.string().required("Requerido"),
-      address: Yup.string().required("Requerido"),
     }),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
@@ -63,8 +62,7 @@ export default function RegisterForm() {
           confirmPassword: values.confirmPassword,
           birthdate: values.birthdate,
           phone: Number(values.phone),
-          username: values.username,
-          address: values.address,
+          username: values.username
         };
         await postRegister(data);
         toast.success("Usuario registrado correctamente. Inicia sesión para continuar");
@@ -191,17 +189,6 @@ export default function RegisterForm() {
       {formik.touched.username && formik.errors.username && (
         <p className="text-red-500 text-xs">{formik.errors.username}</p>
       )}
-
-      <Input
-        name="address"
-        placeholder="Dirección"
-        value={formik.values.address}
-        onChange={formik.handleChange}
-      />
-      {formik.touched.address && formik.errors.address && (
-        <p className="text-red-500 text-xs">{formik.errors.address}</p>
-      )}
-
       <Button type="submit" className="w-full" disabled={formik.isSubmitting}>
         {formik.isSubmitting ? "Registrando..." : "Registrarse"}
       </Button>
