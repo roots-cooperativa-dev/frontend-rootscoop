@@ -21,9 +21,9 @@ export default function LoginForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // 👀 Estado para mostrar/ocultar contraseña
   const { saveUserData } = useAuthContext();
-  const { cart, setCartFromServer } = useCartContext();
+  const { saveCartData } = useCartContext();
   const router = useRouter();
-   const [isLoadingCart, setIsLoadingCart] = useState(true);
+  const [isLoadingCart, setIsLoadingCart] = useState(true);
 
   const formik = useFormik({
     initialValues: { email: "", password: "" },
@@ -53,21 +53,11 @@ export default function LoginForm() {
           },
           isAuth: true,
         });
-        const fetchCart = async () => {
-          try {
 
-            const data = await getCart(Token);
-            console.log(data.items);
-            setCartFromServer(data.items, data.total); // ✅ actualiza el context
-            console.log(cart);
-            router.push("/");
-          } catch (error) {
-            console.error("Error al obtener el carrito:", error);
-          } finally {
-            setIsLoadingCart(false);
-          }
-        };
-        fetchCart();
+        
+        if (dataUser.cart && dataUser.cart.items.length > 0) {
+          saveCartData({ cart: dataUser.cart });
+        }
 
         toast.success("Sesión iniciada correctamente");
 

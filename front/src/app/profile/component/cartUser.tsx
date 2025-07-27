@@ -10,7 +10,7 @@ import Loading from "@/src/components/loading/pantallaCargando";
 
 const CartPage = () => {
   const { user, token, loading } = useAuthContext();
-  const { cart, totalAmount, setCartFromServer } = useCartContext();
+  const { cart, totalAmount, saveCartData } = useCartContext();
   const router = useRouter();
 
   const [isLoadingCart, setIsLoadingCart] = useState(true);
@@ -22,16 +22,15 @@ const CartPage = () => {
         return;
       }
 
-      console.log("TOKEN:", token);
       const data = await getCart(token);
       console.log("Respuesta del carrito:", data);
 
-      if (!data || !data.items || typeof data.total !== "number") {
+      if (!data || !data.items || typeof data.total !== "string") {
         console.warn("Estructura inválida del carrito:", data);
         return;
       }
 
-      setCartFromServer(data.items, data.total);
+      saveCartData({ cart: data });
     } catch (error) {
       console.error("Error al obtener el carrito:", error);
     } finally {
@@ -53,7 +52,7 @@ const CartPage = () => {
   const handleDelete = async (itemId: string, token: string) => {
     try {
       await deleteCartItem(itemId, token);
-      fetchCart();
+      await fetchCart(); // refrescamos el contexto y el localStorage
     } catch (error) {
       console.error("Error al eliminar el producto:", error);
       alert("No se pudo eliminar el producto del carrito.");
@@ -67,7 +66,7 @@ const CartPage = () => {
   const showItems = cart && cart.length > 0;
 
   return (
-    <div className="flex flex-col items-center w-screen px-5 ">
+    <div className="flex flex-col items-center w-screen px-5">
       <h1 className="text-2xl font-bold mb-6">Carrito de compras</h1>
 
       {showItems ? (
