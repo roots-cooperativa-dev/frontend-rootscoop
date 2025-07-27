@@ -32,29 +32,31 @@ export const fetchProductos = async ({
     name,
     categoryId,
     minPrice,
-    maxPrice
+    maxPrice,
 }: {
-    page?: number
-    limit?: number
-    name?: string
-    categoryId?: string
-    minPrice?: number
-    maxPrice?: number
+    page?: number;
+    limit?: number;
+    name?: string;
+    categoryId?: string;
+    minPrice?: number;
+    maxPrice?: number;
 }): Promise<{ products: IProducto[]; pages: number }> => {
     try {
         const response = await axios.get(`${API_URL}/products`, {
-            params: { page, limit, name, categoryId, minPrice, maxPrice }
-        })
+            params: { page, limit, name, categoryId, minPrice, maxPrice },
+        });
 
         return {
             products: response.data.products || [],
-            pages: response.data.pages || 1
-        }
+            pages: response.data.pages || 1,
+        };
     } catch (error) {
-        console.error("Error al obtener productos:", error)
-        return { products: [], pages: 1 }
+        console.error("Error al obtener productos:", error);
+        return { products: [], pages: 1 };
     }
-}
+};
+
+
 
 
 
@@ -97,8 +99,9 @@ export const actualizarProducto = async (
             { headers: getAuthHeader() }
         );
         return response.data;
-    } catch (error) {
-        console.error(`Error actualizando producto con ID ${id}:`, error);
+    } catch (error: any) {
+        console.error(`Error actualizando producto con ID ${id}:`, error.response?.data);
+        console.error(error.response?.data?.message || "Error desconocido al actualizar producto");
         return null;
     }
 };

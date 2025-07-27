@@ -36,6 +36,8 @@ export interface RegisterDto {
   confirmPassword: string;
 }
 
+<<<<<<< HEAD
+=======
 export interface Iproduct {
   id: number;
   name: string;
@@ -51,3 +53,4 @@ interface Icategory {
     name: string;
     products?: Iproduct[];
 }
+>>>>>>> f38542eccdf4482a707960aa6371f6697e8df89d

@@ -3,6 +3,7 @@ export interface ProductoDTO {
   details: string;
   category_Id: string;
   sizes: {
+    id?: string;
     size: string;
     price: number;
     stock: number;
