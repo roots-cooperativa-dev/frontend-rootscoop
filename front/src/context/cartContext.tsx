@@ -18,19 +18,26 @@ type CartContextType = {
   removeFromCart: (productId: string) => void;
   isProductInCart: (productId: string) => boolean;
   resetCart: () => void;
-  saveCartData: (data: SaveCartLoad)=> void;
-  //setCartFromServer: (items: CartProduct[], totalAmount: string) => void;
+  saveCartData: (data: SaveCartLoad) => void;
 };
 
 const cartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_LOCAL_STORANGE_KEY = "cart";
-const CART_LOCAL_STORANGE_KEY_TOTAL = "cartTotal";
-export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [cart, setCart] = useState<CartContextType["cart"] | null>(null);
-  const [total, setTotal] = useState<number>(0);
-  const [totalAmount, setTotalAmount] = useState<string>("");
+const CART_LOCAL_KEY = "cart";
+const CART_TOTAL_KEY = "cartTotal";
 
+export const CartProvider = ({ children }: { children: React.ReactNode }) => {
+  const [cart, setCart] = useState<CartProduct[]>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [totalAmount, setTotalAmount] = useState<string>("0");
+
+  // ✅ Guardar en localStorage
+  const persistCart = (cartData: CartProduct[], totalQty: number) => {
+    localStorage.setItem(CART_LOCAL_KEY, JSON.stringify(cartData));
+    localStorage.setItem(CART_TOTAL_KEY, JSON.stringify(totalQty));
+  };
+
+  // ✅ Guardar carrito desde el backend
   const saveCartData = (data: SaveCartLoad) => {
     const adaptedCart: CartProduct[] = data.cart.items.map((item) => ({
       id: item.product.id,
@@ -50,71 +57,77 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     setTotal(totalQuantity);
-
-    localStorage.setItem(CART_LOCAL_STORANGE_KEY, JSON.stringify(adaptedCart));
-    localStorage.setItem(
-      CART_LOCAL_STORANGE_KEY_TOTAL,
-      JSON.stringify(totalQuantity)
-    );
+    persistCart(adaptedCart, totalQuantity);
   };
 
+  // ✅ Agregar al carrito
   const addToCart = (product: CartProduct) => {
-    setCart((prevCart) => [...(prevCart || []), product]);
-    setTotal((prevTotal) => (prevTotal || 0) + 1);
+    const exists = cart.find(
+      (item) => item.id === product.id && item.size === product.size
+    );
+
+    if (exists) return; // Evitar duplicados
+
+    const updatedCart = [...cart, product];
+    const updatedTotal = total + (product.quantity || 1);
+
+    setCart(updatedCart);
+    setTotal(updatedTotal);
+    persistCart(updatedCart, updatedTotal);
   };
+
+  // ✅ Eliminar del carrito
   const removeFromCart = (productId: string) => {
-    setCart((prevCart) => {
-      if (!prevCart) return [];
-      const updateCart = prevCart.filter((item) => item.id !== productId);
-      return updateCart;
-    });
-    setTotal((prevTotal) => {
-      if (prevTotal === undefined || prevTotal <= 0) {
-        return 0;
-      }
-      return prevTotal - 1;
-    });
+    const updatedCart = cart.filter((item) => item.id !== productId);
+    const newTotal = updatedCart.reduce((acc, item) => acc + item.quantity, 0);
+
+    setCart(updatedCart);
+    setTotal(newTotal);
+    persistCart(updatedCart, newTotal);
   };
+
+  // ✅ Verificar si está en el carrito
   const isProductInCart = (productId: string) => {
-    return cart ? cart.some((item) => item && item.id === productId) : false;
+    return cart.some((item) => item.id === productId);
   };
+
+  // ✅ Resetear carrito
   const resetCart = () => {
     setCart([]);
     setTotal(0);
-    localStorage.removeItem(CART_LOCAL_STORANGE_KEY);
-    localStorage.removeItem(CART_LOCAL_STORANGE_KEY_TOTAL);
+    setTotalAmount("0");
+    localStorage.removeItem(CART_LOCAL_KEY);
+    localStorage.removeItem(CART_TOTAL_KEY);
   };
+
+  // ✅ Cargar carrito desde localStorage
   useEffect(() => {
-    if (!cart) return;
-    localStorage.setItem(CART_LOCAL_STORANGE_KEY, JSON.stringify(cart));
-    localStorage.setItem(
-      CART_LOCAL_STORANGE_KEY_TOTAL,
-      JSON.stringify(total || 0)
-    );
-  }, [cart, total]);
-  useEffect(() => {
-    const storedCart = localStorage.getItem(CART_LOCAL_STORANGE_KEY);
-    const storedTotal = localStorage.getItem(CART_LOCAL_STORANGE_KEY_TOTAL);
-    if (!storedCart || !storedTotal) {
-      setCart([]);
-      setTotal(0);
-      return;
+    const storedCart = localStorage.getItem(CART_LOCAL_KEY);
+    const storedTotal = localStorage.getItem(CART_TOTAL_KEY);
+
+    if (storedCart && storedTotal) {
+      try {
+        const parsedCart = JSON.parse(storedCart);
+        const parsedTotal = JSON.parse(storedTotal);
+        setCart(parsedCart);
+        setTotal(parsedTotal);
+      } catch (err) {
+        console.warn("Error parsing cart from localStorage", err);
+      }
     }
-    setCart(JSON.parse(storedCart));
-    setTotal(JSON.parse(storedTotal));
   }, []);
+
   return (
     <cartContext.Provider
       value={{
-        cart: cart || [],
-        total: total || 0,
-        totalAmount: totalAmount || "0",
+        cart,
+        total,
+        totalAmount,
         addToCart,
         removeFromCart,
         isProductInCart,
         resetCart,
-        saveCartData
-        //setCartFromServer,
+        saveCartData,
       }}
     >
       {children}
@@ -125,7 +138,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 export const useCartContext = () => {
   const context = useContext(cartContext);
   if (!context) {
-    throw new Error("useCartContext must be used within a AuthProvider");
+    throw new Error("useCartContext must be used within a CartProvider");
   }
   return context;
 };
