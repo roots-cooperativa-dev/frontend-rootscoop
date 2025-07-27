@@ -12,7 +12,6 @@ import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Importa los iconos
-import { getCart } from "@/src/services/cart";
 import { useCartContext } from "@/src/context/cartContext";
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -54,7 +53,7 @@ export default function LoginForm() {
           isAuth: true,
         });
 
-        
+
         if (dataUser.cart && dataUser.cart.items.length > 0) {
           saveCartData({ cart: dataUser.cart });
         }
