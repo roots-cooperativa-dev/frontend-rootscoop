@@ -15,8 +15,8 @@ type CartContextType = {
   total: number;
   totalAmount: string;
   addToCart: (product: CartProduct) => void;
-  removeFromCart: (productId: string) => void;
-  isProductInCart: (productId: string) => boolean;
+  removeFromCart: (productId: string, size: string) => void;
+  isProductInCart: (productId: string, size: string) => boolean;
   resetCart: () => void;
   saveCartData: (data: SaveCartLoad) => void;
 };
@@ -30,75 +30,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartProduct[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [totalAmount, setTotalAmount] = useState<string>("0");
-
-  // ✅ Guardar en localStorage
-  const persistCart = (cartData: CartProduct[], totalQty: number) => {
-    localStorage.setItem(CART_LOCAL_KEY, JSON.stringify(cartData));
-    localStorage.setItem(CART_TOTAL_KEY, JSON.stringify(totalQty));
-  };
-
-  // ✅ Guardar carrito desde el backend
-  const saveCartData = (data: SaveCartLoad) => {
-    const adaptedCart: CartProduct[] = data.cart.items.map((item) => ({
-      id: item.product.id,
-      name: item.product.name,
-      details: item.product.details,
-      size: item.productSize?.size,
-      price: parseFloat(item.priceAtAddition),
-      quantity: item.quantity,
-    }));
-
-    setCart(adaptedCart);
-    setTotalAmount(data.cart.total);
-
-    const totalQuantity = data.cart.items.reduce(
-      (acc, item) => acc + (item.quantity || 0),
-      0
-    );
-
-    setTotal(totalQuantity);
-    persistCart(adaptedCart, totalQuantity);
-  };
-
-  // ✅ Agregar al carrito
-  const addToCart = (product: CartProduct) => {
-    const exists = cart.find(
-      (item) => item.id === product.id && item.size === product.size
-    );
-
-    if (exists) return; // Evitar duplicados
-
-    const updatedCart = [...cart, product];
-    const updatedTotal = total + (product.quantity || 1);
-
-    setCart(updatedCart);
-    setTotal(updatedTotal);
-    persistCart(updatedCart, updatedTotal);
-  };
-
-  // ✅ Eliminar del carrito
-  const removeFromCart = (productId: string) => {
-    const updatedCart = cart.filter((item) => item.id !== productId);
-    const newTotal = updatedCart.reduce((acc, item) => acc + item.quantity, 0);
-
-    setCart(updatedCart);
-    setTotal(newTotal);
-    persistCart(updatedCart, newTotal);
-  };
-
-  // ✅ Verificar si está en el carrito
-  const isProductInCart = (productId: string) => {
-    return cart.some((item) => item.id === productId);
-  };
-
-  // ✅ Resetear carrito
-  const resetCart = () => {
-    setCart([]);
-    setTotal(0);
-    setTotalAmount("0");
-    localStorage.removeItem(CART_LOCAL_KEY);
-    localStorage.removeItem(CART_TOTAL_KEY);
-  };
 
   // ✅ Cargar carrito desde localStorage
   useEffect(() => {
@@ -116,6 +47,73 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
   }, []);
+
+  // ✅ Guardar automáticamente en localStorage cuando el cart cambia
+  useEffect(() => {
+    localStorage.setItem(CART_LOCAL_KEY, JSON.stringify(cart));
+    localStorage.setItem(CART_TOTAL_KEY, JSON.stringify(total));
+  }, [cart, total]);
+
+  // ✅ Guardar carrito desde el backend
+  const saveCartData = (data: SaveCartLoad) => {
+    const adaptedCart: CartProduct[] = data.cart.items.map((item) => ({
+      id: item.product.id,
+      name: item.product.name,
+      details: item.product.details,
+      size: item.productSize?.size,
+      price: parseFloat(item.priceAtAddition),
+      quantity: item.quantity,
+    }));
+
+    setCart(adaptedCart);
+    setTotalAmount(data.cart.total);
+
+    const totalQuantity = adaptedCart.reduce((acc, item) => acc + (item.quantity || 0), 0);
+    setTotal(totalQuantity);
+  };
+
+  // ✅ Agregar al carrito (sumando cantidad si ya existe)
+  const addToCart = (product: CartProduct) => {
+    const existsIndex = cart.findIndex(
+      (item) => item.id === product.id && item.size === product.size
+    );
+
+    let updatedCart;
+
+    if (existsIndex !== -1) {
+      updatedCart = [...cart];
+      updatedCart[existsIndex].quantity += product.quantity;
+    } else {
+      updatedCart = [...cart, product];
+    }
+
+    const updatedTotal = updatedCart.reduce((acc, item) => acc + item.quantity, 0);
+    setCart(updatedCart);
+    setTotal(updatedTotal);
+  };
+
+  // ✅ Eliminar por id + size
+  const removeFromCart = (productId: string, size: string) => {
+    const updatedCart = cart.filter((item) => !(item.id === productId && item.size === size));
+    const newTotal = updatedCart.reduce((acc, item) => acc + item.quantity, 0);
+
+    setCart(updatedCart);
+    setTotal(newTotal);
+  };
+
+  // ✅ Verificar si existe (por id + size)
+  const isProductInCart = (productId: string, size: string) => {
+    return cart.some((item) => item.id === productId && item.size === size);
+  };
+
+  // ✅ Resetear carrito
+  const resetCart = () => {
+    setCart([]);
+    setTotal(0);
+    setTotalAmount("0");
+    localStorage.removeItem(CART_LOCAL_KEY);
+    localStorage.removeItem(CART_TOTAL_KEY);
+  };
 
   return (
     <cartContext.Provider
