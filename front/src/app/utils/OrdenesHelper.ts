@@ -3,6 +3,7 @@
 import axios from "axios";
 import { IOrdersResponse } from "../types/index";
 import { getAuthHeader } from "./CategoriasHelper";
+import { IOrderById } from "../types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,5 +34,15 @@ export const updateOrderStatus = async (
     } catch (error) {
         console.error("Error al actualizar estado de orden:", error);
         throw error;
+    }
+};
+
+export const fetchOrderById = async (id: string): Promise<IOrderById | null> => {
+    try {
+        const response = await axios.get<IOrderById>(`${API_URL}/orders/${id}`, getAuthHeader());
+        return response.data;
+    } catch (error) {
+        console.error(`Error al obtener orden con ID ${id}:`, error);
+        return null;
     }
 };

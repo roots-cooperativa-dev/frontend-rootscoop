@@ -2,13 +2,14 @@ export interface IProducto {
   id: string;
   name: string;
   details: string;
-  isDeleted: boolean;
+  deletedAt?: string | null; // ✅ importante
   sizes: Size[];
   category: ICategory;
   files: File[];
 }
 
-export interface CartProduct{
+
+export interface CartProduct {
   id: string,
   name: string,
   details: string,
@@ -39,6 +40,7 @@ export interface File {
 export interface ICategory {
   id: string;
   name: string;
+  deletedAt?: string | null; 
 }
 
 export interface ProductoQueryParams {
@@ -104,14 +106,74 @@ export interface IOrdersResponse {
   data: IOrder[];
   total: number;
 }
-export interface RegisterDto {
+
+export interface IVisita {
+  id: string
+  title: string
+  description: string
+  people: number
+  status: string
+  availableSlots?: any[]
+}
+export interface ISlot {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  maxAppointments: number;
+  appointments: IAppointment[];
+}
+export interface IAppointment {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    birthdate: string;
+    phone: string;
+    username: string;
+    isAdmin: boolean;
+    isDonator: boolean;
+  };
+  slot: ISlot;
+}
+
+export interface IOrderDetailProduct {
+  isDeleted: any;
+  id: string;
+  name: string;
+  details: string;
+  isActive: boolean;
+  sizes: Size[];
+}
+
+export interface IOrderDetail {
+  id: string;
+  total: string;
+  products: IOrderDetailProduct[];
+}
+
+export interface IUserInOrder {
+  id: string;
   name: string;
   email: string;
   birthdate: string;
-  phone: number;
   username: string;
   password: string;
-  confirmPassword: string;
+  phone: string;
+  isAdmin: boolean;
+  isDonator: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+export interface IOrderById {
+  id: string;
+  date: string;
+  status: string;
+  user: IUserInOrder;
+  orderDetail: IOrderDetail;
 }
 
 export interface Icart{

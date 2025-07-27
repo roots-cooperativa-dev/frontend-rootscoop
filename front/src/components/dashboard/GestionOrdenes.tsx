@@ -33,6 +33,7 @@ import {
     DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 import { toast } from "sonner"
+import Link from "next/link"
 
 const estados = ["active", "finalized", "cancelled", "processed"]
 
@@ -468,11 +469,17 @@ export const GestionOrdenes = () => {
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end">
                                                             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                                            <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-                                                            <DropdownMenuItem>Imprimir orden</DropdownMenuItem>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem>Contactar cliente</DropdownMenuItem>
-                                                            <DropdownMenuItem className="text-red-600">Cancelar orden</DropdownMenuItem>
+                                                            <Link href={`/dashboard/ordenes/${order.id}`}>
+                                                                <DropdownMenuItem>Ver detalles</DropdownMenuItem>
+                                                            </Link>
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleStatusChange(order.id, "cancelled")}
+                                                                disabled={updatingId === order.id || order.status === "cancelled"}
+                                                                className="text-red-600"
+                                                            >
+                                                                Cancelar orden
+                                                            </DropdownMenuItem>
+
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
                                                 </TableCell>
