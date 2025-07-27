@@ -3,26 +3,60 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { CartProduct } from "../app/types";
 
+type SaveCartLoad = {
+  cart: {
+    items: any[];
+    total: string;
+  };
+};
+
 type CartContextType = {
   cart: CartProduct[];
   total: number;
+  totalAmount: string;
   addToCart: (product: CartProduct) => void;
-  removeFromCart: (productId: string) => void;
-  isProductInCart: (productId: string) => boolean;
+  removeFromCart: (productId: string, size: string) => void;
+  isProductInCart: (productId: string, size: string) => boolean;
   resetCart: () => void;
-  setCartFromServer: (items: CartProduct[], totalAmount: string) => void;
+  saveCartData: (data: SaveCartLoad) => void;
 };
 
 const cartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_LOCAL_STORANGE_KEY = "cart";
-const CART_LOCAL_STORANGE_KEY_TOTAL = "cartTotal";
-export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [cart, setCart] = useState<CartContextType["cart"] | null>(null);
-  const [total, setTotal] = useState<number>(0);
+const CART_LOCAL_KEY = "cart";
+const CART_TOTAL_KEY = "cartTotal";
 
-  const setCartFromServer = (items: any[]) => {
-    const adaptedCart: CartProduct[] = items.map((item) => ({
+export const CartProvider = ({ children }: { children: React.ReactNode }) => {
+  const [cart, setCart] = useState<CartProduct[]>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [totalAmount, setTotalAmount] = useState<string>("0");
+
+  // ✅ Cargar carrito desde localStorage
+  useEffect(() => {
+    const storedCart = localStorage.getItem(CART_LOCAL_KEY);
+    const storedTotal = localStorage.getItem(CART_TOTAL_KEY);
+
+    if (storedCart && storedTotal) {
+      try {
+        const parsedCart = JSON.parse(storedCart);
+        const parsedTotal = JSON.parse(storedTotal);
+        setCart(parsedCart);
+        setTotal(parsedTotal);
+      } catch (err) {
+        console.warn("Error parsing cart from localStorage", err);
+      }
+    }
+  }, []);
+
+  // ✅ Guardar automáticamente en localStorage cuando el cart cambia
+  useEffect(() => {
+    localStorage.setItem(CART_LOCAL_KEY, JSON.stringify(cart));
+    localStorage.setItem(CART_TOTAL_KEY, JSON.stringify(total));
+  }, [cart, total]);
+
+  // ✅ Guardar carrito desde el backend
+  const saveCartData = (data: SaveCartLoad) => {
+    const adaptedCart: CartProduct[] = data.cart.items.map((item) => ({
       id: item.product.id,
       name: item.product.name,
       details: item.product.details,
@@ -32,68 +66,66 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }));
 
     setCart(adaptedCart);
-    const totalQuantity = items.reduce(
-      (acc, item) => acc + (item.quantity || 0),
-      0
-    );
-    setTotal(parseFloat(totalQuantity));
+    setTotalAmount(data.cart.total);
+
+    const totalQuantity = adaptedCart.reduce((acc, item) => acc + (item.quantity || 0), 0);
+    setTotal(totalQuantity);
   };
 
+  // ✅ Agregar al carrito (sumando cantidad si ya existe)
   const addToCart = (product: CartProduct) => {
-    setCart((prevCart) => [...(prevCart || []), product]);
-    setTotal((prevTotal) => (prevTotal || 0) + 1);
+    const existsIndex = cart.findIndex(
+      (item) => item.id === product.id && item.size === product.size
+    );
+
+    let updatedCart;
+
+    if (existsIndex !== -1) {
+      updatedCart = [...cart];
+      updatedCart[existsIndex].quantity += product.quantity;
+    } else {
+      updatedCart = [...cart, product];
+    }
+
+    const updatedTotal = updatedCart.reduce((acc, item) => acc + item.quantity, 0);
+    setCart(updatedCart);
+    setTotal(updatedTotal);
   };
-  const removeFromCart = (productId: string) => {
-    setCart((prevCart) => {
-      if (!prevCart) return [];
-      const updateCart = prevCart.filter((item) => item.id !== productId);
-      return updateCart;
-    });
-    setTotal((prevTotal) => {
-      if (prevTotal === undefined || prevTotal <= 0) {
-        return 0;
-      }
-      return prevTotal - 1;
-    });
+
+  // ✅ Eliminar por id + size
+  const removeFromCart = (productId: string, size: string) => {
+    const updatedCart = cart.filter((item) => !(item.id === productId && item.size === size));
+    const newTotal = updatedCart.reduce((acc, item) => acc + item.quantity, 0);
+
+    setCart(updatedCart);
+    setTotal(newTotal);
   };
-  const isProductInCart = (productId: string) => {
-    return cart ? cart.some((item) => item.id === productId) : false;
+
+  // ✅ Verificar si existe (por id + size)
+  const isProductInCart = (productId: string, size: string) => {
+    return cart.some((item) => item.id === productId && item.size === size);
   };
+
+  // ✅ Resetear carrito
   const resetCart = () => {
     setCart([]);
     setTotal(0);
-    localStorage.removeItem(CART_LOCAL_STORANGE_KEY);
-    localStorage.removeItem(CART_LOCAL_STORANGE_KEY_TOTAL);
+    setTotalAmount("0");
+    localStorage.removeItem(CART_LOCAL_KEY);
+    localStorage.removeItem(CART_TOTAL_KEY);
   };
-  useEffect(() => {
-    if (!cart) return;
-    localStorage.setItem(CART_LOCAL_STORANGE_KEY, JSON.stringify(cart));
-    localStorage.setItem(
-      CART_LOCAL_STORANGE_KEY_TOTAL,
-      JSON.stringify(total || 0)
-    );
-  }, [cart, total]);
-  useEffect(() => {
-    const storedCart = localStorage.getItem(CART_LOCAL_STORANGE_KEY);
-    const storedTotal = localStorage.getItem(CART_LOCAL_STORANGE_KEY_TOTAL);
-    if (!storedCart || !storedTotal) {
-      setCart([]);
-      setTotal(0);
-      return;
-    }
-    setCart(JSON.parse(storedCart));
-    setTotal(JSON.parse(storedTotal));
-  }, []);
+
   return (
     <cartContext.Provider
       value={{
-        cart: cart || [],
-        total: total || 0,
+        cart,
+        total,
+        totalAmount,
         addToCart,
         removeFromCart,
         isProductInCart,
         resetCart,
-        setCartFromServer,
+        saveCartData,
       }}
     >
       {children}
@@ -104,7 +136,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 export const useCartContext = () => {
   const context = useContext(cartContext);
   if (!context) {
-    throw new Error("useCartContext must be used within a AuthProvider");
+    throw new Error("useCartContext must be used within a CartProvider");
   }
   return context;
 };

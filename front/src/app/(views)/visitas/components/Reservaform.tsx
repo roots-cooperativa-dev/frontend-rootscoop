@@ -13,7 +13,7 @@ import { Slot, Visita } from "../types/index";
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ReservaForm() {
-  const { user, token } = useAuthContext();
+  const { token } = useAuthContext();
   const [visitas, setVisitas] = useState<Visita[]>([]);
   const [fechaSeleccionada, setFechaSeleccionada] = useState<
     Date | undefined

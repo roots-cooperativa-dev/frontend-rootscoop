@@ -10,16 +10,27 @@ import Loading from "@/src/components/loading/pantallaCargando";
 
 const CartPage = () => {
   const { user, token, loading } = useAuthContext();
-  const { cart, total, setCartFromServer } = useCartContext();
+  const { cart, totalAmount, saveCartData } = useCartContext();
   const router = useRouter();
 
   const [isLoadingCart, setIsLoadingCart] = useState(true);
 
   const fetchCart = async () => {
     try {
+      if (!token) {
+        console.warn("Token no disponible, cancelando fetchCart");
+        return;
+      }
+
       const data = await getCart(token);
-      setCartFromServer(data.items, data.total); // ✅ actualiza el context
-      console.log(cart)
+      console.log("Respuesta del carrito:", data);
+
+      if (!data || !data.items || typeof data.total !== "string") {
+        console.warn("Estructura inválida del carrito:", data);
+        return;
+      }
+
+      saveCartData({ cart: data });
     } catch (error) {
       console.error("Error al obtener el carrito:", error);
     } finally {
@@ -28,18 +39,20 @@ const CartPage = () => {
   };
 
   useEffect(() => {
-    if (!loading && (!user || !token)) {
+    if (loading) return;
+
+    if (!user || !token) {
       router.push(routes.login);
       return;
     }
 
-    if (token) fetchCart();
+    fetchCart();
   }, [user, token, loading, router]);
 
   const handleDelete = async (itemId: string, token: string) => {
     try {
       await deleteCartItem(itemId, token);
-      fetchCart(); // ✅ vuelve a sincronizar el contexto
+      await fetchCart(); // refrescamos el contexto y el localStorage
     } catch (error) {
       console.error("Error al eliminar el producto:", error);
       alert("No se pudo eliminar el producto del carrito.");
@@ -47,13 +60,13 @@ const CartPage = () => {
   };
 
   if (isLoadingCart) {
-    return <Loading/>;
+    return <Loading />;
   }
 
   const showItems = cart && cart.length > 0;
 
   return (
-    <div className="flex flex-col items-center w-screen px-5 ">
+    <div className="flex flex-col items-center w-screen px-5">
       <h1 className="text-2xl font-bold mb-6">Carrito de compras</h1>
 
       {showItems ? (
@@ -83,11 +96,11 @@ const CartPage = () => {
             ))}
           </ul>
 
-          {/* <div className="mt-6 text-right">
+          <div className="mt-6 text-right">
             <h3 className="text-xl font-bold mt-4">
-              Total: ${total.toFixed(2)}
+              Total: ${totalAmount}
             </h3>
-          </div> */}
+          </div>
         </>
       ) : (
         <p className="text-gray-500">Tu carrito está vacío.</p>

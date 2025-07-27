@@ -167,10 +167,23 @@ export interface IUserInOrder {
   updatedAt: string;
 }
 
+
 export interface IOrderById {
   id: string;
   date: string;
   status: string;
   user: IUserInOrder;
   orderDetail: IOrderDetail;
+}
+
+export interface Icart{
+  productId: string,
+  productSizeId: string,
+  quantity: number
+}
+export interface IContactanos{
+  name: string,
+  email: string,
+  phone: string,
+  reason: string
 }
