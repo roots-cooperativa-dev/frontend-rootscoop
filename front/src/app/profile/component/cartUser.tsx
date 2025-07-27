@@ -17,11 +17,21 @@ const CartPage = () => {
 
   const fetchCart = async () => {
     try {
-      console.log(token)
+      if (!token) {
+        console.warn("Token no disponible, cancelando fetchCart");
+        return;
+      }
+
+      console.log("TOKEN:", token);
       const data = await getCart(token);
-      console.log(data)
-      setCartFromServer(data.items, data.total); // ✅ actualiza el context
-      console.log(cart)
+      console.log("Respuesta del carrito:", data);
+
+      if (!data || !data.items || typeof data.total !== "number") {
+        console.warn("Estructura inválida del carrito:", data);
+        return;
+      }
+
+      setCartFromServer(data.items, data.total);
     } catch (error) {
       console.error("Error al obtener el carrito:", error);
     } finally {
@@ -30,18 +40,20 @@ const CartPage = () => {
   };
 
   useEffect(() => {
-    if (!loading && (!user || !token)) {
+    if (loading) return;
+
+    if (!user || !token) {
       router.push(routes.login);
       return;
     }
 
-    if (token) fetchCart();
+    fetchCart();
   }, [user, token, loading, router]);
 
   const handleDelete = async (itemId: string, token: string) => {
     try {
       await deleteCartItem(itemId, token);
-      fetchCart(); // ✅ vuelve a sincronizar el contexto
+      fetchCart();
     } catch (error) {
       console.error("Error al eliminar el producto:", error);
       alert("No se pudo eliminar el producto del carrito.");
@@ -49,7 +61,7 @@ const CartPage = () => {
   };
 
   if (isLoadingCart) {
-    return <Loading/>;
+    return <Loading />;
   }
 
   const showItems = cart && cart.length > 0;

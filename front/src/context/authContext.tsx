@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { UserGoogle } from "../types";
 
 type SaveUserPayLoad = {
   user: UserGoogle;
