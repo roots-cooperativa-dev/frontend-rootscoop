@@ -1,15 +1,12 @@
-import { ArrowLeft } from "lucide-react";
 import InfoBox from "./components/InfoBox";
-import Link from "next/link";
 import ReservaFormulario from "./components/Reservaform";
 import { TestimoniosBox } from "./components/TestimoniosBox";
-import Image from "next/image";
 import HeaderBasic from "@/src/components/headers/EncabezadoSencillo";
 
 const VistaPage = () => {
   return (
     <>
-      <HeaderBasic/>
+      <HeaderBasic />
       <main className="max-w-6xl mx-auto px-4 py-12 space-y-16">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-[#017d74] font-chewy">
@@ -18,8 +15,8 @@ const VistaPage = () => {
           <p className="mt-2 text-lg text-[#374151] font-bebas">
             Conocé nuestra planta de investigación, el proceso de fabricación de
             cerveza artesanal y la cocina donde nacen nuestras{" "}
-            <span className="text-[#ff6b35] font-semibold">pizzas</span> y{" "}
-            <span className="text-[#f72585] font-semibold">empanadas</span> más
+            <span className="text-[#febb07] font-semibold">pizzas</span> y{" "}
+            <span className="text-[#922f4e] font-semibold">empanadas</span> más
             famosas de la Plata.
           </p>
         </div>
