@@ -26,7 +26,7 @@ const initialValues: ChangePasswordForm = {
 
 // ✅ Validación con Yup
 const validationSchema = Yup.object({
-  email: Yup.string().email("Email inválido").required("Campo requerido"),
+  token: Yup.string().email("Email inválido").required("Campo requerido"),
   password: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
@@ -73,11 +73,11 @@ const CambiarPass = () => {
           {({ handleChange, handleBlur, values, errors, touched, isSubmitting }) => (
             <Form className="space-y-4 font-popular">
               <div>
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="token">Email *</Label>
                 <Input
                   type="email"
-                  name="email"
-                  id="email"
+                  name="token"
+                  id="token"
                   onChange={handleChange}
                   onBlur={handleBlur}
                   value={values.token}
