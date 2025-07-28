@@ -6,7 +6,7 @@ interface ForgotPasswordData {
 }
 
 interface ChangePasswordData{
-    email: string;
+    token: string;
     password: string;
     confirmPassword: string;
 }
