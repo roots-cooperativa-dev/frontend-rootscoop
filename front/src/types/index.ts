@@ -20,7 +20,7 @@ export interface UserGoogle {
   username: string;
   phone: string;
   isAdmin?: boolean;
-  isDonator?:boolean;
+  isDonator?: boolean;
 }
 enum Irole {
   ADMIN = "admin",
@@ -36,8 +36,6 @@ export interface RegisterDto {
   confirmPassword: string;
 }
 
-<<<<<<< HEAD
-=======
 export interface Iproduct {
   id: number;
   name: string;
@@ -49,8 +47,13 @@ export interface Iproduct {
   category: Icategory;
 }
 interface Icategory {
-    id: number;
-    name: string;
-    products?: Iproduct[];
+  id: number;
+  name: string;
+  products?: Iproduct[];
 }
->>>>>>> f38542eccdf4482a707960aa6371f6697e8df89d
+
+export interface Icart {
+  productId: string;
+  productSizeId: string;
+  quantity: number;
+}

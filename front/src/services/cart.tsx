@@ -1,6 +1,6 @@
 "use server";
 import axios from "axios";
-import { Icart } from "../app/types";
+import { Icart } from "../types";
 
 const axiosApiBack = axios.create({
   baseURL: process.env.API_URL,

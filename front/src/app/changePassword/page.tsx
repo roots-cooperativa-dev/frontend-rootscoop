@@ -5,7 +5,7 @@ import { Label } from "@/src/components/ui/label";
 import { ErrorMessage, Form, Formik, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
-import { changePassword } from "@/src/services/password";
+import { resetPassword } from "@/src/services/password";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiEye, FiEyeOff } from "react-icons/fi";
@@ -44,7 +44,7 @@ const CambiarPass = () => {
     { resetForm, setSubmitting }: FormikHelpers<ChangePasswordForm>
   ) => {
     try {
-      await changePassword(values); // 👈 Enviamos email, password y confirmPassword
+      await resetPassword(values); // 👈 Enviamos email, password y confirmPassword
       toast.success("Contraseña actualizada con éxito.");
       setTimeout(() => {
         router.push("/login");

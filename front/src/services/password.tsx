@@ -24,7 +24,7 @@ export const forgotPassword = async (data: ForgotPasswordData) => {
   return { message: "Solicitud de cambio de contraseña enviada a tu correo", data: response.data };
 };
 
-export const changePassword = async (data: ChangePasswordData) => {
+export const resetPassword = async (data: ChangePasswordData) => {
   const response = await axiosApiBack.post("/users/reset-password", data);
   if (!response.data) throw new Error("problema con la solicitud");
   return { message: "Solicitud de cambio de contraseña enviada a tu correo", data: response.data };
