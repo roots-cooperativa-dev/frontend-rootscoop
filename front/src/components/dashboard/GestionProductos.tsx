@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { fetchProductos, eliminarProducto } from "../../app/utils/ProductsHelper"
+import { fetchProductos, eliminarProducto, restaurarProducto } from "../../app/utils/ProductsHelper"
 import { fetchCategorias } from "../../app/utils/CategoriasHelper"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { Plus, Eye, Edit, Trash2, Search, Filter, Package, ShoppingBag } from "lucide-react"
@@ -25,6 +25,12 @@ import {
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog"
 import type { IProducto, ICategory } from "../../app/types"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../components/ui/tooltip"
 
 export const GestionProductos = () => {
   const [productos, setProductos] = useState<IProducto[]>([])
@@ -249,46 +255,111 @@ export const GestionProductos = () => {
                       >
                         {!producto.deletedAt ? "Disponible" : "Eliminado"}
                       </Badge>
-
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Link href={`/dashboard/productos/${producto.id}`}>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </Link>
-                        <Link href={`/dashboard/productos/edit/${producto.id}`}>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        </Link>
-                        <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setProductoAEliminar(producto)
-                                setDialogOpen(true)
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta acción no se puede deshacer. ¿Eliminar {producto.name}?
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={handleEliminarProducto}>Eliminar</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link href={`/dashboard/productos/${producto.id}`}>
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>Ver detalles</TooltipContent>
+                          </Tooltip>
+
+                          {!producto.deletedAt && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Link href={`/dashboard/productos/edit/${producto.id}`}>
+                                  <Button variant="ghost" size="sm">
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </Link>
+                              </TooltipTrigger>
+                              <TooltipContent>Editar producto</TooltipContent>
+                            </Tooltip>
+                          )}
+
+                          {producto.deletedAt ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm">
+                                      <Package className="w-4 h-4 text-green-700" /> Restaurar
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>¿Restaurar producto?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        ¿Estás seguro de que querés restaurar el producto <strong>{producto.name}</strong>? Esta acción lo volverá a activar en el sistema.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={async () => {
+                                          const ok = await restaurarProducto(producto.id)
+                                          if (ok) {
+                                            toast.success("Producto restaurado correctamente")
+                                            setProductos((prev) =>
+                                              prev.map((p) =>
+                                                p.id === producto.id ? { ...p, deletedAt: null } : p
+                                              )
+                                            )
+                                          } else {
+                                            toast.error("No se pudo restaurar el producto")
+                                          }
+                                        }}
+                                      >
+                                        Restaurar
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </TooltipTrigger>
+                              <TooltipContent>Restaurar producto</TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setProductoAEliminar(producto)
+                                        setDialogOpen(true)
+                                      }}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Esta acción no se puede deshacer. ¿Eliminar <strong>{producto.name}</strong>?
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={handleEliminarProducto}>
+                                        Eliminar
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </TooltipTrigger>
+                              <TooltipContent>Eliminar producto</TooltipContent>
+                            </Tooltip>
+                          )}
+                        </TooltipProvider>
                       </div>
                     </TableCell>
                   </TableRow>

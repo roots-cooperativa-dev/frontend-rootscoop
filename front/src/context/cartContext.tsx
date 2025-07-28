@@ -7,12 +7,14 @@ type SaveCartLoad = {
   cart: {
     items: any[];
     total: string;
+    id: string;
   };
 };
 
 type CartContextType = {
   cart: CartProduct[];
   total: number;
+  id: string;
   totalAmount: string;
   addToCart: (product: CartProduct) => void;
   removeFromCart: (productId: string, size: string) => void;
@@ -23,18 +25,24 @@ type CartContextType = {
 
 const cartContext = createContext<CartContextType | undefined>(undefined);
 
+// 🗝️ Claves del localStorage
 const CART_LOCAL_KEY = "cart";
 const CART_TOTAL_KEY = "cartTotal";
+const CART_ID_KEY = "cartId";
+const CART_TOTAL_AMOUNT_KEY = "cartTotalAmount";
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartProduct[]>([]);
   const [total, setTotal] = useState<number>(0);
+  const [id, setId] = useState<string>("");
   const [totalAmount, setTotalAmount] = useState<string>("0");
 
   // ✅ Cargar carrito desde localStorage
   useEffect(() => {
     const storedCart = localStorage.getItem(CART_LOCAL_KEY);
     const storedTotal = localStorage.getItem(CART_TOTAL_KEY);
+    const storedCartId = localStorage.getItem(CART_ID_KEY);
+    const storedTotalAmount = localStorage.getItem(CART_TOTAL_AMOUNT_KEY);
 
     if (storedCart && storedTotal) {
       try {
@@ -46,16 +54,26 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         console.warn("Error parsing cart from localStorage", err);
       }
     }
+
+    if (storedCartId) {
+      setId(storedCartId);
+    }
+
+    if (storedTotalAmount) {
+      setTotalAmount(storedTotalAmount);
+    }
   }, []);
 
-  // ✅ Guardar automáticamente en localStorage cuando el cart cambia
+  // ✅ Guardar automáticamente en localStorage cuando el cart, total o totalAmount cambian
   useEffect(() => {
     localStorage.setItem(CART_LOCAL_KEY, JSON.stringify(cart));
     localStorage.setItem(CART_TOTAL_KEY, JSON.stringify(total));
-  }, [cart, total]);
+    localStorage.setItem(CART_TOTAL_AMOUNT_KEY, totalAmount);
+  }, [cart, total, totalAmount]);
 
   // ✅ Guardar carrito desde el backend
   const saveCartData = (data: SaveCartLoad) => {
+    console.log(data);
     const adaptedCart: CartProduct[] = data.cart.items.map((item) => ({
       id: item.product.id,
       name: item.product.name,
@@ -65,14 +83,19 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       quantity: item.quantity,
     }));
 
+    setId(data.cart.id);
+    console.log(data.cart.id);
     setCart(adaptedCart);
     setTotalAmount(data.cart.total);
+
+    localStorage.setItem(CART_ID_KEY, data.cart.id);
+    localStorage.setItem(CART_TOTAL_AMOUNT_KEY, data.cart.total);
 
     const totalQuantity = adaptedCart.reduce((acc, item) => acc + (item.quantity || 0), 0);
     setTotal(totalQuantity);
   };
 
-  // ✅ Agregar al carrito (sumando cantidad si ya existe)
+  // ✅ Agregar al carrito
   const addToCart = (product: CartProduct) => {
     const existsIndex = cart.findIndex(
       (item) => item.id === product.id && item.size === product.size
@@ -92,7 +115,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setTotal(updatedTotal);
   };
 
-  // ✅ Eliminar por id + size
+  // ✅ Eliminar del carrito
   const removeFromCart = (productId: string, size: string) => {
     const updatedCart = cart.filter((item) => !(item.id === productId && item.size === size));
     const newTotal = updatedCart.reduce((acc, item) => acc + item.quantity, 0);
@@ -101,7 +124,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setTotal(newTotal);
   };
 
-  // ✅ Verificar si existe (por id + size)
+  // ✅ Verificar si el producto está en el carrito
   const isProductInCart = (productId: string, size: string) => {
     return cart.some((item) => item.id === productId && item.size === size);
   };
@@ -111,8 +134,12 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     setCart([]);
     setTotal(0);
     setTotalAmount("0");
+    setId("");
+
     localStorage.removeItem(CART_LOCAL_KEY);
     localStorage.removeItem(CART_TOTAL_KEY);
+    localStorage.removeItem(CART_ID_KEY);
+    localStorage.removeItem(CART_TOTAL_AMOUNT_KEY);
   };
 
   return (
@@ -120,6 +147,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         cart,
         total,
+        id,
         totalAmount,
         addToCart,
         removeFromCart,

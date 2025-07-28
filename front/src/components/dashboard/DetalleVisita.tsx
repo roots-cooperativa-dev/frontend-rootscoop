@@ -68,7 +68,7 @@ export const DetalleVisita = () => {
         setSubmitting(true)
         try {
             await agregarTurnoAVisita(visitaId, formData)
-            toast.success("Turno agregado correctamente")
+            toast.success("Slot agregado correctamente")
             setFormData({
                 date: "",
                 startTime: "",
@@ -81,7 +81,7 @@ export const DetalleVisita = () => {
             setVisita(encontrada || null)
             setIsModalOpen(false) // Close modal on success
         } catch (error) {
-            toast.error("Error al agregar el turno")
+            toast.error("Error al agregar el Slot")
         } finally {
             setSubmitting(false)
         }
@@ -143,17 +143,17 @@ export const DetalleVisita = () => {
                     <DialogTrigger asChild>
                         <Button className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md">
                             <Plus className="w-4 h-4 mr-2" />
-                            Agregar Turno
+                            Agregar Slot
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle>Agregar Nuevo Turno</DialogTitle>
-                            <DialogDescription>Completa los datos para agregar un nuevo turno a esta visita.</DialogDescription>
+                            <DialogTitle>Agregar Nuevo Slot</DialogTitle>
+                            <DialogDescription>Completa los datos para agregar un nuevo slot a esta visita.</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <Label htmlFor="date">Fecha del turno</Label>
+                                <Label htmlFor="date">Fecha del slot</Label>
                                 <Input
                                     id="date"
                                     type="date"
@@ -210,12 +210,12 @@ export const DetalleVisita = () => {
                                     {submitting ? (
                                         <>
                                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Guardando turno...
+                                            Guardando slot...
                                         </>
                                     ) : (
                                         <>
                                             <Plus className="w-4 h-4 mr-2" />
-                                            Agregar Turno
+                                            Agregar Slot
                                         </>
                                     )}
                                 </Button>
@@ -373,23 +373,23 @@ export const DetalleVisita = () => {
                         </div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No hay Slots cargados</h3>
                         <p className="text-gray-500 text-center mb-4">
-                            Agrega el primer turno para esta visita usando el botón "Agregar Turno".
+                            Agrega el primer slot para esta visita usando el botón "Agregar Slot".
                         </p>
                         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                             <DialogTrigger asChild>
                                 <Button className="bg-[#017d74] hover:bg-[#015d54] text-white">
                                     <Plus className="w-4 h-4 mr-2" />
-                                    Agregar Turno
+                                    Agregar Slot
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
-                                    <DialogTitle>Agregar Nuevo Turno</DialogTitle>
-                                    <DialogDescription>Completa los datos para agregar un nuevo turno a esta visita.</DialogDescription>
+                                    <DialogTitle>Agregar Nuevo Slot</DialogTitle>
+                                    <DialogDescription>Completa los datos para agregar un nuevo slot a esta visita.</DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="date">Fecha del turno</Label>
+                                        <Label htmlFor="date">Fecha del slot</Label>
                                         <Input
                                             id="date"
                                             type="date"
@@ -446,12 +446,12 @@ export const DetalleVisita = () => {
                                             {submitting ? (
                                                 <>
                                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                    Guardando turno...
+                                                    Guardando slot...
                                                 </>
                                             ) : (
                                                 <>
                                                     <Plus className="w-4 h-4 mr-2" />
-                                                    Agregar Turno
+                                                    Agregar Slot
                                                 </>
                                             )}
                                         </Button>

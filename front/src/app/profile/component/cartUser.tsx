@@ -7,6 +7,7 @@ import { useAuthContext } from "../../../context/authContext";
 import { useCartContext } from "../../../context/cartContext";
 import { getCart, deleteCartItem } from "../../../services/cart";
 import Loading from "@/src/components/loading/pantallaCargando";
+import ButtonBuy from "@/src/components/botonComprar/ButtonBuy";
 
 const CartPage = () => {
   const { user, token, loading } = useAuthContext();
@@ -96,11 +97,13 @@ const CartPage = () => {
             ))}
           </ul>
 
-          <div className="mt-6 text-right">
+          <div className="mt-6 text-right ">
             <h3 className="text-xl font-bold mt-4">
               Total: ${totalAmount}
             </h3>
+            
           </div>
+          <ButtonBuy/>
         </>
       ) : (
         <p className="text-gray-500">Tu carrito está vacío.</p>

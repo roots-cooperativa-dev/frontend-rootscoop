@@ -33,7 +33,8 @@ export default function Callback() {
             phone: userData.phone,
             email: userData.email,
             isAdmin: userData.isAdmin,
-            isDonator: userData.isDonator
+            isDonator: userData.isDonator,
+            address: userData.address,
           },
           accessToken: accessToken,
           isAuth: true,

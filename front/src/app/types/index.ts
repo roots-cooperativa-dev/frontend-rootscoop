@@ -8,19 +8,18 @@ export interface IProducto {
   files: File[];
 }
 
-
 export interface CartProduct {
-  id: string,
-  name: string,
-  details: string,
-  size: string,
-  price: number,
-  quantity: number,
+  id: string;
+  name: string;
+  details: string;
+  size: string;
+  price: number;
+  quantity: number;
 }
 
 export enum Irole {
   ADMIN = "admin",
-  USER = "user"
+  USER = "user",
 }
 
 export interface Size {
@@ -31,7 +30,6 @@ export interface Size {
 }
 
 export interface File {
-
   id: string;
   url: string;
   name: string;
@@ -44,14 +42,13 @@ export interface ICategory {
 }
 
 export interface ProductoQueryParams {
-  page?: number
-  limit?: number
-  name?: string
-  categoryId?: string
-  minPrice?: number
-  maxPrice?: number
+  page?: number;
+  limit?: number;
+  name?: string;
+  categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
 }
-
 
 export interface IUsuario {
   createdAt: string; // o Date, según tu backend
@@ -67,11 +64,10 @@ export interface IUsuario {
     lat: number;
     long: number;
   };
-    isDonator: boolean;
-    donates: any[];
-    password?: string;
-  }
-
+  isDonator: boolean;
+  donates: any[];
+  password?: string;
+}
 
 export interface IOrder {
   id: string;
@@ -116,12 +112,12 @@ export interface IOrdersResponse {
 export interface IVisita {
   date: string | number | Date;
   fechaCreacion: string | number | Date;
-  id: string
-  title: string
-  description: string
-  people: number
-  status: string
-  availableSlots?: any[]
+  id: string;
+  title: string;
+  description: string;
+  people: number;
+  status: string;
+  availableSlots?: any[];
 }
 export interface ISlot {
   id: string;
@@ -175,7 +171,6 @@ export interface IUserInOrder {
   updatedAt: string;
 }
 
-
 export interface IOrderById {
   id: string;
   date: string;
@@ -183,7 +178,6 @@ export interface IOrderById {
   user: IUserInOrder;
   orderDetail: IOrderDetail;
 }
-
 
 export interface IUserAddress {
   id: string;
@@ -248,17 +242,28 @@ export interface IAppointmentsPaginatedResponse {
   pages: number;
 }
 export interface AppointmentsQueryParams {
-  status?: "pending" | "approved" | "rejected" | "cancelled" | "completed" | undefined
+  status?:
+    | "pending"
+    | "approved"
+    | "rejected"
+    | "cancelled"
+    | "completed"
+    | undefined;
   page?: number;
   limit?: number;
 }
-export interface IContactanos{
-  name: string,
-  email: string,
-  phone: string,
-  reason: string
+export interface IContactanos {
+  name: string;
+  email: string;
+  phone: string;
+  reason: string;
 }
 interface ForgotPasswordData {
   email: string;
 }
 
+export interface Icart {
+  productId: string;
+  productSizeId: string;
+  quantity: number;
+}

@@ -141,3 +141,15 @@ export const subirImagen = async (file: File, name: string): Promise<any> => {
         return null;
     }
 };
+
+export const restaurarProducto = async (id: string): Promise<boolean> => {
+    try {
+        await axios.post(`${API_URL}/products/restore/${id}`, null, {
+            headers: getAuthHeader(),
+        });
+        return true;
+    } catch (error) {
+        console.error(`Error restaurando producto con ID ${id}:`, error);
+        return false;
+    }
+};

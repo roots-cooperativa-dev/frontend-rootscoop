@@ -1,35 +1,34 @@
-"use client"
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Formik, Form, ErrorMessage, FormikHelpers } from "formik";
+import * as Yup from "yup";
+import { toast } from "sonner";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { ErrorMessage, Form, Formik, FormikHelpers } from "formik";
-import * as Yup from "yup";
-import { toast } from "sonner";
-import { resetPassword } from "@/src/services/password";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { changePassword } from "@/src/services/password";
 
-// ✅ Tipo del formulario
+
 interface ChangePasswordForm {
-  token: string;
-  password: string;
+  token: string; // 👈 este es el email
+  newPassword: string;
   confirmPassword: string;
 }
 
-// ✅ Valores iniciales
 const initialValues: ChangePasswordForm = {
   token: "",
-  password: "",
+  newPassword: "",
   confirmPassword: "",
 };
 
-// ✅ Validación con Yup
 const validationSchema = Yup.object({
   token: Yup.string().email("Email inválido").required("Campo requerido"),
-  password: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
+  newPassword: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
   confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
+    .oneOf([Yup.ref("newPassword")], "Las contraseñas no coinciden")
     .required("Requerido"),
 });
 
@@ -38,20 +37,20 @@ const CambiarPass = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // ✅ Función de envío
   const handleSubmit = async (
     values: ChangePasswordForm,
     { resetForm, setSubmitting }: FormikHelpers<ChangePasswordForm>
   ) => {
     try {
-      await resetPassword(values); // 👈 Enviamos email, password y confirmPassword
+
+      await changePassword(values);
       toast.success("Contraseña actualizada con éxito.");
       setTimeout(() => {
         router.push("/login");
       }, 2000);
       resetForm();
     } catch (error) {
-      console.error("Error al enviar:", error);
+      console.error("Error al cambiar la contraseña:", error);
       toast.error("Hubo un error al cambiar la contraseña.");
     } finally {
       setSubmitting(false);
@@ -60,18 +59,24 @@ const CambiarPass = () => {
 
   return (
     <div className="flex items-center justify-center h-screen">
-      <div className="bg-white w-4/5 p-6 space-y-6 mx-auto rounded-xl shadow-md">
+      <div className="bg-white w-4/5 max-w-md p-6 space-y-6 rounded-xl shadow-md">
         <h1 className="text-2xl font-bold">Cambio de contraseña</h1>
-        <p>
-          Ingresa el email y la nueva contraseña que deseas establecer.
-        </p>
+        <p>Ingresa tu email y la nueva contraseña que deseas establecer.</p>
+
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ handleChange, handleBlur, values, errors, touched, isSubmitting }) => (
-            <Form className="space-y-4 font-popular">
+          {({
+            handleChange,
+            handleBlur,
+            values,
+            errors,
+            touched,
+            isSubmitting,
+          }) => (
+            <Form className="space-y-4">
               <div>
                 <Label htmlFor="token">Email *</Label>
                 <Input
@@ -84,19 +89,19 @@ const CambiarPass = () => {
                   placeholder="tu@email.com"
                 />
                 <ErrorMessage
-                  name="email"
+                  name="token"
                   component="div"
                   className="text-red-500 text-sm"
                 />
               </div>
 
               <div className="relative">
-                <Label htmlFor="password">Nueva contraseña *</Label>
+                <Label htmlFor="newPassword">Nueva contraseña *</Label>
                 <Input
                   type={showPassword ? "text" : "password"}
-                  name="password"
-                  id="password"
-                  value={values.password}
+                  name="newPassword"
+                  id="newPassword"
+                  value={values.newPassword}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   placeholder="********"
@@ -108,8 +113,8 @@ const CambiarPass = () => {
                 >
                   {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                 </button>
-                {touched.password && errors.password && (
-                  <p className="text-red-500 text-xs">{errors.password}</p>
+                {touched.newPassword && errors.newPassword && (
+                  <p className="text-red-500 text-xs">{errors.newPassword}</p>
                 )}
               </div>
 

@@ -146,13 +146,12 @@ export const GestionVisitas = () => {
                                         <TableCell>{visita.availableSlots?.length || 0} slots</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
-                                                {visita.availableSlots && visita.availableSlots.length > 0 && (
-                                                    <Link href={`/dashboard/visitas/${visita.id}/slots`}>
-                                                        <Button size="sm" variant="outline">
-                                                            <Eye className="w-4 h-4 mr-1" />
-                                                        </Button>
-                                                    </Link>
-                                                )}
+                                                <Link href={`/dashboard/visitas/${visita.id}/slots`}>
+                                                    <Button size="sm" variant="outline">
+                                                        <Plus className="w-4 h-4 mr-1" />
+                                                        Agregar Slots
+                                                    </Button>
+                                                </Link>
                                                 <Button
                                                     size="sm"
                                                     variant="destructive"
