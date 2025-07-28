@@ -62,9 +62,10 @@ const DataUser = () => {
     if (isNaN(lat) || isNaN(long) || mapInstance.current || !mapContainer.current) return
 
     const otherPlace = {
-      lat: -27.7963,
-      long: -64.2615,
+      lat: -34.92083122027675,
+      long: -57.94808328819682,
     }
+
 
     mapInstance.current = new mapboxgl.Map({
       container: mapContainer.current,

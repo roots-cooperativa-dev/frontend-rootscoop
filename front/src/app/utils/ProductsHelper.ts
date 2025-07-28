@@ -136,10 +136,15 @@ export const subirImagen = async (file: File, name: string): Promise<any> => {
         );
 
         return response.data;
-    } catch (error) {
-        console.error("Error subiendo imagen:", error);
-        return null;
+    } catch (error: any) {
+        if (error.response && error.response.data) {
+            console.error("🛑 Error del servidor:", error.response.data)
+            return error.response.data // esto puede incluir { message: "...", error: "...", etc }
+        }
+        console.error("❌ Error desconocido al subir imagen:", error)
+        return null
     }
+
 };
 
 export const restaurarProducto = async (id: string): Promise<boolean> => {

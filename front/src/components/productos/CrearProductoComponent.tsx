@@ -12,7 +12,7 @@ import { Label } from "../../components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
 import { Separator } from "../../components/ui/separator"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../components/ui/select"
-import { Plus, X, Package, Loader2 } from "lucide-react" // Import Loader2
+import { Plus, X, Package, Loader2 } from "lucide-react"
 
 type SizeInput = {
     id?: string
@@ -22,14 +22,17 @@ type SizeInput = {
 }
 
 const sizeOptions = ["S", "M", "L", "XL"]
+const MAX_IMAGE_SIZE_KB = 200; // Tamaño máximo de imagen en KB
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024; // 200KB en bytes
+
 
 const ProductoForm = () => {
     const params = useParams()
     const id = params && typeof params.id === "string" ? params.id : undefined
     const router = useRouter()
     const [producto, setProducto] = useState<IProducto | null>(null)
-    const [loading, setLoading] = useState(!!id) // Initial loading for fetching product data
-    const [submitting, setSubmitting] = useState(false) // New state for form submission loading
+    const [loading, setLoading] = useState(!!id)
+    const [submitting, setSubmitting] = useState(false)
     const [name, setName] = useState("")
     const [details, setDetails] = useState("")
     const [categoryId, setCategoryId] = useState("")
@@ -45,7 +48,39 @@ const ProductoForm = () => {
         sizes?: string
         images?: string
     }>({})
+    const [touched, setTouched] = useState<Partial<Record<keyof typeof errors, boolean>>>({})
+    const [formSubmitted, setFormSubmitted] = useState(false)
 
+    // Helper to validate UUID
+    const esUUID = (val: string): boolean => {
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        return uuidRegex.test(val)
+    }
+
+    // Validation function
+    const validateForm = (): Partial<typeof errors> => {
+        const newErrors: typeof errors = {}
+        if (!name.trim()) newErrors.name = "El nombre es obligatorio."
+        if (!details.trim()) newErrors.details = "Los detalles son obligatorios."
+        if (!categoryId) {
+            newErrors.categoryId = "Debe seleccionar una categoría."
+        } else if (!esUUID(categoryId)) {
+            newErrors.categoryId = "La categoría debe ser un UUID válido."
+        }
+
+        if (sizes.length === 0) {
+            newErrors.sizes = "Debe agregar al menos un talle."
+        } else if (sizes.some((s) => !s.size || s.price <= 0 || s.stock < 0)) {
+            newErrors.sizes = "Todos los talles deben tener datos válidos (talle, precio > 0, stock >= 0)."
+        }
+
+        if (files.length === 0 && existingFiles.length === 0) {
+            newErrors.images = "Debe subir al menos una imagen."
+        }
+        return newErrors
+    }
+
+    // Load categories on component mount
     useEffect(() => {
         const loadCategories = async () => {
             try {
@@ -58,13 +93,16 @@ const ProductoForm = () => {
         loadCategories()
     }, [])
 
+    // Load product data for edit mode
     useEffect(() => {
-        if (!id) return
+        if (!id) {
+            setLoading(false)
+            return
+        }
         const loadProducto = async () => {
             try {
                 const p = await fetchProductoById(id as string)
                 if (p) {
-                    setProducto(p)
                     setName(p.name)
                     setDetails(p.details)
                     setCategoryId(p.category.id)
@@ -77,40 +115,49 @@ const ProductoForm = () => {
                         })),
                     )
                     setExistingFiles(p.files || [])
+                } else {
+                    toast.error("Producto no encontrado.")
+                    router.push("/dashboard/productos")
                 }
             } catch {
-                toast.error("Error al cargar el producto")
+                toast.error("Error al cargar el producto.")
+                router.push("/dashboard/productos")
             } finally {
                 setLoading(false)
             }
         }
         loadProducto()
-    }, [id])
+    }, [id, router])
 
+    // Clean up image previews on unmount
     useEffect(() => {
         return () => {
             imagePreviews.forEach((url) => URL.revokeObjectURL(url))
         }
     }, [imagePreviews])
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const selected = Array.from(e.target.files || [])
-        setFiles(selected)
-        imagePreviews.forEach((url) => URL.revokeObjectURL(url))
-        setImagePreviews(selected.map((file) => URL.createObjectURL(file)))
+    // Effect to update errors whenever relevant form data changes
+    useEffect(() => {
+        setErrors(validateForm())
+    }, [name, details, categoryId, sizes, files, existingFiles])
+
+    const handleBlur = (fieldName: keyof typeof errors) => {
+        setTouched((prev) => ({ ...prev, [fieldName]: true }))
     }
 
-    const removeImage = (i: number) => {
-        URL.revokeObjectURL(imagePreviews[i])
-        setFiles(files.filter((_, idx) => idx !== i))
-        setImagePreviews(imagePreviews.filter((_, idx) => idx !== i))
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target
+        if (name === "name") setName(value)
+        else if (name === "details") setDetails(value)
+        // No need to clear specific error here, useEffect will re-validate
     }
 
-    const removeExistingImage = (imgId: string) => {
-        setExistingFiles((prev) => prev.filter((f) => f.id !== imgId))
+    const handleCategoryChange = (value: string) => {
+        setCategoryId(value)
+        setTouched((prev) => ({ ...prev, categoryId: true })) // Mark category as touched
     }
 
-    const handleSizeChange = (index: number, field: keyof SizeInput, value: string | number) => {
+    const handleSizeInputChange = (index: number, field: keyof SizeInput, value: string | number) => {
         const newSizes = [...sizes]
         if (field === "size") {
             newSizes[index][field] = String(value)
@@ -118,55 +165,83 @@ const ProductoForm = () => {
             newSizes[index][field] = Number(value)
         }
         setSizes(newSizes)
+        setTouched((prev) => ({ ...prev, sizes: true })) // Mark sizes as touched
     }
 
-    const addSize = () => setSizes([...sizes, { size: "", price: 0, stock: 0 }])
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const selectedFiles = Array.from(e.target.files || [])
+        const newFiles: File[] = []
+        const newImagePreviews: string[] = []
+        let hasImageSizeError = false
 
-    const removeSize = (i: number) => setSizes(sizes.filter((_, idx) => idx !== i))
+        selectedFiles.forEach((file) => {
+            if (file.size > MAX_IMAGE_SIZE_BYTES) {
+                toast.error(`La imagen "${file.name}" excede el tamaño máximo de ${MAX_IMAGE_SIZE_KB}KB.`)
+                hasImageSizeError = true
+            } else {
+                newFiles.push(file)
+                newImagePreviews.push(URL.createObjectURL(file))
+            }
+        })
 
-    // Función para validar UUID
-    const esUUID = (val: string): boolean => {
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-        return uuidRegex.test(val)
+        imagePreviews.forEach((url) => URL.revokeObjectURL(url)) // Revoke old previews
+
+        setFiles(newFiles)
+        setImagePreviews(newImagePreviews)
+        setTouched((prev) => ({ ...prev, images: true })) // Mark images as touched
+    }
+
+    const removeImage = (i: number) => {
+        URL.revokeObjectURL(imagePreviews[i])
+        setFiles(files.filter((_, idx) => idx !== i))
+        setImagePreviews(imagePreviews.filter((_, idx) => idx !== i))
+        setTouched((prev) => ({ ...prev, images: true })) // Mark images as touched
+    }
+
+    const removeExistingImage = (imgId: string) => {
+        setExistingFiles((prev) => prev.filter((f) => f.id !== imgId))
+        setTouched((prev) => ({ ...prev, images: true })) // Mark images as touched
+    }
+
+    const addSize = () => {
+        setSizes([...sizes, { size: "", price: 0, stock: 0 }])
+        setTouched((prev) => ({ ...prev, sizes: true })) // Mark sizes as touched
+    }
+
+    const removeSize = (i: number) => {
+        setSizes(sizes.filter((_, idx) => idx !== i))
+        setTouched((prev) => ({ ...prev, sizes: true })) // Mark sizes as touched
     }
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
-        setSubmitting(true) // Start loading for submission
+        setFormSubmitted(true) // Mark form as submitted to show all errors
 
-        const newErrors: typeof errors = {}
-        if (!name.trim()) newErrors.name = "El nombre es obligatorio"
-        if (!details.trim()) newErrors.details = "Los detalles son obligatorios"
-        if (!categoryId) newErrors.categoryId = "Debe seleccionar una categoría"
-        if (!esUUID(categoryId)) newErrors.categoryId = "La categoría debe ser un UUID válido"
-        if (sizes.length === 0) newErrors.sizes = "Debe agregar al menos un talle"
-        if (sizes.some((s) => !s.size || s.price <= 0 || s.stock < 0)) {
-            newErrors.sizes = "Todos los talles deben tener datos válidos"
-        }
-        if (files.length === 0 && existingFiles.length === 0) newErrors.images = "Debe subir al menos una imagen"
+        const currentErrors = validateForm() // Get latest errors
+        setErrors(currentErrors) // Update errors state immediately
 
-        setErrors(newErrors)
-        if (Object.keys(newErrors).length > 0) {
-            setSubmitting(false) // Stop loading if there are validation errors
+        if (Object.keys(currentErrors).length > 0) {
+            toast.error("Por favor, corrige los errores en el formulario.")
             return
         }
 
-        try {
-            // Subir nuevas imágenes
-            const subidas = await Promise.all(files.map((f) => subirImagen(f, name)))
-            const nuevosIds = subidas.filter((i) => i?.id).map((i) => i.id)
-            const existentesIds = existingFiles.map((f) => f.id)
-            const file_Ids = [...existentesIds, ...nuevosIds]
+        setSubmitting(true)
 
-            // Validar que los nuevos IDs sean UUID válidos
-            const invalidos = nuevosIds.filter((id) => !esUUID(id))
-            if (invalidos.length > 0) {
-                toast.error("IDs inválidos en las nuevas imágenes: " + invalidos.join(", "))
-                setSubmitting(false) // Stop loading if there are invalid IDs
-                return
+        try {
+            const uploadedFileIds: string[] = []
+            for (const file of files) {
+                const subida = await subirImagen(file, name)
+                if (!subida || !subida.id) {
+                    toast.error(subida?.message || subida?.error || "Error al subir una imagen. Intenta nuevamente.")
+                    setSubmitting(false)
+                    return
+                }
+                uploadedFileIds.push(subida.id)
             }
 
-            // Armar objeto final
+            const existingFileIds = existingFiles.map((f) => f.id)
+            const allFileIds = [...existingFileIds, ...uploadedFileIds]
+
             const productoData = {
                 name,
                 details,
@@ -180,7 +255,7 @@ const ProductoForm = () => {
                     if (s.id) sizeObj.id = s.id
                     return sizeObj
                 }),
-                file_Ids,
+                file_Ids: allFileIds,
             }
 
             console.log("📦 JSON enviado al PUT/POST:", JSON.stringify(productoData, null, 2))
@@ -188,20 +263,33 @@ const ProductoForm = () => {
             const resultado = id ? await actualizarProducto(id as string, productoData) : await crearProducto(productoData)
 
             if (resultado) {
-                toast.success(id ? "Producto actualizado" : "Producto creado")
-                router.push("/dashboard/productos") // Corrected path
+                toast.success(id ? "Producto actualizado correctamente" : "Producto creado correctamente")
+                router.push("/dashboard/productos")
             } else {
-                toast.error("Error al guardar el producto")
+                toast.error("Error al guardar el producto.")
             }
         } catch (err) {
             console.error("Error en handleSubmit:", err)
-            toast.error("Error en el proceso")
+            toast.error("Ocurrió un error inesperado al guardar el producto.")
         } finally {
-            setSubmitting(false) // Stop loading regardless of success or failure
+            setSubmitting(false)
         }
     }
 
-    if (loading) return <p className="text-center mt-10 text-gray-600">Cargando...</p>
+    // The submit button should be disabled if there are any errors, regardless of whether they are displayed yet.
+    // This prevents submitting invalid data even if the user hasn't blurred all fields.
+    const isFormInvalid = Object.keys(errors).length > 0
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-12 h-12 animate-spin text-[#017d74]" />
+                    <p className="text-gray-600">Cargando datos del producto...</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 p-4">
@@ -227,18 +315,28 @@ const ProductoForm = () => {
                             <div className="space-y-6">
                                 <div className="space-y-3">
                                     <Label htmlFor="name">Nombre</Label>
-                                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
-                                    {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+                                    <Input id="name" name="name" value={name} onChange={handleChange} onBlur={() => handleBlur("name")} />
+                                    {errors.name && (touched.name || formSubmitted) && (
+                                        <p className="text-sm text-red-600">{errors.name}</p>
+                                    )}
                                 </div>
                                 <div className="space-y-3">
                                     <Label htmlFor="details">Detalles</Label>
-                                    <Textarea id="details" value={details} onChange={(e) => setDetails(e.target.value)} />
-                                    {errors.details && <p className="text-sm text-red-600">{errors.details}</p>}
+                                    <Textarea
+                                        id="details"
+                                        name="details"
+                                        value={details}
+                                        onChange={handleChange}
+                                        onBlur={() => handleBlur("details")}
+                                    />
+                                    {errors.details && (touched.details || formSubmitted) && (
+                                        <p className="text-sm text-red-600">{errors.details}</p>
+                                    )}
                                 </div>
                                 <div className="space-y-3">
                                     <Label htmlFor="category">Categoría</Label>
-                                    <Select value={categoryId} onValueChange={setCategoryId}>
-                                        <SelectTrigger id="category">
+                                    <Select value={categoryId} onValueChange={handleCategoryChange}>
+                                        <SelectTrigger id="category" onBlur={() => handleBlur("categoryId")}>
                                             <SelectValue placeholder="Seleccionar categoría" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -249,7 +347,9 @@ const ProductoForm = () => {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {errors.categoryId && <p className="text-sm text-red-600">{errors.categoryId}</p>}
+                                    {errors.categoryId && (touched.categoryId || formSubmitted) && (
+                                        <p className="text-sm text-red-600">{errors.categoryId}</p>
+                                    )}
                                 </div>
                             </div>
                             <Separator />
@@ -269,7 +369,7 @@ const ProductoForm = () => {
                                     </div>
                                     {sizes.map((s, i) => (
                                         <div key={i} className="grid grid-cols-4 gap-4 items-center">
-                                            <Select value={s.size} onValueChange={(val) => handleSizeChange(i, "size", val)}>
+                                            <Select value={s.size} onValueChange={(val) => handleSizeInputChange(i, "size", val)}>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Talle" />
                                                 </SelectTrigger>
@@ -284,14 +384,16 @@ const ProductoForm = () => {
                                             <Input
                                                 type="number"
                                                 value={s.price}
-                                                onChange={(e) => handleSizeChange(i, "price", e.target.value)}
+                                                onChange={(e) => handleSizeInputChange(i, "price", e.target.value)}
                                                 placeholder="Precio"
+                                                onBlur={() => handleBlur("sizes")} // Mark sizes as touched on blur of any size input
                                             />
                                             <Input
                                                 type="number"
                                                 value={s.stock}
-                                                onChange={(e) => handleSizeChange(i, "stock", e.target.value)}
+                                                onChange={(e) => handleSizeInputChange(i, "stock", e.target.value)}
                                                 placeholder={id ? "Stock" : "Cantidad"}
+                                                onBlur={() => handleBlur("sizes")} // Mark sizes as touched on blur of any size input
                                             />
                                             {sizes.length > 1 && (
                                                 <Button type="button" variant="ghost" onClick={() => removeSize(i)}>
@@ -300,7 +402,9 @@ const ProductoForm = () => {
                                             )}
                                         </div>
                                     ))}
-                                    {errors.sizes && <p className="text-sm text-red-600">{errors.sizes}</p>}
+                                    {errors.sizes && (touched.sizes || formSubmitted) && (
+                                        <p className="text-sm text-red-600">{errors.sizes}</p>
+                                    )}
                                 </div>
                             </div>
                             <Separator />
@@ -321,7 +425,9 @@ const ProductoForm = () => {
                                     <p className="text-gray-500 text-sm">Haz clic o arrastra imágenes aquí</p>
                                     <p className="text-gray-400 text-xs mt-1">Formatos aceptados: JPG, PNG, WEBP</p>
                                 </div>
-                                {errors.images && <p className="text-sm text-red-600">{errors.images}</p>}
+                                {errors.images && (touched.images || formSubmitted) && (
+                                    <p className="text-sm text-red-600">{errors.images}</p>
+                                )}
                                 {existingFiles.length > 0 && (
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         {existingFiles.map(({ id, url }) => (
@@ -371,7 +477,7 @@ const ProductoForm = () => {
                                 <Button
                                     type="submit"
                                     className="w-full h-14 text-lg font-semibold"
-                                    disabled={submitting} // Disable button when submitting
+                                    disabled={submitting || isFormInvalid} // Disable button when submitting or if there are any errors
                                 >
                                     {submitting ? (
                                         <>
