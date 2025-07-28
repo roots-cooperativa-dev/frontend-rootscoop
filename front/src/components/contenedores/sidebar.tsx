@@ -1,29 +1,56 @@
 'use client'
 
-import { ChartBarStacked, HelpCircle, Home, LogOut, Package, Plus, Settings, UserRound } from "lucide-react";
+import { Banknote, Calendar, ChartBarStacked, ClipboardPaste, HelpCircle, Home, LogOut, Package, Plus, Settings, ShoppingCart, UserRound, UserRoundPen } from "lucide-react";
 
 import Link from "next/link";
 import { Badge } from "../ui/badge";
 import { Separator } from "@radix-ui/react-separator";
 import { cn } from "@/src/lib/utils";
 import { usePathname } from "next/dist/client/components/navigation";
-
 const sidebarLinks = [
   {
     href: "/profile",
     label: "Perfil de usuario",
-    icon: Home,
+    icon: UserRound,
     description: "Informacion basica",
   },
   {
     href: "/profile/editar_perfil",
     label: "Editar datos de usuario",
-    icon: ChartBarStacked,
+    icon: UserRoundPen,
     description: "Cambia tus datos",
     badge: "",
   },
+  {
+    href: "/profile/visits",
+    label: "Visitas programadas",
+    icon: Calendar,
+    description: "agenda",
+    badge: "",
+  },
+  {
+    href: "/profile/ordenes",
+    label: "Ordenes",
+    icon: ClipboardPaste,
+    description: "Visualiza tus ordenes",
+    badge: "",
+  },
+  {
+    href: "/profile/donaciones",
+    label: "Donaciones",
+    icon: Banknote,
+    description: "Donaciones realizadas",
+    badge: "",
+    
+  },
+  {
+    href: "/profile/carrito",
+    label: "Carrito",
+    icon: ShoppingCart,
+    description: "Listo para comprar",
+    badge: "",
+  },
 ];
-
 const Sidebar = () => {
   const pathname = usePathname();
   return (

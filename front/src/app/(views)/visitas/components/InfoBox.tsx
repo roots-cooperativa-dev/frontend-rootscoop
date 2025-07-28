@@ -16,14 +16,14 @@ const InfoBox = () => {
       {/* ¿Qué vas a ver? */}
       <div className="border border-sky-200 bg-white p-5 rounded-xl">
         <div className="flex items-center gap-2 mb-7">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#33a5d7] to-teal-300 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-[#922f4e] flex items-center justify-center">
             <Eye className="text-white w-6 h-6" />
           </div>
-          <h3 className="text-sky-400 font-bold text-lg font-chewy">
+          <h3 className="text-[#922f4e] font-semibold text-lg font-chewy">
             ¿Que vas a ver?
           </h3>
         </div>
-        <ul className="space-y-8 text-gray-700 text-sm flex-item-center font-bebas">
+        <ul className="space-y-8 text-gray-700 text-m flex-item-center font-bebas">
           <li className="flex items-center gap-2">
             <Beer className="h-4 w-4 text-orange-500" />
             Proceso completo de cerveza artesanal
@@ -49,7 +49,7 @@ const InfoBox = () => {
 
       {/* Información práctica */}
       <div className="border border-orange-200 bg-white-50 p-5 rounded-xl">
-        <h3 className="text-orange-400 font-bold text-lg mb-3 font-chewy">
+        <h3 className="text-[#febb07] font-semibold text-lg mb-3 font-chewy">
           Informacion practica
         </h3>
         <ul className="space-y-6 text-sm text-gray-800 font-bebas">
@@ -59,21 +59,25 @@ const InfoBox = () => {
               Duracion: 2 horas
             </strong>
 
-            <span className="text-gray-500 ml-6">Incluye degustación</span>
+            <span className="text-gray-500 ml-6 font-popular">
+              Incluye degustación
+            </span>
           </li>
           <li>
             <strong className="flex items-center gap-2 ">
               <Users className="h-4 w-4 text-[#2d9cdb]" />
               Grupos de hasta 15 personas
             </strong>
-            <span className="text-gray-500 ml-6">Visitas personalizadas</span>
+            <span className="text-gray-500 ml-6 font-popular">
+              Visitas personalizadas
+            </span>
           </li>
           <li>
             <strong className="flex items-center gap-2 ">
               <MapPin className="h-4 w-4 text-[#e63946]" />
               La Plata, Buenos Aires
             </strong>
-            <span className="text-gray-500 ml-6">
+            <span className="text-gray-500 ml-6 font-popular">
               Te enviamos la dirección exacta
             </span>
           </li>
@@ -81,31 +85,19 @@ const InfoBox = () => {
       </div>
 
       {/* ¿Cuánto cuesta? */}
-      <div className="border border-pink-200 bg-white-50 p-5 rounded-xl">
-        <h3 className="text-[#f72585] font-bold text-lg mb-3 font-chewy">
-          ¿Cuanto cuesta?
+      <div className="border border-[#017d74] bg-white-50 p-5 rounded-xl">
+        <h3 className="text-[#017d74] font-semibold text-lg mb-3 font-chewy">
+          Cuanto cuesta
         </h3>
-        <ul className="space-y-2 text-sm text-[#09090b] font-bebas">
+        <ul className="space-y-2 text-m text-[#09090b] font-bebas">
           <li className="flex justify-between">
-            <span>Visita estandar</span>
-            <span className="bg-sky-500 text-white text-xs px-2 py-1 rounded-full">
-              $3.000
-            </span>
-          </li>
-          <li className="flex justify-between">
-            <span>Estudiantes</span>
-            <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
-              $2.000
-            </span>
-          </li>
-          <li className="flex justify-between">
-            <span>Grupos +10 personas</span>
-            <span className="bg-purple-800 text-white text-xs px-2 py-1 rounded-full">
-              $2.500
+            <span className=" text-m font-bebas">Bono contribucion</span>
+            <span className="bg-[#017d74] text-white text-s px-2 py-1 rounded-full font-bebas">
+              $20.000
             </span>
           </li>
         </ul>
-        <p className="mt-2 text-xs text-gray-600 italic">
+        <p className="mt-2 text-s text-gray-600 italic font-popular">
           * Incluye degustación de cerveza y productos de la cocina
         </p>
       </div>

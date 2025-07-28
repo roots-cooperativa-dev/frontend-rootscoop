@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const getAuthHeader = () => {
+export const getAuthHeader = () => {
     const userString = localStorage.getItem("user");
     let token = "";
 
@@ -29,8 +29,8 @@ const getAuthHeader = () => {
 
 
 export const fetchCategorias = async (
-    page: number = 0,
-    limit: number = 0
+    page: number = 1,
+    limit: number = 10
 ): Promise<{ categories: ICategory[]; total: number; pages: number }> => {
     try {
         const response = await axios.get(`${API_URL}/category`, {
@@ -101,5 +101,21 @@ export const eliminarCategoria = async (id: string): Promise<boolean> => {
         return false;
     }
 };
+
+export const restaurarCategoria = async (id: string): Promise<boolean> => {
+    try {
+        const config = await getAuthHeader();
+        const response = await axios.post(`${API_URL}/category/restore/${id}`, null, config);
+        console.log("Respuesta exitosa:", response.data);
+        return true; 
+    } catch (error: any) {
+        console.error("Error restaurando categoría", error?.response?.data || error.message);
+        return false;
+    }
+};
+
+
+
+
 
 

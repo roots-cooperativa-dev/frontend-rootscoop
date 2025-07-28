@@ -2,7 +2,7 @@
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { es } from "date-fns/locale";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Input } from "../../../components/ui/input";
@@ -10,13 +10,92 @@ import { Button } from "../../../components/ui/button";
 import { postRegister } from "@/src/services/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 importa los íconos
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import mapboxgl from "mapbox-gl";
+// import MapboxGeocoder dynamically in useEffect below
+import "mapbox-gl/dist/mapbox-gl.css";
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 export default function RegisterForm() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [direccion, setDireccion] = useState({
+    street: "",
+    latitude: 0,
+    longitude: 0,
+  });
+
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    let map: mapboxgl.Map | null = null;
+    let marker: mapboxgl.Marker | null = null;
+
+    const initializeMap = async () => {
+      // Dynamically import MapboxGeocoder to avoid type mismatches
+      const MapboxGeocoder = (await import('@mapbox/mapbox-gl-geocoder')).default;
+
+      map = new mapboxgl.Map({
+        container: mapContainerRef.current!,
+        style: "mapbox://styles/mapbox/streets-v11",
+        center: [-58.3816, -34.6037],
+        zoom: 12,
+      });
+
+      marker = new mapboxgl.Marker({ draggable: true })
+        .setLngLat([-58.3816, -34.6037])
+        .addTo(map);
+
+      const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken ?? "",
+        mapboxgl: mapboxgl as unknown as typeof import("mapbox-gl"),
+        marker: false,
+        placeholder: "Buscar dirección...",
+      });
+
+      map.addControl(geocoder);
+
+      interface GeocoderResult {
+        result: {
+          center: [number, number];
+          place_name: string;
+        };
+      }
+
+      geocoder.on("result", (e: GeocoderResult) => {
+        const { center, place_name } = e.result;
+        if (center) {
+          marker!.setLngLat(center);
+          setDireccion({
+            street: place_name,
+            latitude: center[1],
+            longitude: center[0],
+          });
+        }
+      });
+
+      marker.on("dragend", () => {
+        const lngLat = marker!.getLngLat();
+        setDireccion({
+          street: "Ubicación personalizada",
+          latitude: lngLat.lat,
+          longitude: lngLat.lng,
+        });
+      });
+    };
+
+    initializeMap();
+
+    return () => {
+      if (map) map.remove();
+    };
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -31,9 +110,7 @@ export default function RegisterForm() {
     validationSchema: Yup.object({
       name: Yup.string().required("Requerido"),
       email: Yup.string().email("Email inválido").required("Requerido"),
-      password: Yup.string()
-        .min(6, "Mínimo 6 caracteres")
-        .required("Requerido"),
+      password: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
         .required("Requerido"),
@@ -50,13 +127,12 @@ export default function RegisterForm() {
             (age === 18 && m >= 0 && today.getDate() >= birthDate.getDate())
           );
         }),
-
       phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
       username: Yup.string().required("Requerido"),
     }),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        setSubmitting(true); // activa bandera de envío
+        setSubmitting(true);
 
         const data = {
           name: values.name,
@@ -66,22 +142,26 @@ export default function RegisterForm() {
           birthdate: values.birthdate,
           phone: Number(values.phone),
           username: values.username,
+          address: {
+            street: direccion.street,
+            latitude: direccion.latitude,
+            longitude: direccion.longitude,
+          },
         };
-        console.log(data);
+
         await postRegister(data);
-        toast.success(
-          "Usuario registrado correctamente inicia sesion para continuar"
-        );
+        toast.success("Usuario registrado correctamente. Inicia sesión para continuar");
 
         setTimeout(() => {
           router.push("/login");
         }, 2000);
 
-        resetForm(); // limpia los campos
+        resetForm();
       } catch (error: any) {
-        toast.error(error?.message || "Error al registrar el usuario");
+        console.log(error.response?.data?.message);
+        toast.error(error?.response?.data?.message || "Error al registrar el usuario");
       } finally {
-        setSubmitting(false); // desactiva bandera
+        setSubmitting(false);
       }
     },
   });
@@ -175,10 +255,6 @@ export default function RegisterForm() {
         )}
       </div>
 
-      {formik.touched.birthdate && formik.errors.birthdate && (
-        <p className="text-red-500 text-xs">{formik.errors.birthdate}</p>
-      )}
-
       <Input
         name="phone"
         placeholder="Teléfono"
@@ -198,6 +274,17 @@ export default function RegisterForm() {
       {formik.touched.username && formik.errors.username && (
         <p className="text-red-500 text-xs">{formik.errors.username}</p>
       )}
+
+      {/* Mapa con geocodificador y marcador */}
+      <div className="space-y-2">
+        <label className="font-medium text-sm">Dirección:</label>
+        <div ref={mapContainerRef} className="h-64 rounded border" />
+        <div className="text-sm text-gray-600 mt-2">
+          <p><strong>Dirección:</strong> {direccion.street}</p>
+          <p><strong>Latitud:</strong> {direccion.latitude}</p>
+          <p><strong>Longitud:</strong> {direccion.longitude}</p>
+        </div>
+      </div>
 
       <Button type="submit" className="w-full" disabled={formik.isSubmitting}>
         {formik.isSubmitting ? "Registrando..." : "Registrarse"}

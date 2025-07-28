@@ -1,6 +1,5 @@
 "use client";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -12,13 +11,17 @@ import { routes } from "../../../routes";
 import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
-import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Importa los iconos
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import { useCartContext } from "@/src/context/cartContext";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 👀 Estado para mostrar/ocultar contraseña
+  const [showPassword, setShowPassword] = useState(false);
   const { saveUserData } = useAuthContext();
+  const { saveCartData } = useCartContext();
   const router = useRouter();
 
   const formik = useFormik({
@@ -34,7 +37,7 @@ export default function LoginForm() {
         const userId = response.data.user.id;
         const Token = response.data.accessToken;
         const dataUser = await getUserById(userId, Token);
-    
+
         saveUserData({
           accessToken: Token,
           user: {
@@ -45,15 +48,24 @@ export default function LoginForm() {
             phone: dataUser.phone,
             email: dataUser.email,
             isAdmin: dataUser.isAdmin,
-            isDonator: dataUser.isDonator
+            isDonator: dataUser.isDonator,
+            address: dataUser.address,
+            donates: dataUser.donates,
+            orders: dataUser.orders,
+            appointments: dataUser.appointments,
+            cart: dataUser.cart,
           },
           isAuth: true,
         });
-        toast.success("Sesión iniciada correctamente");
 
+        if (dataUser.cart && dataUser.cart.items.length > 0) {
+          saveCartData({ cart: dataUser.cart });
+        }
+
+        toast.success("Sesión iniciada correctamente");
         router.push(routes.home);
       } catch (error: any) {
-        toast.error(error.message || "Error al iniciar sesión");
+        toast.error(error?.response.data.message || "Error al iniciar sesión");
         console.error(error);
       } finally {
         setLoading(false);
@@ -63,9 +75,6 @@ export default function LoginForm() {
 
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
-    console.log("BACKEND_URL en prod:", process.env.NEXT_PUBLIC_API_URL);
-    //en local reemplazar por http://localhost:3000 si o si 3000 es back
-    // https://roots-api-te93.onrender.com esta es la url del back deployado
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
@@ -104,9 +113,20 @@ export default function LoginForm() {
         )}
       </div>
 
+      {/* 🔗 Enlace a "Olvidaste tu contraseña" */}
+      <div className="text-right">
+        <a
+          href="/forgotPassword"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Ingresando..." : "Ingresar"}
       </Button>
+
       <Button
         type="button"
         onClick={handleGoogleLogin}

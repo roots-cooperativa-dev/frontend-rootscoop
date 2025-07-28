@@ -1,4 +1,4 @@
-interface LoginDto {
+export interface LoginDto {
   email: string;
   password: string;
 }
@@ -12,21 +12,30 @@ interface Iuser {
   password: string;
   confirmPassword: string;
 }
-interface UserGoogle {
+export interface UserGoogle {
   id: string;
-  email: string;
   name: string;
+  email: string;
   birthdate: string;
-  username: string;
   phone: string;
-  isAdmin?: boolean;
-  isDonator?:boolean;
+  username: string;
+  isAdmin: boolean;
+  isDonator: boolean;
+  donates: any[];         // podés tiparlo mejor si querés
+  orders: any[];
+  appointments: any[];
+  cart: any[]; 
+  address?: {
+    street: string;
+    lat: number;
+    long: number;
+  };
 }
 enum Irole {
   ADMIN = "admin",
   USER = "user",
 }
-interface RegisterDto {
+export interface RegisterDto {
   name: string;
   email: string;
   birthdate: string;
@@ -35,3 +44,4 @@ interface RegisterDto {
   password: string;
   confirmPassword: string;
 }
+

@@ -1,9 +1,10 @@
 // ProductosHelper.ts
 import axios from "axios";
-import { IProducto } from "../types";
+import { IProducto, ProductoQueryParams } from "../types";
 import { ProductoDTO } from "../dto/ProductoDTO";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
 const getAuthHeader = () => {
     const userString = localStorage.getItem("user");
@@ -23,19 +24,45 @@ const getAuthHeader = () => {
     };
 };
 
-export const fetchProductos = async (): Promise<IProducto[]> => {
+
+
+export const fetchProductos = async ({
+    page = 1,
+    limit = 10,
+    name,
+    categoryId,
+    minPrice,
+    maxPrice,
+}: {
+    page?: number;
+    limit?: number;
+    name?: string;
+    categoryId?: string;
+    minPrice?: number;
+    maxPrice?: number;
+}): Promise<{ products: IProducto[]; pages: number }> => {
     try {
-        const response = await axios.get<IProducto[]>(`${API_URL}/products`);
-        return response.data;
+        const response = await axios.get(`${API_URL}/products`, {
+            params: { page, limit, name, categoryId, minPrice, maxPrice },
+        });
+
+        return {
+            products: response.data.products || [],
+            pages: response.data.pages || 1,
+        };
     } catch (error) {
-        console.error("Error fetching productos:", error);
-        return [];
+        console.error("Error al obtener productos:", error);
+        return { products: [], pages: 1 };
     }
 };
 
 
 
-export const fetchProductoById = async (id: string): Promise<IProducto | null> => {
+
+
+export const fetchProductoById = async (
+    id: string
+): Promise<IProducto | null> => {
     try {
         const response = await axios.get<IProducto>(`${API_URL}/products/${id}`);
         return response.data;
@@ -45,7 +72,9 @@ export const fetchProductoById = async (id: string): Promise<IProducto | null> =
     }
 };
 
-export const crearProducto = async (producto: ProductoDTO): Promise<IProducto | null> => {
+export const crearProducto = async (
+    producto: ProductoDTO
+): Promise<IProducto | null> => {
     try {
         const response = await axios.post<IProducto>(
             `${API_URL}/products`,
@@ -70,8 +99,9 @@ export const actualizarProducto = async (
             { headers: getAuthHeader() }
         );
         return response.data;
-    } catch (error) {
-        console.error(`Error actualizando producto con ID ${id}:`, error);
+    } catch (error: any) {
+        console.error(`Error actualizando producto con ID ${id}:`, error.response?.data);
+        console.error(error.response?.data?.message || "Error desconocido al actualizar producto");
         return null;
     }
 };
@@ -79,7 +109,7 @@ export const actualizarProducto = async (
 export const eliminarProducto = async (id: string): Promise<boolean> => {
     try {
         await axios.delete(`${API_URL}/products/${id}`, {
-            headers: getAuthHeader()
+            headers: getAuthHeader(),
         });
         return true;
     } catch (error) {
@@ -99,7 +129,11 @@ export const subirImagen = async (file: File, name: string): Promise<any> => {
             "Content-Type": "multipart/form-data",
         };
 
-        const response = await axios.post(`${API_URL}/file-upload/uploadImg`, formData, { headers });
+        const response = await axios.post(
+            `${API_URL}/file-upload/uploadImg`,
+            formData,
+            { headers }
+        );
 
         return response.data;
     } catch (error) {
