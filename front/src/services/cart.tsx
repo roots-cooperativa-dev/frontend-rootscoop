@@ -1,6 +1,11 @@
 "use server";
 import axios from "axios";
-import { Icart } from "../app/types";
+
+interface Icart {
+  productId: string;
+  productSizeId: string;
+  quantity: number;
+}
 
 const axiosApiBack = axios.create({
   baseURL: process.env.API_URL,
