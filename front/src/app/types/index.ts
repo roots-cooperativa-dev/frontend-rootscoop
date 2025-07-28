@@ -40,7 +40,7 @@ export interface File {
 export interface ICategory {
   id: string;
   name: string;
-  deletedAt?: string | null; 
+  deletedAt?: string | null;
 }
 
 export interface ProductoQueryParams {
@@ -62,10 +62,15 @@ export interface IUsuario {
   phone: string;
   username: string;
   isAdmin: boolean;
-  isDonator: boolean;
-  donates: any[];
-  password?: string;
-}
+  address?: {
+    street: string;
+    lat: number;
+    long: number;
+  };
+    isDonator: boolean;
+    donates: any[];
+    password?: string;
+  }
 
 
 export interface IOrder {
