@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
@@ -13,21 +13,21 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 // ✅ Tipo del formulario
 interface ChangePasswordForm {
   token: string;
-  password: string;
+  newPassword: string;
   confirmPassword: string;
 }
 
 // ✅ Valores iniciales
 const initialValues: ChangePasswordForm = {
   token: "",
-  password: "",
+  newPassword: "",
   confirmPassword: "",
 };
 
 // ✅ Validación con Yup
 const validationSchema = Yup.object({
   token: Yup.string().email("Email inválido").required("Campo requerido"),
-  password: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
+  newPassword: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
     .required("Requerido"),
@@ -62,15 +62,20 @@ const CambiarPass = () => {
     <div className="flex items-center justify-center h-screen">
       <div className="bg-white w-4/5 p-6 space-y-6 mx-auto rounded-xl shadow-md">
         <h1 className="text-2xl font-bold">Cambio de contraseña</h1>
-        <p>
-          Ingresa el email y la nueva contraseña que deseas establecer.
-        </p>
+        <p>Ingresa el email y la nueva contraseña que deseas establecer.</p>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ handleChange, handleBlur, values, errors, touched, isSubmitting }) => (
+          {({
+            handleChange,
+            handleBlur,
+            values,
+            errors,
+            touched,
+            isSubmitting,
+          }) => (
             <Form className="space-y-4 font-popular">
               <div>
                 <Label htmlFor="token">Email *</Label>
@@ -96,7 +101,7 @@ const CambiarPass = () => {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   id="password"
-                  value={values.password}
+                  value={values.newPassword}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   placeholder="********"
@@ -108,8 +113,8 @@ const CambiarPass = () => {
                 >
                   {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                 </button>
-                {touched.password && errors.password && (
-                  <p className="text-red-500 text-xs">{errors.password}</p>
+                {touched.newPassword && errors.newPassword && (
+                  <p className="text-red-500 text-xs">{errors.newPassword}</p>
                 )}
               </div>
 
