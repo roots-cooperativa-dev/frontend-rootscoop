@@ -59,6 +59,7 @@ export default function LoginForm() {
         });
 
         if (dataUser.cart && dataUser.cart.items.length > 0) {
+          console.log(dataUser.cart)
           saveCartData({ cart: dataUser.cart });
         }
 

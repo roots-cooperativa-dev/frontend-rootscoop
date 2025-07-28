@@ -27,7 +27,7 @@ export const forgotPassword = async (data: ForgotPasswordData) => {
   };
 };
 
-export const changePassword = async (data: ChangePasswordData) => {
+export const resetPassword = async (data: ChangePasswordData) => {
   const response = await axiosApiBack.post("/users/reset-password", data);
   if (!response.data) throw new Error("problema con la solicitud");
   return {
