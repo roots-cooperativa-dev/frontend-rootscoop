@@ -13,15 +13,19 @@ interface Iuser {
   confirmPassword: string;
 }
 export interface UserGoogle {
-  address: any;
   id: string;
-  email: string;
   name: string;
+  email: string;
   birthdate: string;
-  username: string;
   phone: string;
-  isAdmin?: boolean;
-  isDonator?:boolean;
+  address: any;
+  username: string;
+  isAdmin: boolean;
+  isDonator: boolean;
+  donates: any[];         // podés tiparlo mejor si querés
+  orders: any[];
+  appointments: any[];
+  cart: any[]; 
 }
 enum Irole {
   ADMIN = "admin",

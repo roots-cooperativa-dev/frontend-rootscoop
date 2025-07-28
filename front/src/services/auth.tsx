@@ -1,7 +1,6 @@
 import axios from "axios";
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
-import { RegisterDto } from "../app/types";
-import { LoginDto, UserGoogle } from "../types";
+import { LoginDto, RegisterDto, UserGoogle } from "../types";
 
 const axiosApiBack = axios.create({
   baseURL: BACKEND_URL,

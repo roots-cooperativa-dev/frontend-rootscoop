@@ -7,7 +7,7 @@ const Ordenes = () => {
   return (
     <>
       <HeaderProfile />
-      <div className="flex bg-slate-50">
+      <div className="flex  bg-slate-50">
         <Sidebar />
         <OrdersUser/>
       </div>
