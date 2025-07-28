@@ -36,13 +36,15 @@ export const Productos = () => {
                 page: 1,
                 limit: 100,
             })
-            setProductos(products)
+            const activos = products.filter((p) => !p.deletedAt)
+            setProductos(activos)
         } catch (error) {
             console.error("Error al filtrar productos:", error)
         } finally {
             setLoading(false)
         }
     }
+
 
 
     useEffect(() => {
