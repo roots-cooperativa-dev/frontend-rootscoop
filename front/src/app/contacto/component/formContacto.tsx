@@ -1,61 +1,63 @@
 "use client";
 
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import { CalendarDays } from "lucide-react";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Button } from "@/src/components/ui/button";
 import { Label } from "@/src/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
+import { toast } from "sonner";
+import { postContact } from "../../../services/contact"; // Ajustá la ruta si es necesario
+import { IContactanos } from "@/src/app/types";
+
+const initialValues: IContactanos = {
+  name: "",
+  email: "",
+  phone: "",
+  reason: "",
+};
+
+const validationSchema = Yup.object({
+  name: Yup.string().required("Campo requerido"),
+  email: Yup.string().email("Email inválido").required("Campo requerido"),
+  phone: Yup.string().required("Campo requerido"),
+});
+
+const handleSubmit = async (
+  values: IContactanos,
+  { resetForm, setSubmitting }: FormikHelpers<IContactanos>
+) => {
+  try {
+    await postContact(values);
+    toast.success("Mensaje enviado con éxito.");
+    resetForm();
+  } catch (error) {
+    console.error("Error al enviar:", error);
+    toast.error("Hubo un error al enviar el mensaje.");
+  } finally {
+    setSubmitting(false); // Asegura que se habilite nuevamente el botón
+  }
+};
 
 const ContactoFormulario = () => {
-  const initialValues = {
-    contactName: "",
-    email: "",
-    phone: "",
-    numberOfPeople: "",
-    preferredDate: "",
-    preferredTime: "",
-    groupType: "",
-    interests: "",
-    additionalComments: "",
-  };
-
-  const validationSchema = Yup.object({
-    contactName: Yup.string().required("Campo requerido"),
-    email: Yup.string().email("Email inválido").required("Campo requerido"),
-    phone: Yup.string().required("Campo requerido"),
-    numberOfPeople: Yup.string().required("Campo requerido"),
-    preferredDate: Yup.string().required("Campo requerido"),
-    preferredTime: Yup.string().required("Campo requerido"),
-    groupType: Yup.string().required("Campo requerido"),
-  });
-
   return (
-    <div className="bg-white w-1/2 p-6 rounded-xl shadow-md space-y-6">
+    <div className="bg-white w-full p-6 rounded-xl shadow-md space-y-6 mx-auto">
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={(values) => console.log(values)}
+        onSubmit={handleSubmit}
       >
-        {({ handleChange, setFieldValue }) => (
-          <Form className="space-y-4 font-bebas">
+        {({ handleChange, isSubmitting }) => (
+          <Form className="space-y-4 font-popular">
             <div>
               <Label>Nombre *</Label>
               <Input
-                name="contactName"
+                name="name"
                 onChange={handleChange}
                 placeholder="Tu nombre"
               />
               <ErrorMessage
-                name="contactName"
+                name="name"
                 component="div"
                 className="text-red-500 text-sm"
               />
@@ -77,7 +79,7 @@ const ContactoFormulario = () => {
             </div>
 
             <div>
-              <Label>Teléfono</Label>
+              <Label>Teléfono *</Label>
               <Input
                 name="phone"
                 onChange={handleChange}
@@ -93,14 +95,18 @@ const ContactoFormulario = () => {
             <div>
               <Label>Motivo de la consulta</Label>
               <Textarea
-                name="interests"
+                name="reason"
                 onChange={handleChange}
-                placeholder="Ej: Proceso de cerveza, cocina cooperativa, historia de ROOTS"
+                placeholder="Ej: Consulta sobre servicios"
               />
             </div>
 
-            <Button type="submit" className="w-full mt-4">
-              Enviar mensaje
+            <Button
+              type="submit"
+              className="w-full mt-4"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Enviando..." : "Enviar mensaje"}
             </Button>
           </Form>
         )}

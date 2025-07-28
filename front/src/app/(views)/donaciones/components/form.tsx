@@ -12,7 +12,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DonarFormulario() {
   const [loading, setLoading] = useState(false);
-  const { user } = useAuthContext();
+  const { user, token } = useAuthContext();
 
   const formik = useFormik({
     initialValues: {
@@ -28,6 +28,10 @@ export default function DonarFormulario() {
         .min(3, "El mensaje debe tener al menos 3 caracteres"),
     }),
     onSubmit: async (values) => {
+      if (!token) {
+        toast.error("No hay token de autenticación. Por favor iniciá sesión.");
+        return;
+      }
       try {
         setLoading(true);
         const res = await axios.post(
@@ -39,12 +43,13 @@ export default function DonarFormulario() {
           {
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
-        if (res.data && res.data.sandboxInitPoint) {
-          window.location.href = res.data.sandboxInitPoint;
+        if (res.data && res.data.initPoint) {
+          window.location.href = res.data.initPoint;
         } else {
           toast("Error al generar el pago.");
         }

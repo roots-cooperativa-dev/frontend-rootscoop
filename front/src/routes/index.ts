@@ -10,4 +10,5 @@ export const routes = {
     politicas: '/politicas',
     terminos: '/terminos',
     products: '/products',
+    cargando: '/cargaDatos',
 }

@@ -11,6 +11,8 @@ const axiosApiBack = axios.create({
 
 export const addProductToCart = async (data: Icart, token: string | null | undefined) => {
   try {
+    console.log(data)
+    console.log(token)
     const response = await axiosApiBack.post("/orders/cart/add", data, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -34,8 +36,9 @@ export const getCart = async ( token: string | null | undefined) => {
       },
     });
 
-    if (!response.data) throw new Error("No se pudo recuperar datos del carrito");
-
+    console.log("RESPONSE DATA:", response.data); // 👈 esto es clave
+    if (!response.data) throw new Error("No hay productos en carrito");
+    console.log(response)
     return response.data;
   } catch (e: any) {
     console.warn(e.message);

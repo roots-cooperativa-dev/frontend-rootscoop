@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -13,7 +12,7 @@ import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Importa los iconos
-import { getCart } from "@/src/services/cart";
+import { useCartContext } from "@/src/context/cartContext";
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginForm() {
@@ -21,7 +20,9 @@ export default function LoginForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // 👀 Estado para mostrar/ocultar contraseña
   const { saveUserData } = useAuthContext();
+  const { saveCartData } = useCartContext();
   const router = useRouter();
+  const [isLoadingCart, setIsLoadingCart] = useState(true);
 
   const formik = useFormik({
     initialValues: { email: "", password: "" },
@@ -36,7 +37,7 @@ export default function LoginForm() {
         const userId = response.data.user.id;
         const Token = response.data.accessToken;
         const dataUser = await getUserById(userId, Token);
-    
+        console.log(dataUser);
         saveUserData({
           accessToken: Token,
           user: {
@@ -47,19 +48,21 @@ export default function LoginForm() {
             phone: dataUser.phone,
             email: dataUser.email,
             isAdmin: dataUser.isAdmin,
-            isDonator: dataUser.isDonator
+            isDonator: dataUser.isDonator,
           },
           isAuth: true,
         });
 
-        //const dataCart = await getCart(Token);
-        //console.log(dataCart);
+
+        if (dataUser.cart && dataUser.cart.items.length > 0) {
+          saveCartData({ cart: dataUser.cart });
+        }
 
         toast.success("Sesión iniciada correctamente");
 
         router.push(routes.home);
       } catch (error: any) {
-        toast.error(error.message || "Error al iniciar sesión");
+        toast.error(error?.response.data.message || "Error al iniciar sesión");
         console.error(error);
       } finally {
         setLoading(false);
