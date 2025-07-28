@@ -8,7 +8,7 @@ interface Icart {
 }
 
 const axiosApiBack = axios.create({
-  baseURL: process.env.API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
