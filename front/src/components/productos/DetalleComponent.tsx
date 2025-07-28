@@ -133,7 +133,7 @@ const ProductoDetalle = ({ producto }: Props) => {
               disabled={stock === 0}
               asChild={stock > 0}
             >
-              {stock > 0 ? <Link href="/paginaError">Comprar ahora</Link> : "Agotado"}
+              {stock > 0 ? <Link href="/profile/carrito">Comprar ahora</Link> : "Agotado"}
             </Button>
 
             {/* Botón Agregar al carrito */}
