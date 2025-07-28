@@ -247,3 +247,13 @@ export interface AppointmentsQueryParams {
   page?: number;
   limit?: number;
 }
+export interface IContactanos{
+  name: string,
+  email: string,
+  phone: string,
+  reason: string
+}
+interface ForgotPasswordData {
+  email: string;
+}
+
