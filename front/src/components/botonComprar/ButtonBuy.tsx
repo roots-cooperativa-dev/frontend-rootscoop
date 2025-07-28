@@ -8,8 +8,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const ButtonBuy = () => {
-  const { totalAmount } = useCartContext();
-  const { user } = useAuthContext();
+  const { totalAmount, cart, id } = useCartContext(); // ✅ incluí cartId
+  const { user, token } = useAuthContext();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -27,13 +27,13 @@ const ButtonBuy = () => {
         amount: parseFloat(totalAmount),
         message: "Compra desde carrito",
         currency: "ARS",
-        cartId: user.id, // ✅ asegurate que esto esté disponible en el user
+        cartId: id, // ✅ ahora cartId está disponible correctamente
       };
 
-      const result = await orderPayments(data, user.id);
+      const result = await orderPayments(data, user.id, token);
 
-      if (result && result.initPoint) {
-        window.location.href = result.initPoint; // 🔁 Redirige al checkout de MercadoPago
+      if (result && result.sandboxInitPoint) {
+        window.location.href = result.sandboxInitPoint;
       } else {
         alert("No se pudo iniciar el pago. Intenta de nuevo.");
       }
