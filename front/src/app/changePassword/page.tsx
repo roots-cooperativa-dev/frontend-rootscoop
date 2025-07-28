@@ -12,14 +12,14 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 
 // ✅ Tipo del formulario
 interface ChangePasswordForm {
-  email: string;
+  token: string;
   password: string;
   confirmPassword: string;
 }
 
 // ✅ Valores iniciales
 const initialValues: ChangePasswordForm = {
-  email: "",
+  token: "",
   password: "",
   confirmPassword: "",
 };
@@ -80,7 +80,7 @@ const CambiarPass = () => {
                   id="email"
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  value={values.email}
+                  value={values.token}
                   placeholder="tu@email.com"
                 />
                 <ErrorMessage
