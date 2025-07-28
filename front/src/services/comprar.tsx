@@ -15,8 +15,12 @@ const axiosApiBack = axios.create({
   },
 });
 
-export const orderPayments = async (data: pay, userId: string) => {
-  const response = await axiosApiBack.post(`/order-payments/create-preference/${userId}`, data);
+export const orderPayments = async (data: pay, userId: string, token:string |null | undefined) => {
+  const response = await axiosApiBack.post(`/order-payments/create-preference/${userId}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   if (!response.data) throw new Error("Error al crear la preferencia de pago");
   return response.data;
 };
