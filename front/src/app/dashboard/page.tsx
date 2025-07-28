@@ -1,11 +1,10 @@
 
 import React from 'react'
-import { DashboardNavbar } from '../../components/dashboard/DashboardNavbar'
-import { GestionProductos } from '../../components/dashboard/GestionProductos'
+import { HomeComponent } from '@/src/components/dashboard/HomeComponent'
 const dashboard = () => {
   return (
 <>
-  <GestionProductos/>
+  <HomeComponent/>
 </>
   )
 }

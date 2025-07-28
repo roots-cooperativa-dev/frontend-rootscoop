@@ -102,4 +102,20 @@ export const eliminarCategoria = async (id: string): Promise<boolean> => {
     }
 };
 
+export const restaurarCategoria = async (id: string): Promise<boolean> => {
+    try {
+        const config = await getAuthHeader();
+        const response = await axios.post(`${API_URL}/category/restore/${id}`, null, config);
+        console.log("Respuesta exitosa:", response.data);
+        return true; 
+    } catch (error: any) {
+        console.error("Error restaurando categoría", error?.response?.data || error.message);
+        return false;
+    }
+};
+
+
+
+
+
 
