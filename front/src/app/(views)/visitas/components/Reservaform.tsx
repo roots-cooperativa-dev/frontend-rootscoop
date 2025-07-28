@@ -40,10 +40,12 @@ export default function ReservaForm() {
 
   useEffect(() => {
     const fechasDisponibles: Date[] = [];
+    const now = new Date();
 
     visitas.forEach((visita) => {
       visita.availableSlots.forEach((slot) => {
-        if (!slot.isBooked) {
+        const slotDateTime = new Date(`${slot.date}T${slot.startTime}`);
+        if (!slot.isBooked && slotDateTime > now) {
           const fecha = new Date(slot.date + "T00:00:00");
           if (
             !fechasDisponibles.some(
@@ -62,11 +64,15 @@ export default function ReservaForm() {
   useEffect(() => {
     if (fechaSeleccionada) {
       const fechaStr = fechaSeleccionada.toISOString().split("T")[0];
+      const now = new Date();
+
       const slots = visitas.flatMap((visita) =>
-        visita.availableSlots.filter(
-          (slot) => slot.date === fechaStr && !slot.isBooked
-        )
+        visita.availableSlots.filter((slot) => {
+          const slotDateTime = new Date(`${slot.date}T${slot.startTime}`);
+          return slot.date === fechaStr && !slot.isBooked && slotDateTime > now;
+        })
       );
+
       setSlotsDisponibles(slots);
     } else {
       setSlotsDisponibles([]);
@@ -100,12 +106,24 @@ export default function ReservaForm() {
     onSubmit: async (values) => {
       if (!values.slotId || !values.cantidad) return;
 
+      const slot = slotsDisponibles.find((s) => s.id === values.slotId);
+      if (!slot) {
+        toast.error("El horario seleccionado ya no está disponible.");
+        return;
+      }
+
+      const slotDateTime = new Date(`${slot.date}T${slot.startTime}`);
+      if (slotDateTime <= new Date()) {
+        toast.error("El horario ya pasó, por favor elige otro.");
+        return;
+      }
+
       const payload = {
         visitSlotId: values.slotId,
         numberOfPeople: parseInt(values.cantidad),
         description: values.description,
       };
-      console.log("Payload a enviar:", payload);
+
       try {
         await axios.post(`${BACKEND_URL}/visits/appointments`, payload, {
           headers: {
@@ -182,9 +200,13 @@ export default function ReservaForm() {
               modifiers={{ available: fechasConSlots }}
               modifiersClassNames={{ available: "fecha-disponible" }}
               disabled={(date) => {
-                return !fechasConSlots.some(
-                  (fecha) => fecha.toDateString() === date.toDateString()
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                const esPasada = date < hoy;
+                const noHaySlotEseDía = !fechasConSlots.some(
+                  (f) => f.toDateString() === date.toDateString()
                 );
+                return esPasada || noHaySlotEseDía;
               }}
               className="bg-gray-50 p-4 rounded-lg"
             />
@@ -259,6 +281,7 @@ export default function ReservaForm() {
             )}
           </div>
         )}
+
         <div>
           <label className="block text-m font-bebas font-semibold text-gray-700">
             Descripcion de la visita
@@ -275,6 +298,7 @@ export default function ReservaForm() {
             <p className="text-red-500 text-sm">{formik.errors.description}</p>
           )}
         </div>
+
         <button
           type="submit"
           disabled={!formik.values.slotId}
