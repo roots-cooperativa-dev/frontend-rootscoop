@@ -11,18 +11,18 @@ import { routes } from "../../../routes";
 import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
-import { FiEye, FiEyeOff } from "react-icons/fi"; // 👈 Importa los iconos
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useCartContext } from "@/src/context/cartContext";
+
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 👀 Estado para mostrar/ocultar contraseña
+  const [showPassword, setShowPassword] = useState(false);
   const { saveUserData } = useAuthContext();
   const { saveCartData } = useCartContext();
   const router = useRouter();
-  const [isLoadingCart, setIsLoadingCart] = useState(true);
 
   const formik = useFormik({
     initialValues: { email: "", password: "" },
@@ -37,7 +37,7 @@ export default function LoginForm() {
         const userId = response.data.user.id;
         const Token = response.data.accessToken;
         const dataUser = await getUserById(userId, Token);
-        console.log(dataUser);
+
         saveUserData({
           accessToken: Token,
           user: {
@@ -53,13 +53,11 @@ export default function LoginForm() {
           isAuth: true,
         });
 
-
         if (dataUser.cart && dataUser.cart.items.length > 0) {
           saveCartData({ cart: dataUser.cart });
         }
 
         toast.success("Sesión iniciada correctamente");
-
         router.push(routes.home);
       } catch (error: any) {
         toast.error(error?.response.data.message || "Error al iniciar sesión");
@@ -110,9 +108,20 @@ export default function LoginForm() {
         )}
       </div>
 
+      {/* 🔗 Enlace a "Olvidaste tu contraseña" */}
+      <div className="text-right">
+        <a
+          href="/forgotPassword"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Ingresando..." : "Ingresar"}
       </Button>
+
       <Button
         type="button"
         onClick={handleGoogleLogin}
