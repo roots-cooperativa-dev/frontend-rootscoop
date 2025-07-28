@@ -45,3 +45,24 @@ export interface RegisterDto {
   confirmPassword: string;
 }
 
+export interface Iproduct {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  image: string;
+  categoryId: number;
+  category: Icategory;
+}
+interface Icategory {
+  id: number;
+  name: string;
+  products?: Iproduct[];
+}
+
+export interface Icart {
+  productId: string;
+  productSizeId: string;
+  quantity: number;
+}

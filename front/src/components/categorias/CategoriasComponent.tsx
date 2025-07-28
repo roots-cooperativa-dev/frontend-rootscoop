@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+
 import { useEffect, useState } from "react"
 import {
     fetchCategorias,
@@ -10,21 +11,22 @@ import {
     restaurarCategoria,
 } from "../../app/utils/CategoriasHelper"
 import type { ICategory } from "../../app/types"
-import {
-    Card, CardContent, CardHeader, CardTitle, CardDescription,
-} from "../../components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
 import { Input } from "../../components/ui/input"
 import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
-import {
-    Pencil, Trash2, Plus, Search, Undo2, CheckCircle,
-    XCircle, Loader2, Tag,
-} from "lucide-react"
+import { Pencil, Trash2, Plus, Search, Undo2, CheckCircle, XCircle, Loader2, Tag } from "lucide-react"
 import { toast } from "sonner"
 import {
-    AlertDialog, AlertDialogTrigger, AlertDialogContent,
-    AlertDialogHeader, AlertDialogTitle, AlertDialogDescription,
-    AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogCancel,
+    AlertDialogAction,
 } from "../../components/ui/alert-dialog"
 import { cn } from "../../lib/utils"
 
@@ -32,7 +34,6 @@ export const CategoriasCRUD = () => {
     const [categorias, setCategorias] = useState<ICategory[]>([])
     const [loading, setLoading] = useState(true)
     const [newName, setNewName] = useState("")
-    const [errorNombre, setErrorNombre] = useState<string | null>(null)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editingName, setEditingName] = useState("")
     const [categoriaAEliminar, setCategoriaAEliminar] = useState<ICategory | null>(null)
@@ -40,15 +41,18 @@ export const CategoriasCRUD = () => {
     const [isCreating, setIsCreating] = useState(false)
     const [mostrarEliminadas, setMostrarEliminadas] = useState(false)
     const [page, setPage] = useState(1)
-    const [limit] = useState(5)
+    const [limit] = useState(5) // Increased limit for better display
     const [totalPages, setTotalPages] = useState(1)
-    const [actionLoadingId, setActionLoadingId] = useState<string | null>(null)
+    const [actionLoadingId, setActionLoadingId] = useState<string | null>(null) // For individual action loading
 
     const loadCategorias = async () => {
         setLoading(true)
         try {
             const { categories, pages } = await fetchCategorias(page, limit)
-            setCategorias(categories)
+            const filtradas = mostrarEliminadas
+                ? categories.filter((c) => c.deletedAt)
+                : categories.filter((c) => !c.deletedAt)
+            setCategorias(filtradas)
             setTotalPages(pages)
         } catch (error) {
             toast.error("Error cargando categorías")
@@ -61,14 +65,15 @@ export const CategoriasCRUD = () => {
         loadCategorias()
     }, [page, mostrarEliminadas])
 
-    const filteredCategorias = categorias
-        .filter((c) =>
-            mostrarEliminadas ? c.deletedAt : !c.deletedAt
-        )
-        .filter((c) => c.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    const filteredCategorias = categorias.filter((categoria) =>
+        categoria.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
 
     const handleCrear = async () => {
-        if (!newName.trim() || errorNombre) return
+        if (!newName.trim()) {
+            toast.error("El nombre no puede estar vacío")
+            return
+        }
         setIsCreating(true)
         try {
             const nueva = await crearCategoria(newName.trim())
@@ -113,12 +118,18 @@ export const CategoriasCRUD = () => {
         if (!categoriaAEliminar) return
         setActionLoadingId(categoriaAEliminar.id)
         try {
-            await eliminarCategoria(categoriaAEliminar.id)
-            await loadCategorias()
-            setCategoriaAEliminar(null)
-            toast.success("Categoría eliminada")
-        } catch {
-            toast.error("Error al eliminar categoría")
+            await toast.promise(
+                eliminarCategoria(categoriaAEliminar.id),
+                {
+                    loading: "Eliminando categoría...",
+                    success: async () => {
+                        await loadCategorias()
+                        setCategoriaAEliminar(null)
+                        return "Categoría eliminada"
+                    },
+                    error: "Error al eliminar categoría",
+                }
+            )
         } finally {
             setActionLoadingId(null)
         }
@@ -127,15 +138,14 @@ export const CategoriasCRUD = () => {
     const handleRestaurar = async (id: string) => {
         setActionLoadingId(id)
         try {
-            const restored = await restaurarCategoria(id)
-            if (restored) {
-                toast.success("Categoría restaurada")
-                await loadCategorias()
-            } else {
-                toast.error("Error al restaurar categoría")
-            }
-        } catch {
-            toast.error("Error al restaurar categoría")
+            await toast.promise(restaurarCategoria(id), {
+                loading: "Restaurando categoría...",
+                success: async () => {
+                    await loadCategorias()
+                    return "Categoría restaurada"
+                },
+                error: "Error al restaurar categoría",
+            })
         } finally {
             setActionLoadingId(null)
         }
@@ -144,30 +154,6 @@ export const CategoriasCRUD = () => {
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
             handleCrear()
-        }
-    }
-
-    const handleInputChange = (value: string) => {
-        setNewName(value)
-
-        const nombreNormalizado = value.trim().toLowerCase()
-
-        const categoriaActiva = categorias.find(
-            (cat) => cat.name.trim().toLowerCase() === nombreNormalizado && !cat.deletedAt
-        )
-
-        const categoriaEliminada = categorias.find(
-            (cat) => cat.name.trim().toLowerCase() === nombreNormalizado && !!cat.deletedAt
-        )
-
-        if (categoriaActiva) {
-            setErrorNombre("Ya existe una categoría con ese nombre.")
-        } else if (categoriaEliminada) {
-            setErrorNombre(
-                "Ya existe una categoría con ese nombre, pero está eliminada. Ve a 'Ver Eliminadas' y restáurala."
-            )
-        } else {
-            setErrorNombre(null)
         }
     }
 
@@ -188,8 +174,9 @@ export const CategoriasCRUD = () => {
                     variant="outline"
                     onClick={() => {
                         setMostrarEliminadas(!mostrarEliminadas)
-                        setPage(1)
+                        setPage(1) // Reset page when changing view
                     }}
+                    className="shadow-sm"
                 >
                     {mostrarEliminadas ? (
                         <>
@@ -203,7 +190,7 @@ export const CategoriasCRUD = () => {
                 </Button>
             </div>
 
-            {/* Crear nueva categoría */}
+            {/* Create New Category Card */}
             {!mostrarEliminadas && (
                 <Card className="border-2 border-dashed border-gray-200 hover:border-[#017d74]/30 transition-colors">
                     <CardHeader className="pb-4">
@@ -218,29 +205,23 @@ export const CategoriasCRUD = () => {
                                 <Input
                                     placeholder="Ingresa el nombre de la categoría..."
                                     value={newName}
-                                    onChange={(e) => handleInputChange(e.target.value)}
+                                    onChange={(e) => setNewName(e.target.value)}
                                     onKeyPress={handleKeyPress}
                                     className="pr-10 focus:border-[#017d74] focus:ring-[#017d74]"
                                     disabled={isCreating}
                                 />
                                 {newName && !isCreating && (
                                     <button
-                                        onClick={() => {
-                                            setNewName("")
-                                            setErrorNombre(null)
-                                        }}
+                                        onClick={() => setNewName("")}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                     >
                                         <XCircle className="w-4 h-4" />
                                     </button>
                                 )}
-                                {errorNombre && (
-                                    <p className="mt-1 text-sm text-red-600">{errorNombre}</p>
-                                )}
                             </div>
                             <Button
                                 onClick={handleCrear}
-                                disabled={!newName.trim() || isCreating || !!errorNombre}
+                                disabled={!newName.trim() || isCreating}
                                 className="bg-[#017d74] hover:bg-[#015d54] text-white px-6 shadow-md hover:shadow-lg transition-all"
                             >
                                 {isCreating ? (
@@ -358,20 +339,37 @@ export const CategoriasCRUD = () => {
                                                         {categoria.deletedAt ? "Eliminada" : "Activa"}
                                                     </Badge>
                                                     {mostrarEliminadas ? (
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() => handleRestaurar(categoria.id)}
-                                                            disabled={actionLoadingId === categoria.id}
-                                                            className="bg-blue-600 text-white hover:bg-blue-700"
-                                                        >
-                                                            {actionLoadingId === categoria.id ? (
-                                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                            ) : (
-                                                                <Undo2 className="w-4 h-4 mr-2" />
-                                                            )}
-                                                            Restaurar
-                                                        </Button>
-
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <Button
+                                                                    size="sm"
+                                                                    disabled={actionLoadingId === categoria.id}
+                                                                    className="bg-blue-600 text-white hover:bg-blue-700"
+                                                                >
+                                                                    {actionLoadingId === categoria.id ? (
+                                                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                                    ) : (
+                                                                        <Undo2 className="w-4 h-4 mr-2" />
+                                                                    )}{" "}
+                                                                    Restaurar
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>¿Restaurar categoría?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        Esta acción restaurará la categoría <strong>{categoria.name}</strong>. Estará
+                                                                        nuevamente activa en tu lista de categorías.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                                    <AlertDialogAction onClick={() => handleRestaurar(categoria.id)}>
+                                                                        Restaurar
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
                                                     ) : (
                                                         <div className="flex gap-2">
                                                             <Button
