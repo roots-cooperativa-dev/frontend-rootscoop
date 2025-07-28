@@ -18,7 +18,6 @@ export interface UserGoogle {
   email: string;
   birthdate: string;
   phone: string;
-  address: any;
   username: string;
   isAdmin: boolean;
   isDonator: boolean;
@@ -26,6 +25,11 @@ export interface UserGoogle {
   orders: any[];
   appointments: any[];
   cart: any[]; 
+  address?: {
+    street: string;
+    lat: number;
+    long: number;
+  };
 }
 enum Irole {
   ADMIN = "admin",
