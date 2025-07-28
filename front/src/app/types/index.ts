@@ -125,3 +125,6 @@ export interface IContactanos{
   phone: string,
   reason: string
 }
+interface ForgotPasswordData {
+  email: string;
+}
