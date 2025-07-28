@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
-import { Button } from "../../../../components/ui/button";
+import { Button } from "../../../components/ui/button";
 import { CheckCircle } from "lucide-react";
 
 function SuccessCompraContent() {
