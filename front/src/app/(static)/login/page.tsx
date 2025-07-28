@@ -49,6 +49,11 @@ export default function LoginForm() {
             email: dataUser.email,
             isAdmin: dataUser.isAdmin,
             isDonator: dataUser.isDonator,
+            address: dataUser.address,
+            donates: dataUser.donates,
+            orders: dataUser.orders,
+            appointments: dataUser.appointments,
+            cart: dataUser.cart,
           },
           isAuth: true,
         });
