@@ -72,7 +72,6 @@ export const createUser = async (userData: CrearUsuarioDTO): Promise<IUsuario | 
 
 export const updateUser = async (userId: string, userData: Partial<IUsuario>): Promise<IUsuario | null> => {
     try {
-        // Aseguramos que el ID esté incluido en el body
         const payload = { ...userData, id: userId };
 
         const response = await axios.put(`${API_URL}/users/upadte/user`, payload, {
@@ -96,7 +95,7 @@ export const updateUserRoles = async (
 ): Promise<boolean> => {
     try {
         const config = await getAuthHeader();
-        await axios.patch(`${API_URL}/users/Roles/${userId}`, roles, config);
+        await axios.patch(`${API_URL}/users/roles/${userId}`, roles, config);
         return true;
     } catch (error: any) {
         if (axios.isAxiosError(error)) {
@@ -107,3 +106,4 @@ export const updateUserRoles = async (
         return false;
     }
 };
+

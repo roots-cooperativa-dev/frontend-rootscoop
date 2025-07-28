@@ -5,7 +5,6 @@ import { getAuthHeader } from "./CategoriasHelper";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-
 export const fetchVisitas = async (): Promise<IVisita[]> => {
   try {
     const headers = await getAuthHeader(); // Si es async
@@ -40,5 +39,16 @@ export const agregarTurnoAVisita = async (
   } catch (error) {
     console.error("Error al agregar turno a la visita:", error);
     throw error;
+  }
+};
+
+export const eliminarVisita = async (visitaId: string): Promise<boolean> => {
+  try {
+    const headers = await getAuthHeader();
+    await axios.delete(`${API_URL}/visits/${visitaId}`, { ...headers });
+    return true;
+  } catch (error) {
+    console.error("Error al eliminar visita:", error);
+    return false;
   }
 };

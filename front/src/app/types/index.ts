@@ -53,8 +53,8 @@ export interface ProductoQueryParams {
 }
 
 
-
 export interface IUsuario {
+  createdAt: string; // o Date, según tu backend
   id: string;
   name: string;
   email: string;
@@ -66,6 +66,7 @@ export interface IUsuario {
   donates: any[];
   password?: string;
 }
+
 
 export interface IOrder {
   id: string;
@@ -108,6 +109,8 @@ export interface IOrdersResponse {
 }
 
 export interface IVisita {
+  date: string | number | Date;
+  fechaCreacion: string | number | Date;
   id: string
   title: string
   description: string
@@ -176,10 +179,73 @@ export interface IOrderById {
   orderDetail: IOrderDetail;
 }
 
-export interface Icart{
-  productId: string,
-  productSizeId: string,
-  quantity: number
+
+export interface IUserAddress {
+  id: string;
+  street: string;
+  latitude: string;
+  longitude: string;
+}
+
+export interface IUser {
+  id: string;
+  name: string;
+  email: string;
+  birthdate: string;
+  username: string;
+  password: string;
+  phone: string;
+  isAdmin: boolean;
+  isSuperAdmin: boolean;
+  isDonator: boolean;
+  createdAt: string;
+  updatedAt: string;
+  address: IUserAddress | null;
+}
+
+export interface IVisit {
+  id: string;
+  title: string;
+  description: string;
+  people: number;
+  status: string;
+}
+
+export interface IVisitSlot {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  isBooked: boolean;
+  maxAppointments: number;
+  currentAppointmentsCount: number;
+  visitId: string;
+  visit: IVisit;
+}
+
+export interface IFullAppointment {
+  id: string;
+  userId: string;
+  status: string;
+  bookedAt: string;
+  numberOfPeople: number;
+  visitSlotId: string;
+  description: string;
+  visitSlot: IVisitSlot;
+  user: IUser;
+}
+
+export interface IAppointmentsPaginatedResponse {
+  data: IFullAppointment[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+export interface AppointmentsQueryParams {
+  status?: "pending" | "approved" | "rejected" | "cancelled" | "completed" | undefined
+  page?: number;
+  limit?: number;
 }
 export interface IContactanos{
   name: string,
@@ -187,3 +253,7 @@ export interface IContactanos{
   phone: string,
   reason: string
 }
+interface ForgotPasswordData {
+  email: string;
+}
+

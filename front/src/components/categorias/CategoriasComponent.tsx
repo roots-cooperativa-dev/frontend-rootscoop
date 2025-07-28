@@ -149,6 +149,7 @@ export const CategoriasCRUD = () => {
         }
     }
 
+
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
             handleCrear()
@@ -347,9 +348,10 @@ export const CategoriasCRUD = () => {
                                                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                                             ) : (
                                                                 <Undo2 className="w-4 h-4 mr-2" />
-                                                            )}{" "}
+                                                            )}
                                                             Restaurar
                                                         </Button>
+
                                                     ) : (
                                                         <div className="flex gap-2">
                                                             <Button
