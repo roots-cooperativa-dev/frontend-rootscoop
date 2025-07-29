@@ -302,10 +302,10 @@ export const DonacionesComponent = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     <Link href={`donaciones/${donation.id}`}>
-                                                        <Button variant="ghost" size="sm">
-                                                            <Eye className="w-4 h-4" />
-                                                        </Button>
-                                                    </Link>
+                                                   <Button variant="ghost" size="sm">
+                                                       <Eye className="w-4 h-4" />
+                                                   </Button>
+                                                   </Link>
                                                 </TableCell>
                                             </TableRow>
                                         )
