@@ -383,7 +383,7 @@ export const Productos = () => {
                     </span>
                   </div>
                   <div className="space-y-2 mt-auto">
-                    <Button
+                    {/* <Button
                       className={`w-full transition-all duration-200 ${
                         producto.sizes[0]?.stock > 0
                           ? "bg-[#922f4e] hover:bg-[#7a2741] text-white shadow-md hover:shadow-lg"
@@ -409,7 +409,7 @@ export const Productos = () => {
                           Sin stock
                         </span>
                       )}
-                    </Button>
+                    </Button> */}
 
                     <Button
                       variant="outline"

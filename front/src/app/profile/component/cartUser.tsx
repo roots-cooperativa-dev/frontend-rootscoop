@@ -8,6 +8,7 @@ import { useCartContext } from "../../../context/cartContext";
 import { getCart, deleteCartItem } from "../../../services/cart";
 import Loading from "@/src/components/loading/pantallaCargando";
 import ButtonBuy from "@/src/components/botonComprar/ButtonBuy";
+import { toast } from "sonner";
 
 const CartPage = () => {
   const { user, token, loading } = useAuthContext();
@@ -50,13 +51,23 @@ const CartPage = () => {
     fetchCart();
   }, [user, token, loading, router]);
 
-  const handleDelete = async (itemId: string, token: string) => {
+  const handleDelete = async (
+    itemId: string,
+    token: string | null | undefined
+  ) => {
+    console.log(itemId);
     try {
-      await deleteCartItem(itemId, token);
-      await fetchCart(); // refrescamos el contexto y el localStorage
+      const response = await deleteCartItem(itemId, token);
+      console.log(response);
+
+      if (!response) {
+        toast.error("Error al eliminar este item");
+        throw new Error("No se recibió respuesta al intentar eliminar el item");
+      }
+      await fetchCart();
+      toast.success("Producto eliminado del carrito");
     } catch (error) {
       console.error("Error al eliminar el producto:", error);
-      alert("No se pudo eliminar el producto del carrito.");
     }
   };
 
@@ -67,8 +78,13 @@ const CartPage = () => {
   const showItems = cart && cart.length > 0;
 
   return (
-    <div className="flex flex-col items-center w-screen px-5">
-      <h1 className="text-2xl font-bold mb-6">Carrito de compras</h1>
+    <div className="flex pb-6 flex-col items-center w-screen px-5">
+      <h1 className="text-2xl font-bold mb-6 mt-6">Carrito de compras</h1>
+      <p className="pt-6 pb-6">
+        El precio del producto no esta incluido en el envio, para hacer envios
+        uno de nuestros socios se comunicara contigo para coordinar la entrega,
+        ten en cuenta que el precio del envio varia segun el medio utilizado.
+      </p>
 
       {showItems ? (
         <>
@@ -80,30 +96,31 @@ const CartPage = () => {
               >
                 <div>
                   <h2 className="text-lg font-semibold">{item.name}</h2>
-                  <p className="text-sm">Talla: <strong>{item.size}</strong></p>
-                  <p className="text-sm">Precio unitario: ${item.price?.toFixed(2)}</p>
+                  <p className="text-sm">
+                    Talla: <strong>{item.size}</strong>
+                  </p>
+                  <p className="text-sm">
+                    Precio unitario: ${item.price?.toFixed(2)}
+                  </p>
                   <p className="text-sm">Cantidad: {item.quantity}</p>
                   <p className="text-sm font-semibold">
                     Subtotal: ${(item.price! * (item.quantity || 1)).toFixed(2)}
                   </p>
                 </div>
-                {/* <button
+                <button
                   onClick={() => item.id && handleDelete(item.id, token)}
                   className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                 >
                   Eliminar
-                </button> */}
+                </button>
               </li>
             ))}
           </ul>
 
           <div className="mt-6 text-right ">
-            <h3 className="text-xl font-bold mt-4">
-              Total: ${totalAmount}
-            </h3>
-            
+            <h3 className="text-xl font-bold mt-4">Total: ${totalAmount}</h3>
           </div>
-          <ButtonBuy/>
+          <ButtonBuy />
         </>
       ) : (
         <p className="text-gray-500">Tu carrito está vacío.</p>
