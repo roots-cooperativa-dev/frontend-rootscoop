@@ -18,7 +18,6 @@ function SuccessCompraContent() {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleGoHome = async () => {
-    console.log("clickeado")
     setIsRedirecting(true);
     try {
       resetCart(); // Limpiar carrito local

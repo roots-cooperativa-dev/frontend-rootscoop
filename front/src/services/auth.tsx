@@ -1,3 +1,4 @@
+'use server'
 import axios from "axios";
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 import { LoginDto, RegisterDto, UpdateUserDTO, UserGoogle } from "../types";
