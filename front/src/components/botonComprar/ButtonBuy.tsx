@@ -31,9 +31,10 @@ const ButtonBuy = () => {
       };
 
       const result = await orderPayments(data, user.id, token);
-
-      if (result && result.sandboxInitPoint) {
-        window.location.href = result.sandboxInitPoint;
+      console.log
+      
+      if (result && result.initPoint) {
+        window.location.href = result.initPoint;
       } else {
         alert("No se pudo iniciar el pago. Intenta de nuevo.");
       }
