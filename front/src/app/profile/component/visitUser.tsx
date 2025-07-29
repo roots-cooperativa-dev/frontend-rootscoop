@@ -2,24 +2,57 @@
 
 import Loading from "@/src/components/loading/pantallaCargando";
 import { useAuthContext } from "@/src/context/authContext";
+import { getUserById } from "@/src/services/auth";
 import { format } from "date-fns";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+type visitas = {
+  id: string;
+  pagoId: string;
+  status: string;
+  statusDetail: string;
+  amount: number;
+  currencyId: string;
+  paymentTypeId: string;
+  paymentMethodId: string;
+  dateApproved: string;
+  createdAt?: string;
+};
 
 const VisitasAgendadas = () => {
-  const { user, loading } = useAuthContext();
+  const { user, token, loading } = useAuthContext();
+  const [visit, setVisits] = useState<visitas[]>([]);
+  const [loadingVisits, setLoadingVisits] = useState(true);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loading/>
-      </div>
-    );
+  useEffect(() => {
+    const fetchUserDonations = async () => {
+      if (user?.id && token) {
+        try {
+          const userData = await getUserById(user.id, token);
+          console.log(userData);
+          setVisits(userData.appointments || []);
+        } catch (error) {
+          toast.error("Error al obtener tus donaciones");
+          console.error(error);
+        } finally {
+          setLoadingVisits(false);
+        }
+      }
+    };
+
+    fetchUserDonations();
+  }, [user]);
+
+  if (loading || loadingVisits) {
+    return <Loading />;
   }
 
   if (!user || !user.appointments || user.appointments.length === 0) {
     return (
       <div className="flex w-full justify-center items-center h-screen">
         <h1 className="text-center text-gray-500 text-lg">
-          No tenés turnos registrados
+          No tenés visitas registradas
         </h1>
       </div>
     );
@@ -31,7 +64,7 @@ const VisitasAgendadas = () => {
         Tus Turnos
       </h1>
       <ul className="space-y-4">
-        {user.appointments.map((appointment: any) => (
+        {visit.map((appointment: any) => (
           <li
             key={appointment.id}
             className="bg-white p-4 rounded-xl shadow border border-gray-200"

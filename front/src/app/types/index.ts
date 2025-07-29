@@ -15,6 +15,7 @@ export interface CartProduct {
   size: string;
   price: number;
   quantity: number;
+  cartItemId: string;
 }
 
 export enum Irole {
@@ -68,6 +69,27 @@ export interface IUsuario {
   donates: any[];
   password?: string;
 }
+
+
+export interface IDonation {
+    id: string;
+    pagoId: string;
+    status: string;
+    statusDetail: string;
+    amount: number;
+    currencyId: string;
+    paymentTypeId: string;
+    paymentMethodId: string;
+    dateApproved: string; // ISO string
+    createdAt: string; // ISO string
+    userId: string;
+}
+
+export interface IDonationWithUser {
+    donation: IDonation;
+    user: IUsuario;
+}
+
 
 export interface IOrder {
   id: string;

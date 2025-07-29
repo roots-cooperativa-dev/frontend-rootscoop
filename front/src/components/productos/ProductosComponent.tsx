@@ -105,19 +105,6 @@ export const Productos = () => {
   const hasActiveFilters =
     selectedCategorias.length > 0 || name || minPrice || maxPrice;
 
-  // Función para manejar la validación del stock
-  const handleComprarAhora = (e: React.MouseEvent, stock: number) => {
-    if (stock === 0) {
-      e.preventDefault();
-      toast.error(
-        "Debes agregar un producto al carrito para realizar la compra.",
-        {
-          duration: 3000,
-        }
-      );
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <header className="bg-white border-b shadow-sm sticky top-0 z-50">
@@ -148,7 +135,6 @@ export const Productos = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="font-chewy text-5xl font-black text-[#017d74] mb-4">
             Productos ROOTS
@@ -160,11 +146,9 @@ export const Productos = () => {
           </p>
         </div>
 
-        {/* Filtros compactos en una línea */}
         <Card className="mb-6 border-2 border-gray-100 shadow-sm">
           <CardContent className="py-4">
             <div className="flex flex-wrap items-end gap-4">
-              {/* Búsqueda */}
               <div className="flex-1 min-w-[200px]">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -177,11 +161,12 @@ export const Productos = () => {
                 </div>
               </div>
 
-              {/* Categorías */}
               <div className="min-w-[180px]">
                 <Select
                   value={
-                    selectedCategorias.length === 1 ? selectedCategorias[0] : ""
+                    selectedCategorias.length === 1
+                      ? selectedCategorias[0]
+                      : ""
                   }
                   onValueChange={(value) => {
                     if (value === "all") {
@@ -205,7 +190,6 @@ export const Productos = () => {
                 </Select>
               </div>
 
-              {/* Precio mínimo */}
               <div className="min-w-[120px]">
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
@@ -221,7 +205,6 @@ export const Productos = () => {
                 </div>
               </div>
 
-              {/* Precio máximo */}
               <div className="min-w-[120px]">
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
@@ -237,7 +220,6 @@ export const Productos = () => {
                 </div>
               </div>
 
-              {/* Botones de acción */}
               <div className="flex gap-2">
                 <Button
                   onClick={aplicarFiltros}
@@ -261,7 +243,6 @@ export const Productos = () => {
           </CardContent>
         </Card>
 
-        {/* Indicador de filtros activos */}
         {hasActiveFilters && (
           <div className="mb-6 p-4 bg-[#017d74]/5 border border-[#017d74]/20 rounded-lg">
             <div className="flex items-center justify-between">
@@ -280,7 +261,6 @@ export const Productos = () => {
           </div>
         )}
 
-        {/* Productos */}
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <div className="text-center space-y-4">
@@ -310,119 +290,86 @@ export const Productos = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {productos.map((producto) => (
-              <Card
+              <Link
                 key={producto.id}
-                className="flex flex-col justify-between h-full group overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-[#017d74] hover:-translate-y-1"
+                href={`/productos/${producto.id}`}
+                className="group transition-all duration-300 border-2 border-gray-100 hover:border-[#017d74] hover:-translate-y-1 rounded-xl overflow-hidden"
               >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={producto.files[0]?.url || "/img/image-not-found.jpg"}
-                    alt={producto.name}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {producto.sizes[0]?.stock === 0 && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <Badge className="bg-red-600 text-white font-semibold">
-                        Sin stock
-                      </Badge>
-                    </div>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white shadow-md border-0 hover:scale-110 transition-transform"
-                  >
-                    <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
-                  </Button>
-                  {producto.sizes[0]?.stock > 0 &&
-                    producto.sizes[0]?.stock <= 5 && (
-                      <Badge className="absolute top-3 left-3 bg-orange-500 text-white text-xs">
-                        ¡Últimas unidades!
-                      </Badge>
-                    )}
-                </div>
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg text-gray-900 line-clamp-2 group-hover:text-[#017d74] transition-colors">
-                        {producto.name}
-                      </CardTitle>
-                      <Badge
-                        variant="outline"
-                        className="mt-2 border-[#febb07] text-[#febb07] bg-[#febb07]/10"
-                      >
-                        {producto.category.name}
-                      </Badge>
-                    </div>
-                    <div className="text-right ml-3">
-                      <p className="text-2xl font-bold text-[#017d74]">
-                        ${producto.sizes[0]?.price ?? "-"}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-col justify-between flex-grow pt-0">
-                  <CardDescription className="mb-4 text-gray-600 line-clamp-2">
-                    {producto.details}
-                  </CardDescription>
-                  <div className="flex items-center mb-4">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < 4
-                              ? "fill-[#febb07] text-[#febb07]"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-600 ml-2">
-                      (12 reseñas)
-                    </span>
-                  </div>
-                  <div className="space-y-2 mt-auto">
-                    {/* <Button
-                      className={`w-full transition-all duration-200 ${
-                        producto.sizes[0]?.stock > 0
-                          ? "bg-[#922f4e] hover:bg-[#7a2741] text-white shadow-md hover:shadow-lg"
-                          : "bg-gray-400 text-gray-600 cursor-not-allowed"
-                      }`}
-                      disabled={producto.sizes[0]?.stock === 0}
-                      asChild={producto.sizes[0]?.stock > 0}
-                    >
-                      {producto.sizes[0]?.stock > 0 ? (
-                        <Link
-                          href="/profile/carrito"
-                          className="flex items-center justify-center"
-                          onClick={(e) =>
-                            handleComprarAhora(e, producto.sizes[0]?.stock)
-                          }
-                        >
-                          <ShoppingBag className="w-4 h-4 mr-2" />
-                          Comprar ahora
-                        </Link>
-                      ) : (
-                        <span className="flex items-center justify-center">
-                          <ShoppingBag className="w-4 h-4 mr-2" />
+                <Card className="flex flex-col justify-between h-full">
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={
+                        producto.files[0]?.url || "/img/image-not-found.jpg"
+                      }
+                      alt={producto.name}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {producto.sizes[0]?.stock === 0 && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <Badge className="bg-red-600 text-white font-semibold">
                           Sin stock
-                        </span>
-                      )}
-                    </Button> */}
-
+                        </Badge>
+                      </div>
+                    )}
                     <Button
+                      size="sm"
                       variant="outline"
-                      className="w-full text-[#017d74] border-[#017d74] hover:bg-[#017d74] hover:text-white transition-all duration-200 bg-transparent"
-                      asChild
+                      className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white shadow-md border-0 hover:scale-110 transition-transform"
+                      onClick={(e) => e.preventDefault()}
                     >
-                      <Link href={`/productos/${producto.id}`}>
-                        Ver detalles
-                      </Link>
+                      <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
                     </Button>
+                    {producto.sizes[0]?.stock > 0 &&
+                      producto.sizes[0]?.stock <= 5 && (
+                        <Badge className="absolute top-3 left-3 bg-orange-500 text-white text-xs">
+                          ¡Últimas unidades!
+                        </Badge>
+                      )}
                   </div>
-                </CardContent>
-              </Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg text-gray-900 line-clamp-2 group-hover:text-[#017d74] transition-colors">
+                          {producto.name}
+                        </CardTitle>
+                        <Badge
+                          variant="outline"
+                          className="mt-2 border-[#febb07] text-[#febb07] bg-[#febb07]/10"
+                        >
+                          {producto.category.name}
+                        </Badge>
+                      </div>
+                      <div className="text-right ml-3">
+                        <p className="text-2xl font-bold text-[#017d74]">
+                          ${producto.sizes[0]?.price ?? "-"}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex flex-col justify-between flex-grow pt-0">
+                    <CardDescription className="mb-4 text-gray-600 line-clamp-2">
+                      {producto.details}
+                    </CardDescription>
+                    <div className="flex items-center mb-4">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < 4
+                                ? "fill-[#febb07] text-[#febb07]"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm text-gray-600 ml-2">
+                        (12 reseñas)
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         )}

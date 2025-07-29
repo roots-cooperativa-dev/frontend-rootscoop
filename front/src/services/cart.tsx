@@ -59,7 +59,7 @@ export const deleteCartItem = async (
   token: string | null | undefined
 ) => {
   try {
-    const response = await axiosApiBack.get(`/orders/cart/items/${id}`, {
+    const response = await axiosApiBack.delete(`/orders/cart/items/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
