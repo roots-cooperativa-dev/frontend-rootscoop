@@ -69,11 +69,10 @@ export interface Icart {
 
 export interface UpdateUserDTO {
   name: string;
-  email: string;
   birthdate: string;
   phone: number;
   username: string;
-  password?: string; // opcional si no se está actualizando
+  password: string; 
   address: {
     street: string;
     latitude: number;
