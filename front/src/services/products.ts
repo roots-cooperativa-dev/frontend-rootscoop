@@ -28,13 +28,15 @@ export const createOrders = async (
   }
 };
 
-export const getOrdersUser = async (token: string) => {
-  const response = await axiosApiBack.get(`/orders`, {
+export const getOrdersUser = async (token: string, page = 1, limit = 5) => {
+  const response = await axiosApiBack.get(`/orders/my-orders?page=${page}&limit=${limit}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  if (!response.data) throw new Error("No se pudieron obtener las ordenes del usuario");
+
+  if (!response.data) throw new Error("No se pudieron obtener las órdenes del usuario");
 
   return response.data;
 };
+
