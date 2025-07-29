@@ -188,7 +188,6 @@ export default function ReservaForm() {
             <p className="text-red-500 text-sm">{formik.errors.visitaId}</p>
           )}
         </div>
-
         {fechasConSlots.length > 0 && (
           <div>
             <label className="block text-m font-semibold font-bebas text-gray-700 mb-2">
@@ -251,7 +250,6 @@ export default function ReservaForm() {
             />
           </div>
         )}
-
         {fechaSeleccionada && slotsDisponibles.length === 0 && (
           <div className="p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
             <p className="text-yellow-700 text-sm">
@@ -259,7 +257,6 @@ export default function ReservaForm() {
             </p>
           </div>
         )}
-
         {slotsDisponibles.length > 0 && (
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -284,7 +281,25 @@ export default function ReservaForm() {
             )}
           </div>
         )}
-
+        <div>
+          <label className="block text-m font-bebas font-semibold text-gray-700">
+            Cantidad de personas
+          </label>
+          <input
+            type="number"
+            name="cantidad"
+            min="1"
+            max="15"
+            value={formik.values.cantidad}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className="w-full mt-1 p-2 border rounded-lg"
+            placeholder="¿Cuántas personas asistirán?"
+          />
+          {formik.touched.cantidad && formik.errors.cantidad && (
+            <p className="text-red-500 text-sm">{formik.errors.cantidad}</p>
+          )}
+        </div>
         <div>
           <label className="block text-m font-bebas font-semibold text-gray-700">
             Descripcion de la visita
@@ -302,7 +317,6 @@ export default function ReservaForm() {
             <p className="text-red-500 text-sm">{formik.errors.description}</p>
           )}
         </div>
-
         <button
           type="submit"
           disabled={!formik.values.slotId}
