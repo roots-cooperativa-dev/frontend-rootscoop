@@ -20,17 +20,17 @@ function SuccessCompraContent() {
     resetCart();
 
     // 2. Eliminar carrito en backend
-    const eliminarCarritoBackend = async () => {
-      try {
-        const borrarCarrito = await deleteCart(token);
-        console.log(borrarCarrito)
-        console.log("Carrito eliminado del backend correctamente");
-      } catch (error) {
-        console.error("Error al eliminar el carrito del backend:", error);
-      }
-    };
+    // const eliminarCarritoBackend = async () => {
+    //   try {
+    //     const borrarCarrito = await deleteCart(token);
+    //     console.log(borrarCarrito)
+    //     console.log("Carrito eliminado del backend correctamente");
+    //   } catch (error) {
+    //     console.error("Error al eliminar el carrito del backend:", error);
+    //   }
+    // };
 
-    eliminarCarritoBackend();
+    // eliminarCarritoBackend();
   }, [resetCart, token]);
 
   return (
