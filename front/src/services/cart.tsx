@@ -69,3 +69,28 @@ export const deleteCartItem = async (
     return null;
   }
 };
+
+export const updateCartItemQuantity = async (
+  cartItemId: string,
+  quantity: number,
+  token: string | null | undefined
+) => {
+  try {
+    const response = await axiosApiBack.put(
+      `/orders/cart/items/${cartItemId}`,
+      { quantity },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.data) throw new Error("No se pudo actualizar cantidad");
+
+    return response.data;
+  } catch (e: any) {
+    console.warn(e.message);
+    return null;
+  }
+};
