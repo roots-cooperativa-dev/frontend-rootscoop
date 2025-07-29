@@ -8,6 +8,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import CartAddBtn from "../cart/cartAddBtn";
+import { toast } from "sonner";
+import { useCartContext } from "../../context/cartContext";
+import { useRouter } from "next/navigation";
 
 interface Props {
   producto: IProducto;
@@ -21,12 +24,23 @@ const ProductoDetalle = ({ producto }: Props) => {
   const [imagenSeleccionada, setImagenSeleccionada] = useState(imagenes[0]?.url || "/img/image-not-found.jpg");
   const [cantidad, setCantidad] = useState<number>(1);
 
+  const { cart } = useCartContext();
+  const router = useRouter();
+
   const incrementarCantidad = () => {
     if (cantidad < stock) setCantidad((prev) => prev + 1);
   };
 
   const decrementarCantidad = () => {
     if (cantidad > 1) setCantidad((prev) => prev - 1);
+  };
+
+  const handleComprarAhora = () => {
+    if (cart.length === 0) {
+      toast.error("Tienes que agregar al menos un producto al carrito para poder comprar");
+      return;
+    }
+    router.push("/profile/carrito");
   };
 
   return (
@@ -75,8 +89,11 @@ const ProductoDetalle = ({ producto }: Props) => {
                   width={100}
                   height={100}
                   onClick={() => setImagenSeleccionada(img.url || "/img/image-not-found.jpg")}
-                  className={`cursor-pointer rounded-lg border-2 ${(img.url || "/img/image-not-found.jpg") === imagenSeleccionada ? "border-[#017d74]" : "border-transparent"
-                    }`}
+                  className={`cursor-pointer rounded-lg border-2 ${
+                    (img.url || "/img/image-not-found.jpg") === imagenSeleccionada
+                      ? "border-[#017d74]"
+                      : "border-transparent"
+                  }`}
                 />
               ))}
             </div>
@@ -128,12 +145,13 @@ const ProductoDetalle = ({ producto }: Props) => {
 
             {/* Botón Comprar */}
             <Button
-              className={`w-full text-lg font-bold shadow-md ${stock > 0 ? "bg-[#922f4e] hover:bg-[#642d91] text-white" : "bg-gray-300 text-gray-500"
-                }`}
+              className={`w-full text-lg font-bold shadow-md ${
+                stock > 0 ? "bg-[#922f4e] hover:bg-[#642d91] text-white" : "bg-gray-300 text-gray-500"
+              }`}
               disabled={stock === 0}
-              asChild={stock > 0}
+              onClick={handleComprarAhora}
             >
-              {stock > 0 ? <Link href="/profile/carrito">Comprar ahora</Link> : "Agotado"}
+              {stock > 0 ? "Comprar ahora" : "Agotado"}
             </Button>
 
             {/* Botón Agregar al carrito */}

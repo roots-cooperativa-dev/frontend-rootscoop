@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import mapboxgl from "mapbox-gl";
-// import MapboxGeocoder dynamically in useEffect below
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
@@ -20,7 +19,6 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 export default function RegisterForm() {
   const router = useRouter();
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [direccion, setDireccion] = useState({
@@ -38,8 +36,7 @@ export default function RegisterForm() {
     let marker: mapboxgl.Marker | null = null;
 
     const initializeMap = async () => {
-      // Dynamically import MapboxGeocoder to avoid type mismatches
-      const MapboxGeocoder = (await import('@mapbox/mapbox-gl-geocoder')).default;
+      const MapboxGeocoder = (await import("@mapbox/mapbox-gl-geocoder")).default;
 
       map = new mapboxgl.Map({
         container: mapContainerRef.current!,
@@ -54,21 +51,14 @@ export default function RegisterForm() {
 
       const geocoder = new MapboxGeocoder({
         accessToken: mapboxgl.accessToken ?? "",
-        mapboxgl: mapboxgl as unknown as typeof import("mapbox-gl"),
+        mapboxgl: mapboxgl as any,
         marker: false,
         placeholder: "Buscar dirección...",
       });
 
       map.addControl(geocoder);
 
-      interface GeocoderResult {
-        result: {
-          center: [number, number];
-          place_name: string;
-        };
-      }
-
-      geocoder.on("result", (e: GeocoderResult) => {
+      geocoder.on("result", (e: any) => {
         const { center, place_name } = e.result;
         if (center) {
           marker!.setLngLat(center);
@@ -130,6 +120,8 @@ export default function RegisterForm() {
       phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
       username: Yup.string().required("Requerido"),
     }),
+    validateOnChange: true,
+    validateOnBlur: true,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
         setSubmitting(true);
@@ -172,7 +164,10 @@ export default function RegisterForm() {
         name="name"
         placeholder="Nombre completo"
         value={formik.values.name}
-        onChange={formik.handleChange}
+        onChange={(e) => {
+          formik.setFieldTouched("name", true);
+          formik.handleChange(e);
+        }}
       />
       {formik.touched.name && formik.errors.name && (
         <p className="text-red-500 text-xs">{formik.errors.name}</p>
@@ -183,7 +178,10 @@ export default function RegisterForm() {
         name="email"
         placeholder="tu@email.com"
         value={formik.values.email}
-        onChange={formik.handleChange}
+        onChange={(e) => {
+          formik.setFieldTouched("email", true);
+          formik.handleChange(e);
+        }}
       />
       {formik.touched.email && formik.errors.email && (
         <p className="text-red-500 text-xs">{formik.errors.email}</p>
@@ -195,7 +193,10 @@ export default function RegisterForm() {
           name="password"
           placeholder="********"
           value={formik.values.password}
-          onChange={formik.handleChange}
+          onChange={(e) => {
+            formik.setFieldTouched("password", true);
+            formik.handleChange(e);
+          }}
         />
         <button
           type="button"
@@ -215,7 +216,10 @@ export default function RegisterForm() {
           name="confirmPassword"
           placeholder="Repetir contraseña"
           value={formik.values.confirmPassword}
-          onChange={formik.handleChange}
+          onChange={(e) => {
+            formik.setFieldTouched("confirmPassword", true);
+            formik.handleChange(e);
+          }}
         />
         <button
           type="button"
@@ -234,12 +238,13 @@ export default function RegisterForm() {
           selected={
             formik.values.birthdate ? new Date(formik.values.birthdate) : null
           }
-          onChange={(date: Date | null) =>
+          onChange={(date: Date | null) => {
+            formik.setFieldTouched("birthdate", true);
             formik.setFieldValue(
               "birthdate",
               date?.toISOString().split("T")[0] || ""
-            )
-          }
+            );
+          }}
           dateFormat="yyyy-MM-dd"
           placeholderText="Ingresar fecha de nacimiento"
           maxDate={new Date()}
@@ -259,7 +264,10 @@ export default function RegisterForm() {
         name="phone"
         placeholder="Teléfono"
         value={formik.values.phone}
-        onChange={formik.handleChange}
+        onChange={(e) => {
+          formik.setFieldTouched("phone", true);
+          formik.handleChange(e);
+        }}
       />
       {formik.touched.phone && formik.errors.phone && (
         <p className="text-red-500 text-xs">{formik.errors.phone}</p>
@@ -269,13 +277,15 @@ export default function RegisterForm() {
         name="username"
         placeholder="Nombre de usuario"
         value={formik.values.username}
-        onChange={formik.handleChange}
+        onChange={(e) => {
+          formik.setFieldTouched("username", true);
+          formik.handleChange(e);
+        }}
       />
       {formik.touched.username && formik.errors.username && (
         <p className="text-red-500 text-xs">{formik.errors.username}</p>
       )}
 
-      {/* Mapa con geocodificador y marcador */}
       <div className="space-y-2">
         <label className="font-medium text-sm">Dirección:</label>
         <div ref={mapContainerRef} className="h-64 rounded border" />

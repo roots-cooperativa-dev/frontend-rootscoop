@@ -11,6 +11,7 @@ import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { changePassword } from "@/src/services/password";
 
+
 interface ChangePasswordForm {
   token: string; // 👈 este es el email
   newPassword: string;
@@ -41,6 +42,7 @@ const CambiarPass = () => {
     { resetForm, setSubmitting }: FormikHelpers<ChangePasswordForm>
   ) => {
     try {
+
       await changePassword(values);
       toast.success("Contraseña actualizada con éxito.");
       setTimeout(() => {

@@ -1,14 +1,37 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Button } from "../../../components/ui/button";
 import { CheckCircle } from "lucide-react";
+import { useCartContext } from "@/src/context/cartContext";
+import { deleteCart } from "../../../services/comprar"; // ajustá la ruta según tu proyecto
+import { useAuthContext } from "@/src/context/authContext"; // si usás authContext para obtener el token
 
 function SuccessCompraContent() {
+  const { resetCart } = useCartContext();
+  const { token } = useAuthContext(); // suponiendo que `user?.token` contiene el token
   const searchParams = useSearchParams();
   const paymentId = searchParams?.get("payment_id");
   const router = useRouter();
+
+  useEffect(() => {
+    // 1. Resetear el carrito local
+    resetCart();
+
+    // 2. Eliminar carrito en backend
+    // const eliminarCarritoBackend = async () => {
+    //   try {
+    //     const borrarCarrito = await deleteCart(token);
+    //     console.log(borrarCarrito)
+    //     console.log("Carrito eliminado del backend correctamente");
+    //   } catch (error) {
+    //     console.error("Error al eliminar el carrito del backend:", error);
+    //   }
+    // };
+
+    // eliminarCarritoBackend();
+  }, [resetCart, token]);
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-green-50 px-4">

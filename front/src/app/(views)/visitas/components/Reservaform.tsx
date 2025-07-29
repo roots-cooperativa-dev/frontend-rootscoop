@@ -53,6 +53,8 @@ export default function ReservaForm() {
       slotId: Yup.string().required("Selecciona un horario"),
       description: Yup.string().required("Campo obligatorio"),
     }),
+    validateOnChange: true,
+    validateOnBlur: true,
     onSubmit: async (values) => {
       const slot = slotsDisponibles.find((s) => s.id === values.slotId);
       if (!slot) {
@@ -131,7 +133,6 @@ export default function ReservaForm() {
         Reserva tu visita
       </h2>
 
-      {/* Sección de turnos disponibles */}
       <div className="mb-8">
         <h2 className="text-xl font-bold mb-4 text-gray-800">
           🗓️ Próximas visitas disponibles
@@ -164,7 +165,6 @@ export default function ReservaForm() {
         </div>
       </div>
 
-      {/* Formulario */}
       <form onSubmit={formik.handleSubmit} className="space-y-4">
         <div>
           <label className="block text-m font-bebas font-semibold text-gray-700">
@@ -173,7 +173,8 @@ export default function ReservaForm() {
           <select
             name="visitaId"
             value={formik.values.visitaId}
-            onChange={(e) => formik.setFieldValue("visitaId", e.target.value)}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             className="w-full mt-1 p-2 border rounded-lg"
           >
             <option value="">-- Selecciona una visita --</option>
@@ -187,7 +188,6 @@ export default function ReservaForm() {
             <p className="text-red-500 text-sm">{formik.errors.visitaId}</p>
           )}
         </div>
-
         {fechasConSlots.length > 0 && (
           <div>
             <label className="block text-m font-semibold font-bebas text-gray-700 mb-2">
@@ -221,36 +221,35 @@ export default function ReservaForm() {
             <style
               dangerouslySetInnerHTML={{
                 __html: `
-              .calendar-wrapper .fecha-disponible {
-                background-color: #bbf7d0 !important;
-                border: 2px solid #16a34a !important;
-                color: #166534 !important;
-                font-weight: 600 !important;
-                border-radius: 4px !important;
-              }
-              .calendar-wrapper .fecha-disponible:hover {
-                background-color: #86efac !important;
-              }
-              .calendar-wrapper [aria-selected="true"] {
-                background-color: #017d74 !important;
-                color: white !important;
-                font-weight: bold !important;
-                border-radius: 4px !important;
-              }
-              .calendar-wrapper [aria-selected="true"]:hover {
-                background-color: #016c64 !important;
-              }
-              .calendar-wrapper [aria-disabled="true"] {
-                color: #9ca3af !important;
-                cursor: not-allowed !important;
-                opacity: 0.5 !important;
-              }
-            `,
+                .calendar-wrapper .fecha-disponible {
+                  background-color: #bbf7d0 !important;
+                  border: 2px solid #16a34a !important;
+                  color: #166534 !important;
+                  font-weight: 600 !important;
+                  border-radius: 4px !important;
+                }
+                .calendar-wrapper .fecha-disponible:hover {
+                  background-color: #86efac !important;
+                }
+                .calendar-wrapper [aria-selected="true"] {
+                  background-color: #017d74 !important;
+                  color: white !important;
+                  font-weight: bold !important;
+                  border-radius: 4px !important;
+                }
+                .calendar-wrapper [aria-selected="true"]:hover {
+                  background-color: #016c64 !important;
+                }
+                .calendar-wrapper [aria-disabled="true"] {
+                  color: #9ca3af !important;
+                  cursor: not-allowed !important;
+                  opacity: 0.5 !important;
+                }
+              `,
               }}
             />
           </div>
         )}
-
         {fechaSeleccionada && slotsDisponibles.length === 0 && (
           <div className="p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
             <p className="text-yellow-700 text-sm">
@@ -258,7 +257,6 @@ export default function ReservaForm() {
             </p>
           </div>
         )}
-
         {slotsDisponibles.length > 0 && (
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -268,6 +266,7 @@ export default function ReservaForm() {
               name="slotId"
               value={formik.values.slotId}
               onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               className="w-full p-2 border rounded-lg"
             >
               <option value="">-- Seleccionar horario --</option>
@@ -282,7 +281,25 @@ export default function ReservaForm() {
             )}
           </div>
         )}
-
+        <div>
+          <label className="block text-m font-bebas font-semibold text-gray-700">
+            Cantidad de personas
+          </label>
+          <input
+            type="number"
+            name="cantidad"
+            min="1"
+            max="15"
+            value={formik.values.cantidad}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className="w-full mt-1 p-2 border rounded-lg"
+            placeholder="¿Cuántas personas asistirán?"
+          />
+          {formik.touched.cantidad && formik.errors.cantidad && (
+            <p className="text-red-500 text-sm">{formik.errors.cantidad}</p>
+          )}
+        </div>
         <div>
           <label className="block text-m font-bebas font-semibold text-gray-700">
             Descripcion de la visita
@@ -293,13 +310,13 @@ export default function ReservaForm() {
             placeholder="Especifica motivo de la visita o detalles adicionales..."
             value={formik.values.description}
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             className="w-full mt-1 p-2 border rounded-lg"
           />
           {formik.touched.description && formik.errors.description && (
             <p className="text-red-500 text-sm">{formik.errors.description}</p>
           )}
         </div>
-
         <button
           type="submit"
           disabled={!formik.values.slotId}
