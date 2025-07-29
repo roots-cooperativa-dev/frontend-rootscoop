@@ -52,3 +52,32 @@ export const eliminarVisita = async (visitaId: string): Promise<boolean> => {
     return false;
   }
 };
+
+export const updateVisita = async (
+  visitaId: string,
+  visita: VisitaDTO
+): Promise<VisitaDTO> => {
+  try {
+    const headers = await getAuthHeader();
+    const response = await axios.put(
+      `${API_URL}/visits/${visitaId}`,
+      visita,
+      { ...headers }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar visita:", error);
+    throw error;
+  }
+};
+
+export const fetchVisitaById = async (id: string): Promise<IVisita | null> => {
+  try {
+    const headers = await getAuthHeader();
+    const response = await axios.get(`${API_URL}/visits/${id}`, { ...headers });
+    return response.data;
+  } catch (error) {
+    console.error(`Error al obtener la visita con ID ${id}:`, error);
+    return null;
+  }
+};
