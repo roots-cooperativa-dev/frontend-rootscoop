@@ -19,8 +19,6 @@ export const addProductToCart = async (
   token: string | null | undefined
 ) => {
   try {
-    console.log(data);
-    console.log(token);
     const response = await axiosApiBack.post("/orders/cart/add", data, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -44,9 +42,7 @@ export const getCart = async (token: string | null | undefined) => {
       },
     });
 
-    console.log("RESPONSE DATA:", response.data); // 👈 esto es clave
     if (!response.data) throw new Error("No hay productos en carrito");
-    console.log(response);
     return response.data;
   } catch (e: any) {
     console.warn(e.message);

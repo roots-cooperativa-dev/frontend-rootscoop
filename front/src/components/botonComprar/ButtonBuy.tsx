@@ -31,7 +31,6 @@ const ButtonBuy = () => {
       };
 
       const result = await orderPayments(data, user.id, token);
-      console.log
       
       if (result && result.initPoint) {
         window.location.href = result.initPoint;

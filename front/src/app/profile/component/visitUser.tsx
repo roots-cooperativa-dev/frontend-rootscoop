@@ -30,7 +30,6 @@ const VisitasAgendadas = () => {
       if (user?.id && token) {
         try {
           const userData = await getUserById(user.id, token);
-          console.log(userData);
           setVisits(userData.appointments || []);
         } catch (error) {
           toast.error("Error al obtener tus donaciones");

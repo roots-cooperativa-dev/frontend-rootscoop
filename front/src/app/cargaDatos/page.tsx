@@ -15,9 +15,7 @@ const DataLoad = () => {
   const fetchCart = async () => {
     try {
       const data = await getCart(token);
-      console.log(data)
       setCartFromServer(data.items, data.total); // ✅ actualiza el context
-      console.log(cart);
       router.push("/");
     } catch (error) {
       console.error("Error al obtener el carrito:", error);
