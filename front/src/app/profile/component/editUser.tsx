@@ -6,23 +6,29 @@ import { useAuthContext } from "@/src/context/authContext";
 import { updateUser, getUserById } from "@/src/services/auth";
 import Loading from "@/src/components/loading/pantallaCargando";
 import mapboxgl from "mapbox-gl";
+import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { toast } from "sonner";
-import { UserGoogle } from "@/src/types";
+import { UpdateUserDTO } from "../../../types/index";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 const EditUser = () => {
   const { user, token, saveUserData } = useAuthContext();
 
-  const [formData, setFormData] = useState<Partial<UserGoogle>>({
+  const [formData, setFormData] = useState<UpdateUserDTO>({
     name: "",
     email: "",
     birthdate: "",
     username: "",
-    phone: "",
-    address: { street: "", lat: 0, long: 0 },
+    phone: 0,
+    password: "",
+    address: {
+      street: "",
+      latitude: -34.6037,
+      longitude: -58.3816,
+    },
   });
 
   const [loadingUser, setLoadingUser] = useState(true);
@@ -34,12 +40,24 @@ const EditUser = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
 
-  // --- Cargar datos del usuario
   useEffect(() => {
     if (user?.id && token) {
       getUserById(user.id, token)
         .then((data) => {
-          setFormData(data);
+          const cleanedData: UpdateUserDTO = {
+            name: data.name,
+            email: data.email,
+            birthdate: data.birthdate,
+            username: data.username,
+            phone: Number(data.phone),
+            password: "",
+            address: {
+              street: data.address?.street || "",
+              latitude: data.address?.latitude || -34.6037,
+              longitude: data.address?.longitude || -58.3816,
+            },
+          };
+          setFormData(cleanedData);
         })
         .catch(() => setError("Error cargando datos del usuario"))
         .finally(() => setLoadingUser(false));
@@ -48,80 +66,69 @@ const EditUser = () => {
     }
   }, [user, token]);
 
-  // --- Inicializar Mapa
   useEffect(() => {
-    if (!mapContainerRef.current || !formData.address) return;
+    if (!mapContainerRef.current) return;
 
-    let map: mapboxgl.Map | null = null;
-    let marker: mapboxgl.Marker | null = null;
+    const { latitude, longitude } = formData.address;
 
-    const lat = formData.address.lat || -34.6037;   // default a Buenos Aires
-    const long = formData.address.long || -58.3816; // default a Buenos Aires
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current as HTMLElement,
+      style: "mapbox://styles/mapbox/streets-v11",
+      center: [longitude, latitude],
+      zoom: 12,
+    });
 
-    const initializeMap = async () => {
-      const MapboxGeocoder = (await import("@mapbox/mapbox-gl-geocoder")).default;
+    const marker = new mapboxgl.Marker({ draggable: true })
+      .setLngLat([longitude, latitude])
+      .addTo(map);
 
-      if (!mapContainerRef.current) return;
-      map = new mapboxgl.Map({
-        container: mapContainerRef.current as HTMLElement,
-        style: "mapbox://styles/mapbox/streets-v11",
-        center: [long, lat],
-        zoom: 12,
-      });
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken!,
+      // casteo explícito del tipo para evitar error TS
+      mapboxgl: mapboxgl as unknown as typeof import("mapbox-gl"),
+      marker: false,
+      placeholder: "Buscar dirección...",
+    });
+    map.addControl(geocoder);
 
-      marker = new mapboxgl.Marker({ draggable: true })
-        .setLngLat([long, lat])
-        .addTo(map);
+    geocoder.on("result", (e: any) => {
+      const { center, place_name } = e.result;
+      setFormData((prev) => ({
+        ...prev,
+        address: {
+          street: place_name,
+          latitude: center[1],
+          longitude: center[0],
+        },
+      }));
+      marker.setLngLat(center);
+    });
 
-      const geocoder = new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken ?? "",
-        mapboxgl: mapboxgl as unknown as typeof import("mapbox-gl"),
-        marker: false,
-        placeholder: "Buscar dirección...",
-      });
+    marker.on("dragend", () => {
+      const lngLat = marker.getLngLat();
+      setFormData((prev) => ({
+        ...prev,
+        address: {
+          street: "Ubicación personalizada",
+          latitude: lngLat.lat,
+          longitude: lngLat.lng,
+        },
+      }));
+    });
 
-      map.addControl(geocoder);
-
-      geocoder.on("result", (e: any) => {
-        const { center, place_name } = e.result;
-        if (center) {
-          marker!.setLngLat(center);
-            setFormData((prev: Partial<UserGoogle>) => ({
-            ...prev,
-            address: {
-              street: place_name,
-              lat: center[1],
-              long: center[0],
-            },
-            }));
-        }
-      });
-
-      marker.on("dragend", () => {
-        const lngLat = marker!.getLngLat();
-        setFormData((prev) => ({
-          ...prev,
-          address: {
-            street: "Ubicación personalizada",
-            lat: lngLat.lat,
-            long: lngLat.lng,
-          },
-        }));
-      });
-    };
-
-    initializeMap();
+    mapRef.current = map;
+    markerRef.current = marker;
 
     return () => {
-      if (map) map.remove();
+      if (mapRef.current) mapRef.current.remove();
     };
   }, [formData.address]);
 
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev: Partial<UserGoogle>) => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: name === "phone" ? Number(value) : value,
     }));
   };
 
@@ -138,7 +145,10 @@ const EditUser = () => {
     }
 
     try {
-      const updatedUser = await updateUser(user.id, token, formData);
+      const payload = { ...formData };
+      if (!payload.password) delete payload.password;
+
+      const updatedUser = await updateUser(user.id, token, payload);
       saveUserData({ user: updatedUser, accessToken: token, isAuth: true });
       toast.success("Datos actualizados correctamente");
       setSuccess("Datos actualizados correctamente");
@@ -165,7 +175,7 @@ const EditUser = () => {
               type="text"
               name="name"
               placeholder="Nombre completo"
-              value={formData.name || ""}
+              value={formData.name}
               onChange={handleChange}
               className="border p-2 rounded"
               required
@@ -174,7 +184,7 @@ const EditUser = () => {
               type="email"
               name="email"
               placeholder="Correo electrónico"
-              value={formData.email || ""}
+              value={formData.email}
               onChange={handleChange}
               className="border p-2 rounded"
               required
@@ -183,7 +193,7 @@ const EditUser = () => {
               type="date"
               name="birthdate"
               placeholder="Fecha de nacimiento"
-              value={formData.birthdate || ""}
+              value={formData.birthdate}
               onChange={handleChange}
               className="border p-2 rounded"
             />
@@ -191,7 +201,7 @@ const EditUser = () => {
               type="text"
               name="username"
               placeholder="Nombre de usuario"
-              value={formData.username || ""}
+              value={formData.username}
               onChange={handleChange}
               className="border p-2 rounded"
               required
@@ -200,24 +210,36 @@ const EditUser = () => {
               type="tel"
               name="phone"
               placeholder="Teléfono"
-              value={formData.phone || ""}
+              value={formData.phone}
               onChange={handleChange}
               className="border p-2 rounded"
             />
-
-            {/* Mapa y dirección */}
+            <input
+              type="password"
+              name="password"
+              placeholder="Nueva contraseña (dejar vacío si no se modifica)"
+              value={formData.password || ""}
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
             <div className="space-y-2">
               <label className="font-medium text-sm">Dirección:</label>
-              <div ref={mapContainerRef} className="h-64 w-full rounded border" />
-              {formData.address && (
-                <div className="text-sm text-gray-600 mt-2">
-                  <p><strong>Dirección:</strong> {formData.address.street}</p>
-                  <p><strong>Latitud:</strong> {formData.address.lat}</p>
-                  <p><strong>Longitud:</strong> {formData.address.long}</p>
-                </div>
-              )}
+              <div
+                ref={mapContainerRef}
+                className="h-64 w-full rounded border"
+              />
+              <div className="text-sm text-gray-600 mt-2">
+                <p>
+                  <strong>Dirección:</strong> {formData.address.street}
+                </p>
+                <p>
+                  <strong>Latitud:</strong> {formData.address.latitude}
+                </p>
+                <p>
+                  <strong>Longitud:</strong> {formData.address.longitude}
+                </p>
+              </div>
             </div>
-
             <button
               type="submit"
               disabled={loadingSubmit}

@@ -17,7 +17,7 @@ const AuthNav = () => {
           {Boolean(total) && <span className="absolute -top-2 -right-2 w-4 h-4 flex items-center justify-center text-[10px] text-white bg-red-500 rounded-full">
             {total}
           </span>}
-          <ShoppingCart className="h-6 w-6 text-white" />
+          <ShoppingCart className="h-6 w-6 text-[#017D74]" />
         </div>
         </Link>
       <Button
