@@ -25,7 +25,6 @@ const CartPage = () => {
       }
 
       const data = await getCart(token);
-      console.log("Respuesta del carrito:", data);
 
       if (!data || !data.items || typeof data.total !== "string") {
         console.warn("Estructura inválida del carrito:", data);
@@ -51,19 +50,15 @@ const CartPage = () => {
     fetchCart();
   }, [user, token, loading, router]);
 
-  const handleDelete = async (
-    itemId: string,
-    token: string | null | undefined
-  ) => {
-    console.log(itemId);
+  const handleDelete = async (itemId: string, token: string | null | undefined) => {
     try {
       const response = await deleteCartItem(itemId, token);
-      console.log(response);
 
       if (!response) {
         toast.error("Error al eliminar este item");
         throw new Error("No se recibió respuesta al intentar eliminar el item");
       }
+
       await fetchCart();
       toast.success("Producto eliminado del carrito");
     } catch (error) {
@@ -71,9 +66,7 @@ const CartPage = () => {
     }
   };
 
-  if (isLoadingCart) {
-    return <Loading />;
-  }
+  if (isLoadingCart) return <Loading />;
 
   const showItems = cart && cart.length > 0;
 
@@ -81,9 +74,7 @@ const CartPage = () => {
     <div className="flex pb-6 flex-col items-center w-screen px-5">
       <h1 className="text-2xl font-bold mb-6 mt-6">Carrito de compras</h1>
       <p className="pt-6 pb-6">
-        El precio del producto no esta incluido en el envio, para hacer envios
-        uno de nuestros socios se comunicara contigo para coordinar la entrega,
-        ten en cuenta que el precio del envio varia segun el medio utilizado.
+        El precio del producto no está incluido en el envío. Uno de nuestros socios se comunicará contigo para coordinar la entrega. Ten en cuenta que el precio del envío varía según el medio utilizado.
       </p>
 
       {showItems ? (
@@ -91,24 +82,20 @@ const CartPage = () => {
           <ul className="space-y-4 w-full">
             {cart.map((item, index) => (
               <li
-                key={item.id || index}
+                key={item.cartItemId || index}
                 className="flex items-center justify-between p-4 border rounded-md bg-white"
               >
                 <div>
                   <h2 className="text-lg font-semibold">{item.name}</h2>
-                  <p className="text-sm">
-                    Talla: <strong>{item.size}</strong>
-                  </p>
-                  <p className="text-sm">
-                    Precio unitario: ${item.price?.toFixed(2)}
-                  </p>
+                  <p className="text-sm">Talla: <strong>{item.size}</strong></p>
+                  <p className="text-sm">Precio unitario: ${item.price.toFixed(2)}</p>
                   <p className="text-sm">Cantidad: {item.quantity}</p>
                   <p className="text-sm font-semibold">
-                    Subtotal: ${(item.price! * (item.quantity || 1)).toFixed(2)}
+                    Subtotal: ${(item.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
                 <button
-                  onClick={() => item.id && handleDelete(item.id, token)}
+                  onClick={() => item.cartItemId && handleDelete(item.cartItemId, token)}
                   className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                 >
                   Eliminar
@@ -117,7 +104,7 @@ const CartPage = () => {
             ))}
           </ul>
 
-          <div className="mt-6 text-right ">
+          <div className="mt-6 text-right">
             <h3 className="text-xl font-bold mt-4">Total: ${totalAmount}</h3>
           </div>
           <ButtonBuy />

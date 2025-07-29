@@ -15,6 +15,7 @@ export interface CartProduct {
   size: string;
   price: number;
   quantity: number;
+  cartItemId: string;
 }
 
 export enum Irole {

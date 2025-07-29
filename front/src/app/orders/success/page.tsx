@@ -1,14 +1,21 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Button } from "../../../components/ui/button";
 import { CheckCircle } from "lucide-react";
+import { useCartContext } from "@/src/context/cartContext";
 
 function SuccessCompraContent() {
+  const { resetCart } = useCartContext();
   const searchParams = useSearchParams();
   const paymentId = searchParams?.get("payment_id");
   const router = useRouter();
+
+  // Ejecutar resetCart al montar el componente
+  useEffect(() => {
+    resetCart();
+  }, [resetCart]);
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-green-50 px-4">
