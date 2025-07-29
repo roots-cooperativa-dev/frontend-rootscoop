@@ -22,9 +22,8 @@ type SizeInput = {
 }
 
 const sizeOptions = ["S", "M", "L", "XL"]
-const MAX_IMAGE_SIZE_KB = 200; // Tamaño máximo de imagen en KB
-const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_KB * 1024; // 200KB en bytes
-
+const MAX_IMAGE_SIZE_MB = 2 // Maximum image size in MB
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024 // 5MB in bytes
 
 const ProductoForm = () => {
     const params = useParams()
@@ -149,7 +148,6 @@ const ProductoForm = () => {
         const { name, value } = e.target
         if (name === "name") setName(value)
         else if (name === "details") setDetails(value)
-        // No need to clear specific error here, useEffect will re-validate
     }
 
     const handleCategoryChange = (value: string) => {
@@ -176,7 +174,7 @@ const ProductoForm = () => {
 
         selectedFiles.forEach((file) => {
             if (file.size > MAX_IMAGE_SIZE_BYTES) {
-                toast.error(`La imagen "${file.name}" excede el tamaño máximo de ${MAX_IMAGE_SIZE_KB}KB.`)
+                // Removed toast.error here
                 hasImageSizeError = true
             } else {
                 newFiles.push(file)
@@ -189,6 +187,10 @@ const ProductoForm = () => {
         setFiles(newFiles)
         setImagePreviews(newImagePreviews)
         setTouched((prev) => ({ ...prev, images: true })) // Mark images as touched
+        setErrors((prev) => ({
+            ...prev,
+            images: hasImageSizeError ? `Algunas imágenes exceden el tamaño máximo de ${MAX_IMAGE_SIZE_MB}MB.` : undefined,
+        }))
     }
 
     const removeImage = (i: number) => {
@@ -221,7 +223,7 @@ const ProductoForm = () => {
         setErrors(currentErrors) // Update errors state immediately
 
         if (Object.keys(currentErrors).length > 0) {
-            toast.error("Por favor, corrige los errores en el formulario.")
+            // Removed toast.error here, as errors are now displayed below inputs
             return
         }
 
@@ -383,14 +385,14 @@ const ProductoForm = () => {
                                             </Select>
                                             <Input
                                                 type="number"
-                                                value={s.price}
+                                                value={s.price === 0 ? "" : s.price}
                                                 onChange={(e) => handleSizeInputChange(i, "price", e.target.value)}
                                                 placeholder="Precio"
                                                 onBlur={() => handleBlur("sizes")} // Mark sizes as touched on blur of any size input
                                             />
                                             <Input
                                                 type="number"
-                                                value={s.stock}
+                                                value={s.stock === 0 ? "" : s.stock}
                                                 onChange={(e) => handleSizeInputChange(i, "stock", e.target.value)}
                                                 placeholder={id ? "Stock" : "Cantidad"}
                                                 onBlur={() => handleBlur("sizes")} // Mark sizes as touched on blur of any size input
