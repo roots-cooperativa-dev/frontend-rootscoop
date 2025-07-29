@@ -9,6 +9,7 @@ import { getCart, deleteCartItem } from "../../../services/cart";
 import Loading from "@/src/components/loading/pantallaCargando";
 import ButtonBuy from "@/src/components/botonComprar/ButtonBuy";
 import { toast } from "sonner";
+import Link from "next/link";
 
 const CartPage = () => {
   const { user, token, loading } = useAuthContext();
@@ -50,7 +51,10 @@ const CartPage = () => {
     fetchCart();
   }, [user, token, loading, router]);
 
-  const handleDelete = async (itemId: string, token: string | null | undefined) => {
+  const handleDelete = async (
+    itemId: string,
+    token: string | null | undefined
+  ) => {
     try {
       const response = await deleteCartItem(itemId, token);
 
@@ -74,7 +78,9 @@ const CartPage = () => {
     <div className="flex pb-6 flex-col items-center w-screen px-5">
       <h1 className="text-2xl font-bold mb-6 mt-6">Carrito de compras</h1>
       <p className="pt-6 pb-6">
-        El precio del producto no está incluido en el envío. Uno de nuestros socios se comunicará contigo para coordinar la entrega. Ten en cuenta que el precio del envío varía según el medio utilizado.
+        El precio del producto no está incluido en el envío. Uno de nuestros
+        socios se comunicará contigo para coordinar la entrega. Ten en cuenta
+        que el precio del envío varía según el medio utilizado.
       </p>
 
       {showItems ? (
@@ -87,15 +93,21 @@ const CartPage = () => {
               >
                 <div>
                   <h2 className="text-lg font-semibold">{item.name}</h2>
-                  <p className="text-sm">Talla: <strong>{item.size}</strong></p>
-                  <p className="text-sm">Precio unitario: ${item.price.toFixed(2)}</p>
+                  <p className="text-sm">
+                    Talla: <strong>{item.size}</strong>
+                  </p>
+                  <p className="text-sm">
+                    Precio unitario: ${item.price.toFixed(2)}
+                  </p>
                   <p className="text-sm">Cantidad: {item.quantity}</p>
                   <p className="text-sm font-semibold">
                     Subtotal: ${(item.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
                 <button
-                  onClick={() => item.cartItemId && handleDelete(item.cartItemId, token)}
+                  onClick={() =>
+                    item.cartItemId && handleDelete(item.cartItemId, token)
+                  }
                   className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                 >
                   Eliminar
@@ -110,7 +122,18 @@ const CartPage = () => {
           <ButtonBuy />
         </>
       ) : (
-        <p className="text-gray-500">Tu carrito está vacío.</p>
+        <>
+          <p className="text-gray-500">Tu carrito está vacío.</p>
+          <p>
+            Ve a nuestra store para{" "}
+            <Link
+              href="/productos"
+              className="text-[#017D74] underline hover:text-[#015e57]"
+            >
+              comprar
+            </Link>
+          </p>
+        </>
       )}
     </div>
   );

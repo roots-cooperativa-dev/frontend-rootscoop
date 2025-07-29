@@ -1,6 +1,6 @@
 import axios from "axios";
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
-import { LoginDto, RegisterDto, UserGoogle } from "../types";
+import { LoginDto, RegisterDto, UpdateUserDTO, UserGoogle } from "../types";
 
 const axiosApiBack = axios.create({
   baseURL: BACKEND_URL,
@@ -36,6 +36,31 @@ export const getUserById = async (id: string, token: string) => {
 export const updateUser = async (
   id: string,
   token: string,
+  data: UpdateUserDTO
+) => {
+  const response = await axiosApiBack.put(
+    `/users/update/user`, // NUEVA RUTA
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        id: id, // PASAR ID COMO PARÁMETRO DE QUERY
+      },
+    }
+  );
+
+  if (!response.data) throw new Error("No se pudo actualizar el usuario");
+
+  return response.data;
+};
+
+
+
+export const actualizarUser = async (
+  id: string,
+  token: string,
   data: Partial<UserGoogle>
 ) => {
   const response = await axiosApiBack.put(`/users/${id}`, data, {
@@ -48,4 +73,3 @@ export const updateUser = async (
 
   return response.data;
 };
-
