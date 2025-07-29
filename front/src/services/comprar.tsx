@@ -24,3 +24,13 @@ export const orderPayments = async (data: pay, userId: string, token:string |nul
   if (!response.data) throw new Error("Error al crear la preferencia de pago");
   return response.data;
 };
+
+export const deleteCart = async ( token:string |null | undefined) => {
+  const response = await axiosApiBack.post(`/orders/cart/checkout`, {}, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.data) throw new Error("Error al eliminar todo del carrito");
+  return response.data;
+};
