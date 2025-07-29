@@ -11,6 +11,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { toast } from "sonner";
 import { UpdateUserDTO } from "../../../types/index";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
@@ -19,7 +20,6 @@ const EditUser = () => {
 
   const [formData, setFormData] = useState<UpdateUserDTO>({
     name: "",
-    email: "",
     birthdate: "",
     username: "",
     phone: 0,
@@ -30,6 +30,11 @@ const EditUser = () => {
       longitude: -58.3816,
     },
   });
+
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -46,7 +51,6 @@ const EditUser = () => {
         .then((data) => {
           const cleanedData: UpdateUserDTO = {
             name: data.name,
-            email: data.email,
             birthdate: data.birthdate,
             username: data.username,
             phone: Number(data.phone),
@@ -84,7 +88,6 @@ const EditUser = () => {
 
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken!,
-      // casteo explícito del tipo para evitar error TS
       mapboxgl: mapboxgl as unknown as typeof import("mapbox-gl"),
       marker: false,
       placeholder: "Buscar dirección...",
@@ -134,9 +137,10 @@ const EditUser = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoadingSubmit(true);
     setError(null);
     setSuccess(null);
+    setConfirmPasswordError(null);
+    setLoadingSubmit(true);
 
     if (!user?.id || !token) {
       setError("No se pudo identificar al usuario.");
@@ -144,10 +148,20 @@ const EditUser = () => {
       return;
     }
 
-    try {
-      const payload = { ...formData };
-      if (!payload.password) delete payload.password;
+    if (!formData.password) {
+      setError("La contraseña es obligatoria para guardar los cambios.");
+      setLoadingSubmit(false);
+      return;
+    }
 
+    if (formData.password !== confirmPassword) {
+      setConfirmPasswordError("Las contraseñas no coinciden.");
+      setLoadingSubmit(false);
+      return;
+    }
+
+    try {
+      const payload = { ...formData }; // confirmPassword no se incluye
       const updatedUser = await updateUser(user.id, token, payload);
       saveUserData({ user: updatedUser, accessToken: token, isAuth: true });
       toast.success("Datos actualizados correctamente");
@@ -181,18 +195,8 @@ const EditUser = () => {
               required
             />
             <input
-              type="email"
-              name="email"
-              placeholder="Correo electrónico"
-              value={formData.email}
-              onChange={handleChange}
-              className="border p-2 rounded"
-              required
-            />
-            <input
               type="date"
               name="birthdate"
-              placeholder="Fecha de nacimiento"
               value={formData.birthdate}
               onChange={handleChange}
               className="border p-2 rounded"
@@ -214,32 +218,64 @@ const EditUser = () => {
               onChange={handleChange}
               className="border p-2 rounded"
             />
-            <input
-              type="password"
-              name="password"
-              placeholder="Nueva contraseña (dejar vacío si no se modifica)"
-              value={formData.password || ""}
-              onChange={handleChange}
-              className="border p-2 rounded"
-            />
+
+            {/* Password */}
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Contraseña nueva o actual"
+                value={formData.password}
+                onChange={handleChange}
+                className="border p-2 rounded w-full"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
+
+            {/* Confirm password */}
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirmar contraseña"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setConfirmPasswordError(null);
+                }}
+                className="border p-2 rounded w-full"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+              >
+                {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
+            {confirmPasswordError && (
+              <p className="text-red-500 text-sm">{confirmPasswordError}</p>
+            )}
+
+            {/* Dirección */}
             <div className="space-y-2">
               <label className="font-medium text-sm">Dirección:</label>
-              <div
-                ref={mapContainerRef}
-                className="h-64 w-full rounded border"
-              />
+              <div ref={mapContainerRef} className="h-64 w-full rounded border" />
               <div className="text-sm text-gray-600 mt-2">
-                <p>
-                  <strong>Dirección:</strong> {formData.address.street}
-                </p>
-                <p>
-                  <strong>Latitud:</strong> {formData.address.latitude}
-                </p>
-                <p>
-                  <strong>Longitud:</strong> {formData.address.longitude}
-                </p>
+                <p><strong>Dirección:</strong> {formData.address.street}</p>
+                <p><strong>Latitud:</strong> {formData.address.latitude}</p>
+                <p><strong>Longitud:</strong> {formData.address.longitude}</p>
               </div>
             </div>
+
             <button
               type="submit"
               disabled={loadingSubmit}
