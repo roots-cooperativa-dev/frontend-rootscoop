@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { routes } from "../../../routes";
 import { useAuthContext } from "../../../context/authContext";
 import { useCartContext } from "../../../context/cartContext";
-import { getCart, deleteCartItem } from "../../../services/cart";
+import { getCart, deleteCartItem, updateCartItemQuantity } from "../../../services/cart";
 import Loading from "@/src/components/loading/pantallaCargando";
 import ButtonBuy from "@/src/components/botonComprar/ButtonBuy";
 import { toast } from "sonner";
@@ -20,17 +20,11 @@ const CartPage = () => {
 
   const fetchCart = async () => {
     try {
-      if (!token) {
-        console.warn("Token no disponible, cancelando fetchCart");
-        return;
-      }
+      if (!token) return;
 
       const data = await getCart(token);
 
-      if (!data || !data.items || typeof data.total !== "string") {
-        console.warn("Estructura inválida del carrito:", data);
-        return;
-      }
+      if (!data || !data.items || typeof data.total !== "string") return;
 
       saveCartData({ cart: data });
     } catch (error) {
@@ -51,22 +45,28 @@ const CartPage = () => {
     fetchCart();
   }, [user, token, loading, router]);
 
-  const handleDelete = async (
-    itemId: string,
-    token: string | null | undefined
-  ) => {
+  const handleDelete = async (itemId: string, token: string | null | undefined) => {
     try {
       const response = await deleteCartItem(itemId, token);
-
       if (!response) {
         toast.error("Error al eliminar este item");
-        throw new Error("No se recibió respuesta al intentar eliminar el item");
+        return;
       }
-
       await fetchCart();
       toast.success("Producto eliminado del carrito");
     } catch (error) {
       console.error("Error al eliminar el producto:", error);
+    }
+  };
+
+  const handleQuantityChange = async (itemId: string, quantity: number) => {
+    if (quantity < 1) return; // No permitimos cantidades menores a 1
+    try {
+      await updateCartItemQuantity(itemId, quantity, token);
+      await fetchCart();
+    } catch (error) {
+      toast.error("No se pudo actualizar la cantidad");
+      console.error("Error al actualizar cantidad:", error);
     }
   };
 
@@ -99,8 +99,28 @@ const CartPage = () => {
                   <p className="text-sm">
                     Precio unitario: ${item.price.toFixed(2)}
                   </p>
-                  <p className="text-sm">Cantidad: {item.quantity}</p>
-                  <p className="text-sm font-semibold">
+                  <div className="flex items-center gap-2 mt-1">
+                    <button
+                      className="px-2 py-1 bg-[#017D74] text-white rounded"
+                      onClick={() =>
+                        item.cartItemId &&
+                        handleQuantityChange(item.cartItemId, item.quantity - 1)
+                      }
+                    >
+                      -
+                    </button>
+                    <span className="text-sm">{item.quantity}</span>
+                    <button
+                      className="px-2 py-1 bg-[#017D74] text-white rounded"
+                      onClick={() =>
+                        item.cartItemId &&
+                        handleQuantityChange(item.cartItemId, item.quantity + 1)
+                      }
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="text-sm font-semibold mt-1">
                     Subtotal: ${(item.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
