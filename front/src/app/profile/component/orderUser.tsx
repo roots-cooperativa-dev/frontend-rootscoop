@@ -4,6 +4,7 @@ import { useAuthContext } from "@/src/context/authContext";
 import { useEffect, useState } from "react";
 import { getOrdersUser } from "../../../services/products";
 import { format } from "date-fns";
+import Loading from "@/src/components/loading/pantallaCargando";
 
 const OrdersUser = () => {
   const { token, loading: authLoading } = useAuthContext();
@@ -29,9 +30,7 @@ const OrdersUser = () => {
 
   if (authLoading || loadingOrders) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p>Cargando órdenes...</p>
-      </div>
+      <Loading/>
     );
   }
 

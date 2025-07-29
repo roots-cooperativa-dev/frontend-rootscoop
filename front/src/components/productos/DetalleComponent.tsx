@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { IProducto } from "../../app/types/index";
 import { Badge } from "../../components/ui/badge";
@@ -13,6 +13,7 @@ import { useCartContext } from "../../context/cartContext";
 import { useAuthContext } from "../../context/authContext";
 import { useRouter } from "next/navigation";
 import { addProductToCart } from "../../services/cart"; // importa tu función que llama al backend
+import AuthNav from "../authNav/authNav";
 
 interface Props {
   producto: IProducto;
@@ -25,7 +26,9 @@ const ProductoDetalle = ({ producto }: Props) => {
   const sizeName = producto.sizes[0]?.size ?? "Único";
   const imagenes = producto.files || [];
 
-  const [imagenSeleccionada, setImagenSeleccionada] = useState(imagenes[0]?.url || "/img/image-not-found.jpg");
+  const [imagenSeleccionada, setImagenSeleccionada] = useState(
+    imagenes[0]?.url || "/img/image-not-found.jpg"
+  );
   const [cantidad, setCantidad] = useState<number>(1);
 
   const { cart, addToCart } = useCartContext();
@@ -91,13 +94,16 @@ const ProductoDetalle = ({ producto }: Props) => {
               priority
             />
           </Link>
-          <Link
-            href="/productos"
-            className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Volver a productos</span>
-          </Link>
+          <div className="flex gap-6">
+            <Link
+              href="/productos"
+              className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Volver a productos</span>
+            </Link>
+            <AuthNav />
+          </div>
         </div>
       </header>
 
@@ -123,9 +129,12 @@ const ProductoDetalle = ({ producto }: Props) => {
                   alt={`Imagen ${i + 1}`}
                   width={100}
                   height={100}
-                  onClick={() => setImagenSeleccionada(img.url || "/img/image-not-found.jpg")}
+                  onClick={() =>
+                    setImagenSeleccionada(img.url || "/img/image-not-found.jpg")
+                  }
                   className={`cursor-pointer rounded-lg border-2 ${
-                    (img.url || "/img/image-not-found.jpg") === imagenSeleccionada
+                    (img.url || "/img/image-not-found.jpg") ===
+                    imagenSeleccionada
                       ? "border-[#017d74]"
                       : "border-transparent"
                   }`}
@@ -136,14 +145,22 @@ const ProductoDetalle = ({ producto }: Props) => {
 
           {/* Información del producto */}
           <div>
-            <h1 className="text-4xl font-bold text-[#017d74] mb-2">{producto.name}</h1>
-            <Badge className="mb-4 bg-[#febb07] text-black">{producto.category.name}</Badge>
-            <p className="text-lg text-gray-700 font-popular mb-6">{producto.details}</p>
+            <h1 className="text-4xl font-bold text-[#017d74] mb-2">
+              {producto.name}
+            </h1>
+            <Badge className="mb-4 bg-[#febb07] text-black">
+              {producto.category.name}
+            </Badge>
+            <p className="text-lg text-gray-700 font-popular mb-6">
+              {producto.details}
+            </p>
             <div className="flex items-center mb-6">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-5 h-5 ${i < 4 ? "fill-[#febb07] text-[#febb07]" : "text-gray-300"}`}
+                  className={`w-5 h-5 ${
+                    i < 4 ? "fill-[#febb07] text-[#febb07]" : "text-gray-300"
+                  }`}
                 />
               ))}
               <span className="ml-2 text-sm text-gray-500">(12 reseñas)</span>
@@ -151,9 +168,13 @@ const ProductoDetalle = ({ producto }: Props) => {
             <p className="text-3xl font-bold text-[#922f4e] mb-2">${price}</p>
             <p className="mb-6 text-gray-600">
               {stock > 0 ? (
-                <span className="text-green-600 font-medium">En stock ({stock} disponibles)</span>
+                <span className="text-green-600 font-medium">
+                  En stock ({stock} disponibles)
+                </span>
               ) : (
-                <span className="text-red-500 font-medium">Producto sin stock</span>
+                <span className="text-red-500 font-medium">
+                  Producto sin stock
+                </span>
               )}
             </p>
 
@@ -161,11 +182,19 @@ const ProductoDetalle = ({ producto }: Props) => {
             <div className="flex items-center gap-4 mb-4">
               <span className="font-semibold text-gray-700">Cantidad:</span>
               <div className="flex items-center border rounded px-3 py-1">
-                <button onClick={decrementarCantidad} className="text-xl px-2 font-bold" disabled={cantidad <= 1}>
+                <button
+                  onClick={decrementarCantidad}
+                  className="text-xl px-2 font-bold"
+                  disabled={cantidad <= 1}
+                >
                   -
                 </button>
                 <span className="px-3">{cantidad}</span>
-                <button onClick={incrementarCantidad} className="text-xl px-2 font-bold" disabled={cantidad >= stock}>
+                <button
+                  onClick={incrementarCantidad}
+                  className="text-xl px-2 font-bold"
+                  disabled={cantidad >= stock}
+                >
                   +
                 </button>
               </div>
@@ -174,7 +203,9 @@ const ProductoDetalle = ({ producto }: Props) => {
             {/* Botón Comprar ahora */}
             <Button
               className={`w-full text-lg font-bold shadow-md ${
-                stock > 0 ? "bg-[#922f4e] hover:bg-[#642d91] text-white" : "bg-gray-300 text-gray-500"
+                stock > 0
+                  ? "bg-[#922f4e] hover:bg-[#642d91] text-white"
+                  : "bg-gray-300 text-gray-500"
               }`}
               disabled={stock === 0}
               onClick={handleComprarAhora}
