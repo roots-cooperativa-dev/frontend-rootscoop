@@ -110,7 +110,7 @@ export const CarrouselSection = () => {
                                                         {item.buttonText}
                                                     </a>
                                                 ) : (
-                                                    <Link href={item.action}>
+                                                    <Link href={item.action} target='_blank' rel='noopener noreferrer'>
                                                         <Eye className="w-6 h-6 mr-3" />
                                                         {item.buttonText}
                                                     </Link>

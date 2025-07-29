@@ -44,6 +44,7 @@ export const CategoriasCRUD = () => {
     const [limit] = useState(5) // Increased limit for better display
     const [totalPages, setTotalPages] = useState(1)
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null) // For individual action loading
+    const [isDuplicateName, setIsDuplicateName] = useState(false) // New state for duplicate name validation
 
     const loadCategorias = async () => {
         setLoading(true)
@@ -65,6 +66,13 @@ export const CategoriasCRUD = () => {
         loadCategorias()
     }, [page, mostrarEliminadas])
 
+    // Effect to re-check duplicate name when categories or newName changes
+    useEffect(() => {
+        const trimmedNewName = newName.trim().toLowerCase()
+        const duplicate = categorias.some((cat) => cat.name.toLowerCase() === trimmedNewName && !cat.deletedAt)
+        setIsDuplicateName(duplicate)
+    }, [newName, categorias])
+
     const filteredCategorias = categorias.filter((categoria) =>
         categoria.name.toLowerCase().includes(searchTerm.toLowerCase()),
     )
@@ -72,6 +80,10 @@ export const CategoriasCRUD = () => {
     const handleCrear = async () => {
         if (!newName.trim()) {
             toast.error("El nombre no puede estar vacío")
+            return
+        }
+        if (isDuplicateName) {
+            toast.error("Ya existe una categoría con este nombre.")
             return
         }
         setIsCreating(true)
@@ -96,6 +108,16 @@ export const CategoriasCRUD = () => {
             toast.error("El nombre no puede estar vacío")
             return
         }
+        // Check for duplicate name during edit, excluding the current category being edited
+        const trimmedEditingName = editingName.trim().toLowerCase()
+        const duplicateOnEdit = categorias.some(
+            (cat) => cat.id !== id && cat.name.toLowerCase() === trimmedEditingName && !cat.deletedAt,
+        )
+        if (duplicateOnEdit) {
+            toast.error("Ya existe otra categoría con este nombre.")
+            return
+        }
+
         setActionLoadingId(id)
         try {
             const updated = await actualizarCategoria(id, editingName.trim())
@@ -117,38 +139,35 @@ export const CategoriasCRUD = () => {
     const handleEliminarConfirmado = async () => {
         if (!categoriaAEliminar) return
         setActionLoadingId(categoriaAEliminar.id)
-        try {
-            await toast.promise(
-                eliminarCategoria(categoriaAEliminar.id),
-                {
-                    loading: "Eliminando categoría...",
-                    success: async () => {
-                        await loadCategorias()
-                        setCategoriaAEliminar(null)
-                        return "Categoría eliminada"
-                    },
-                    error: "Error al eliminar categoría",
-                }
-            )
-        } finally {
-            setActionLoadingId(null)
-        }
+        toast.promise(eliminarCategoria(categoriaAEliminar.id), {
+            loading: "Eliminando categoría...",
+            success: async () => {
+                await loadCategorias()
+                setCategoriaAEliminar(null)
+                setActionLoadingId(null)
+                return "Categoría eliminada"
+            },
+            error: () => {
+                setActionLoadingId(null)
+                return "Error al eliminar categoría"
+            },
+        })
     }
 
     const handleRestaurar = async (id: string) => {
         setActionLoadingId(id)
-        try {
-            await toast.promise(restaurarCategoria(id), {
-                loading: "Restaurando categoría...",
-                success: async () => {
-                    await loadCategorias()
-                    return "Categoría restaurada"
-                },
-                error: "Error al restaurar categoría",
-            })
-        } finally {
-            setActionLoadingId(null)
-        }
+        toast.promise(restaurarCategoria(id), {
+            loading: "Restaurando categoría...",
+            success: async () => {
+                await loadCategorias()
+                setActionLoadingId(null)
+                return "Categoría restaurada"
+            },
+            error: () => {
+                setActionLoadingId(null)
+                return "Error al restaurar categoría"
+            },
+        })
     }
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -207,7 +226,10 @@ export const CategoriasCRUD = () => {
                                     value={newName}
                                     onChange={(e) => setNewName(e.target.value)}
                                     onKeyPress={handleKeyPress}
-                                    className="pr-10 focus:border-[#017d74] focus:ring-[#017d74]"
+                                    className={cn(
+                                        "pr-10 focus:border-[#017d74] focus:ring-[#017d74]",
+                                        isDuplicateName && "border-red-500 focus:border-red-500 focus:ring-red-500",
+                                    )}
                                     disabled={isCreating}
                                 />
                                 {newName && !isCreating && (
@@ -218,10 +240,13 @@ export const CategoriasCRUD = () => {
                                         <XCircle className="w-4 h-4" />
                                     </button>
                                 )}
+                                {isDuplicateName && (
+                                    <p className="text-red-500 text-sm mt-1">Ya existe una categoría con este nombre.</p>
+                                )}
                             </div>
                             <Button
                                 onClick={handleCrear}
-                                disabled={!newName.trim() || isCreating}
+                                disabled={!newName.trim() || isCreating || isDuplicateName}
                                 className="bg-[#017d74] hover:bg-[#015d54] text-white px-6 shadow-md hover:shadow-lg transition-all"
                             >
                                 {isCreating ? (
