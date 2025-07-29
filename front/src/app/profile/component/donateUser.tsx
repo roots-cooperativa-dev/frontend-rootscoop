@@ -28,7 +28,6 @@ const DonateUser = () => {
       if (user?.id && token) {
         try {
           const userData = await getUserById(user.id, token);
-          console.log(userData);
           setDonations(userData.donates || []);
         } catch (error) {
           toast.error("Error al obtener tus donaciones");

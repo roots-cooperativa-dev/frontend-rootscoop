@@ -260,7 +260,6 @@ const ProductoForm = () => {
                 file_Ids: allFileIds,
             }
 
-            console.log("📦 JSON enviado al PUT/POST:", JSON.stringify(productoData, null, 2))
 
             const resultado = id ? await actualizarProducto(id as string, productoData) : await crearProducto(productoData)
 
