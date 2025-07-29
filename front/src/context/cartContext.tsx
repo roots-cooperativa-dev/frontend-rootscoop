@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { CartProduct } from "../app/types";
 
+
 type SaveCartLoad = {
   cart: {
     items: any[];
@@ -72,28 +73,27 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [cart, total, totalAmount]);
 
   // ✅ Guardar carrito desde el backend
-  const saveCartData = (data: SaveCartLoad) => {
-    console.log(data);
-    const adaptedCart: CartProduct[] = data.cart.items.map((item) => ({
-      id: item.product.id,
-      name: item.product.name,
-      details: item.product.details,
-      size: item.productSize?.size,
-      price: parseFloat(item.priceAtAddition),
-      quantity: item.quantity,
-    }));
+ const saveCartData = (data: SaveCartLoad) => {
+  const adaptedCart: CartProduct[] = data.cart.items.map((item) => ({
+    id: item.product.id,
+    cartItemId: item.id, // ✅ nuevo campo necesario para eliminar
+    name: item.product.name,
+    details: item.product.details,
+    size: item.productSize?.size,
+    price: parseFloat(item.priceAtAddition),
+    quantity: item.quantity,
+  }));
 
-    setId(data.cart.id);
-    console.log(data.cart.id);
-    setCart(adaptedCart);
-    setTotalAmount(data.cart.total);
+  setId(data.cart.id);
+  setCart(adaptedCart);
+  setTotalAmount(data.cart.total);
 
-    localStorage.setItem(CART_ID_KEY, data.cart.id);
-    localStorage.setItem(CART_TOTAL_AMOUNT_KEY, data.cart.total);
+  localStorage.setItem(CART_ID_KEY, data.cart.id);
+  localStorage.setItem(CART_TOTAL_AMOUNT_KEY, data.cart.total);
 
-    const totalQuantity = adaptedCart.reduce((acc, item) => acc + (item.quantity || 0), 0);
-    setTotal(totalQuantity);
-  };
+  const totalQuantity = adaptedCart.reduce((acc, item) => acc + (item.quantity || 0), 0);
+  setTotal(totalQuantity);
+};
 
   // ✅ Agregar al carrito
   const addToCart = (product: CartProduct) => {
