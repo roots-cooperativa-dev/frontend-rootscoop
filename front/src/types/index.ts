@@ -66,3 +66,17 @@ export interface Icart {
   productSizeId: string;
   quantity: number;
 }
+
+export interface UpdateUserDTO {
+  name: string;
+  email: string;
+  birthdate: string;
+  phone: number;
+  username: string;
+  password?: string; // opcional si no se está actualizando
+  address: {
+    street: string;
+    latitude: number;
+    longitude: number;
+  };
+}
