@@ -99,7 +99,21 @@ export const updateUserRoles = async (
         return true;
     } catch (error: any) {
         if (axios.isAxiosError(error)) {
-            console.error("Error al actualizar roles:", error.response?.data || error.message);
+            const data = error.response?.data;
+
+            console.error("Error al actualizar roles:");
+
+            if (data?.errors) {
+                // Si el backend devuelve errores tipo { errors: { campo: [errores] } }
+                Object.entries(data.errors).forEach(([field, messages]) => {
+                    console.error(`${field}: ${(messages as string[]).join(", ")}`);
+                });
+            } else if (data?.message) {
+                console.error("Mensaje:", data.message);
+            } else {
+                console.error("Mensaje genérico:", error.message);
+            }
+
         } else {
             console.error("Error desconocido:", error);
         }

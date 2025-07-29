@@ -9,6 +9,7 @@ import {
   User,
   ClipboardList,
   X,
+  CircleDollarSign as DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -67,6 +68,12 @@ export const DashboardSidebar = ({ isOpen = false, onClose }: SidebarProps) => {
       label: "Turnos",
       icon: Plus,
       description: "Registro de turnos",
+    },
+    {
+      href: "/dashboard/donaciones",
+      label: "Donaciones",
+      icon: DollarSign,
+      description: "Historial de donaciones",
     },
   ];
 
