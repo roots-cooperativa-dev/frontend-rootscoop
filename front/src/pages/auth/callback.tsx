@@ -11,6 +11,7 @@ import { UpdateUserDTO } from "@/src/types";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import mapboxgl from "mapbox-gl";
 
+
 export default function Callback() {
   const router = useRouter();
   const { user, token, saveUserData } = useAuthContext();
@@ -127,6 +128,8 @@ export default function Callback() {
     if (!mapContainerRef.current) return;
 
     const { latitude, longitude } = formData.address;
+    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current as HTMLElement,
