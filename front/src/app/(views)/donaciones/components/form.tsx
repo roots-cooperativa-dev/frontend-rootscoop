@@ -68,7 +68,6 @@ export default function DonarFormulario() {
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
-    // Validar con Yup
     const errors = await formik.validateForm();
 
     formik.setTouched(
@@ -87,6 +86,23 @@ export default function DonarFormulario() {
     await formik.submitForm();
   };
 
+  // 🧠 Nuevo: solo permite números con hasta 2 decimales
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (/^\d*\.?\d{0,2}$/.test(value)) {
+      formik.setFieldValue("amount", value);
+    }
+  };
+
+  // 🧠 Nuevo: bloquea pegado con formato inválido
+  const handleAmountPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pastedText = e.clipboardData.getData("Text");
+    if (!/^\d*\.?\d{0,2}$/.test(pastedText)) {
+      e.preventDefault();
+      toast.error("Solo se permiten números con hasta 2 decimales.");
+    }
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -102,10 +118,11 @@ export default function DonarFormulario() {
           id="amount"
           name="amount"
           type="text"
-          inputMode="numeric"
+          inputMode="decimal"
           placeholder="Ingresá un monto (mínimo $1)"
           value={formik.values.amount}
-          onChange={formik.handleChange}
+          onChange={handleAmountChange}
+          onPaste={handleAmountPaste}
           onBlur={formik.handleBlur}
           className="h-12 text-lg font-semibold placeholder:text-gray-400 focus:ring-2 focus:ring-[#017d74]/40"
         />
