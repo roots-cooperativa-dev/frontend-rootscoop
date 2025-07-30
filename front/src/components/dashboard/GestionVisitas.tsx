@@ -3,26 +3,31 @@
 import { useEffect, useState } from "react"
 import { fetchVisitas, eliminarVisita } from "../../app/utils/VisitasHelper"
 import type { IVisita } from "../../app/types"
-import {
-    Table, TableBody, TableCell, TableHead,
-    TableHeader, TableRow
-} from "../../components/ui/table"
-import {
-    Card, CardContent, CardHeader,
-    CardTitle, CardDescription
-} from "../../components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card"
 import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
 import Link from "next/link"
-import {
-    Eye, Plus, Calendar, Clock, MapPin, Loader2, Trash2
-} from "lucide-react"
+import { Eye, Plus, Calendar, Clock, MapPin, Loader2, Trash2 } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { toast } from "sonner"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "../../components/ui/alert-dialog" // Importar componentes de AlertDialog
 
 export const GestionVisitas = () => {
     const [visitas, setVisitas] = useState<IVisita[]>([])
     const [loading, setLoading] = useState(true)
+    const [visitaAEliminar, setVisitaAEliminar] = useState<IVisita | null>(null) // Estado para la visita a eliminar
+    const [dialogOpen, setDialogOpen] = useState(false) // Estado para controlar la apertura del AlertDialog
 
     useEffect(() => {
         const cargarVisitas = async () => {
@@ -38,15 +43,16 @@ export const GestionVisitas = () => {
         cargarVisitas()
     }, [])
 
-    const handleEliminar = async (id: string) => {
-        const confirm = window.confirm("¿Estás seguro de que deseas eliminar esta visita?")
-        if (!confirm) return
+    const handleEliminar = async () => {
+        if (!visitaAEliminar) return // Asegurarse de que hay una visita seleccionada
 
         try {
-            const success = await eliminarVisita(id)
+            const success = await eliminarVisita(visitaAEliminar.id)
             if (success) {
-                setVisitas((prev) => prev.filter((v) => v.id !== id))
+                setVisitas((prev) => prev.filter((v) => v.id !== visitaAEliminar.id))
                 toast.success("Visita eliminada correctamente")
+                setDialogOpen(false) // Cerrar el diálogo después de la eliminación
+                setVisitaAEliminar(null) // Limpiar la visita a eliminar
             } else {
                 toast.error("No se pudo eliminar la visita")
             }
@@ -73,6 +79,11 @@ export const GestionVisitas = () => {
         </div>
     )
 
+    // Stats calculations (moved here to be accessible for rendering)
+    const totalVisitas = visitas.length
+    const activeVisitas = visitas.filter((v) => v.status === "active").length
+    const totalTurnos = visitas.reduce((acc, v) => acc + (v.availableSlots?.length || 0), 0)
+
     return (
         <div className="space-y-6">
             {/* HEADER */}
@@ -96,7 +107,47 @@ export const GestionVisitas = () => {
 
             {/* STATS CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* ... Tarjetas como ya tenías ... */}
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <Calendar className="w-6 h-6 text-blue-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Total Visitas</p>
+                                <p className="text-2xl font-bold text-gray-900">{totalVisitas}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <MapPin className="w-6 h-6 text-green-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Visitas Activas</p>
+                                <p className="text-2xl font-bold text-gray-900">{activeVisitas}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <Clock className="w-6 h-6 text-purple-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-600">Total Turnos</p>
+                                <p className="text-2xl font-bold text-gray-900">{totalTurnos}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* LISTADO */}
@@ -121,7 +172,7 @@ export const GestionVisitas = () => {
                                     <TableHead>Descripción</TableHead>
                                     <TableHead>Personas</TableHead>
                                     <TableHead>Estado</TableHead>
-                                    <TableHead>Slots</TableHead>
+                                    <TableHead>Turnos</TableHead>
                                     <TableHead className="text-right">Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -135,30 +186,60 @@ export const GestionVisitas = () => {
                                             <Badge
                                                 className={cn(
                                                     "font-medium",
-                                                    visita.status === "active"
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-red-100 text-red-800"
+                                                    visita.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800",
                                                 )}
                                             >
                                                 {visita.status === "active" ? "Activa" : "Inactiva"}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>{visita.availableSlots?.length || 0} slots</TableCell>
+                                        <TableCell>{visita.availableSlots?.length || 0} turnos</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-2">
-                                                <Link href={`/dashboard/visitas/${visita.id}/slots`}>
+                                                <Link href={`/dashboard/visitas/edit/${visita.id}`}>
                                                     <Button size="sm" variant="outline">
-                                                        <Plus className="w-4 h-4 mr-1" />
-                                                        Agregar Slots
+                                                        Editar
                                                     </Button>
                                                 </Link>
-                                                <Button
-                                                    size="sm"
-                                                    variant="destructive"
-                                                    onClick={() => handleEliminar(visita.id)}
+
+                                                {visita.availableSlots && visita.availableSlots.length > 0 && (
+                                                    <Link href={`/dashboard/visitas/${visita.id}/slots`}>
+                                                        <Button size="sm" variant="outline">
+                                                            <Eye className="w-4 h-4 mr-1" />
+                                                            Agregar Horario
+                                                        </Button>
+                                                    </Link>
+                                                )}
+
+                                                <AlertDialog
+                                                    open={dialogOpen && visitaAEliminar?.id === visita.id}
+                                                    onOpenChange={setDialogOpen}
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                setVisitaAEliminar(visita)
+                                                                setDialogOpen(true)
+                                                            }}
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>¿Eliminar visita?</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar la visita "
+                                                                <strong>{visitaAEliminar?.title}</strong>"?
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={handleEliminar}>Eliminar</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </div>
                                         </TableCell>
                                     </TableRow>
