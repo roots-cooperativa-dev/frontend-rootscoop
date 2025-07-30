@@ -30,6 +30,18 @@ export default function Callback() {
       try {
         const userData = await getUserById(userId, accessToken);
 
+        const birthYear = userData.birthdate
+          ? new Date(userData.birthdate).getFullYear()
+          : null;
+        const currentYear = new Date().getFullYear();
+
+        // ✅ Si la fecha ya fue modificada (≠ año actual), redirigimos al home
+        if (birthYear && birthYear !== currentYear) {
+          router.push("/"); // Ya tiene una fecha válida, no necesita completar nada
+          return;
+        }
+
+        // ⬇️ Si la fecha es del año actual o no existe, dejamos que complete el perfil
         saveUserData({
           user: {
             id: userId,
@@ -49,8 +61,6 @@ export default function Callback() {
           accessToken: accessToken,
           isAuth: true,
         });
-
-        router.push("/");
       } catch (error) {
         console.error("Error al obtener datos del usuario:", error);
       }
@@ -58,7 +68,6 @@ export default function Callback() {
 
     fetchUser();
   }, [router.isReady, router.query, saveUserData]);
-  
 
   const [formData, setFormData] = useState<UpdateUserDTO>({
     name: "",
@@ -210,6 +219,7 @@ export default function Callback() {
       saveUserData({ user: updatedUser, accessToken: token, isAuth: true });
       toast.success("Datos actualizados correctamente");
       setSuccess("Datos actualizados correctamente");
+      router.push("/");
     } catch {
       toast.error("Error actualizando datos del usuario");
       setError("Error actualizando datos del usuario");
@@ -224,7 +234,11 @@ export default function Callback() {
     <div className="flex flex-col w-full max-w-4xl mx-auto m-6 bg-slate-50">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Termina de completar tu perfil</CardTitle>
+          <CardTitle>Completá tus datos para finalizar el registro</CardTitle>
+          <p>
+            Para poder validar tus datos te pediremos que termines de completar
+            tu perfil
+          </p>
           {error && <p className="text-red-600">{error}</p>}
           {success && <p className="text-green-600">{success}</p>}
 
