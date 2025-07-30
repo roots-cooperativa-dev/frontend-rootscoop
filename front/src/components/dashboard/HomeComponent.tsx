@@ -34,7 +34,7 @@ export const HomeComponent = () => {
                 const visitas = await fetchVisitas()
                 const { categories } = await fetchCategorias(1, 100)
                 const { products } = await fetchProductos({ page: 1, limit: 100 })
-                const { users } = (await fetchUsers(1, 100)) as { users: IUsuario[] } // Cast to IUsuario[]
+                const { users } = (await fetchUsers({ page: 1, limit: 100 })) as { users: IUsuario[] } // Cast to IUsuario[]
 
                 setTotalVisitas(visitas.length)
                 setTotalCategorias(categories.length)
@@ -51,13 +51,9 @@ export const HomeComponent = () => {
                 // Últimas 5 visitas, ordenadas por fecha si es posible
                 const sortedVisitas = [...visitas].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                 setUltimasVisitas(sortedVisitas.slice(0, 5))
-
-                // Procesar usuarios por mes (usando createdAt)
                 const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
                 const currentYear = new Date().getFullYear()
                 const monthlyUserCounts: { [key: string]: number } = {}
-
-                // Initialize counts for all months of the current year to 0
                 for (let i = 0; i < 12; i++) {
                     monthlyUserCounts[monthNames[i]] = 0
                 }

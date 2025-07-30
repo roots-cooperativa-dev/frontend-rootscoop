@@ -60,28 +60,31 @@ export const DonacionesComponent = () => {
     const [donations, setDonations] = useState<any[]>([])
     const [filtered, setFiltered] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-
-    // Filtros
+    const [currentPage, setCurrentPage] = useState(1)
+    const [pages, setPages] = useState(1)
     const [searchUser, setSearchUser] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
     const [order, setOrder] = useState<"desc" | "asc">("desc")
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
 
     useEffect(() => {
         const loadDonations = async () => {
-            setLoading(true)
+            setLoading(true);
             try {
-                const data = await fetchDonationsWithUsers()
-                setDonations(data)
-                setFiltered(data)
+                const data = await fetchDonationsWithUsers(currentPage, itemsPerPage);
+                setDonations(data.items);
+                setFiltered(data.items);
+                setPages(data.pages);
             } catch (error) {
-                console.error("Error al cargar donaciones:", error)
-                // Puedes añadir un toast de error aquí si lo deseas
+                console.error("Error al cargar donaciones:", error);
             } finally {
-                setLoading(false)
+                setLoading(false);
             }
-        }
-        loadDonations()
-    }, [])
+        };
+        loadDonations();
+    }, [currentPage, itemsPerPage]);
+
 
     useEffect(() => {
         let result = [...donations]
@@ -312,6 +315,46 @@ export const DonacionesComponent = () => {
                                     })}
                                 </TableBody>
                             </Table>
+                            <div className="flex items-center gap-2 mt-4">
+                                <label className="text-sm text-gray-600">Mostrar:</label>
+                                <select
+                                    className="border rounded px-2 py-1 text-sm"
+                                    value={itemsPerPage}
+                                    onChange={(e) => {
+                                        setItemsPerPage(parseInt(e.target.value));
+                                        setCurrentPage(1); // Reiniciar a la primera página
+                                    }}
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
+                                </select>
+                                <span className="text-sm text-gray-600">por página</span>
+                            </div>
+
+                            {pages > 1 && (
+                                <div className="flex justify-center items-center gap-4 mt-6">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Anterior
+                                    </Button>
+                                    <span className="text-sm text-gray-600">
+                                        Página {currentPage} de {pages}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pages))}
+                                        disabled={currentPage === pages}
+                                    >
+                                        Siguiente
+                                    </Button>
+                                </div>
+                            )}
+
                         </div>
                     )}
                 </CardContent>

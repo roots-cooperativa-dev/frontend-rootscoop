@@ -201,14 +201,14 @@ export const GestionVisitas = () => {
                                                     </Button>
                                                 </Link>
 
-                                                {visita.availableSlots && visita.availableSlots.length > 0 && (
-                                                    <Link href={`/dashboard/visitas/${visita.id}/slots`}>
-                                                        <Button size="sm" variant="outline">
-                                                            <Eye className="w-4 h-4 mr-1" />
-                                                            Agregar Horario
-                                                        </Button>
-                                                    </Link>
-                                                )}
+
+                                                <Link href={`/dashboard/visitas/${visita.id}/slots`}>
+                                                    <Button size="sm" variant="outline">
+                                                        <Eye className="w-4 h-4 mr-1" />
+                                                        Agregar Horario
+                                                    </Button>
+                                                </Link>
+
 
                                                 <AlertDialog
                                                     open={dialogOpen && visitaAEliminar?.id === visita.id}

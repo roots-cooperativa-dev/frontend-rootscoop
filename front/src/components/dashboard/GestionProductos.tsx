@@ -77,9 +77,7 @@ export const GestionProductos = () => {
         } else if (statusFilter === "deleted") {
           filteredProducts = filteredProducts.filter((p) => !!p.deletedAt);
         }
-
         setProductos(filteredProducts)
-        // Ajustamos totalPages para que refleje cantidad real según filtro (puede ser aproximado)
         setTotalPages(data.pages)
       } catch (error) {
         toast.error("Error cargando productos")
