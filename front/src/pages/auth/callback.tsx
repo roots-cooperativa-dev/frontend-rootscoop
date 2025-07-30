@@ -220,6 +220,7 @@ export default function Callback() {
       toast.success("Datos actualizados correctamente");
       setSuccess("Datos actualizados correctamente");
       router.push("/");
+      
     } catch {
       toast.error("Error actualizando datos del usuario");
       setError("Error actualizando datos del usuario");
