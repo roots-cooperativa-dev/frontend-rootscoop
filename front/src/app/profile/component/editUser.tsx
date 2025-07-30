@@ -224,7 +224,7 @@ const EditUser = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Contraseña nueva o actual"
+                placeholder="Ingrese su nueva contraseña"
                 value={formData.password}
                 onChange={handleChange}
                 className="border p-2 rounded w-full"
