@@ -6,7 +6,7 @@ import { useCartContext } from "@/src/context/cartContext";
 
 const AuthNav = () => {
   const { isAuth, user } = useAuthContext();
-  const { cart, total, resetCart } = useCartContext(); //si uso logout debo incluir resetCart
+  const { total } = useCartContext(); 
 
   if (isAuth === null) return <p>...cargando</p>;
   if (user?.isAdmin) {

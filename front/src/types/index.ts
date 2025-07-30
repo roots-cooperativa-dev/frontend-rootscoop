@@ -24,8 +24,8 @@ export interface UserGoogle {
   donates: any[];         // podés tiparlo mejor si querés
   orders: any[];
   appointments: any[];
-  cart: any[]; 
-  address?: {
+  cart?: any[]; 
+  address: {
     street: string;
     lat: number;
     long: number;
