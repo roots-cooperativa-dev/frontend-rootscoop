@@ -20,8 +20,11 @@ import {
     Calendar,
     Loader2,
     CreditCard,
+    Eye,
 } from "lucide-react"
 import { cn } from "../../lib/utils"
+import Link from "next/link"
+
 
 // Helper para configurar el estilo de los badges de estado
 const getStatusConfig = (status: string) => {
@@ -257,6 +260,8 @@ export const DonacionesComponent = () => {
                                         <TableHead>Estado</TableHead>
                                         <TableHead>Método de Pago</TableHead>
                                         <TableHead>Fecha</TableHead>
+                                        <TableHead>Acciones</TableHead>
+
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -294,6 +299,13 @@ export const DonacionesComponent = () => {
                                                         <Calendar className="w-4 h-4 text-gray-500" />
                                                         {new Date(donation.dateApproved).toLocaleString()}
                                                     </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Link href={`donaciones/${donation.id}`}>
+                                                        <Button variant="ghost" size="sm">
+                                                            <Eye className="w-4 h-4" />
+                                                        </Button>
+                                                    </Link>
                                                 </TableCell>
                                             </TableRow>
                                         )
