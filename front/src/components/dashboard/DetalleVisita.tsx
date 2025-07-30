@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { fetchVisitas, agregarTurnoAVisita } from "../../app/utils/VisitasHelper"
@@ -24,6 +23,7 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "../../components/ui/dialog"
+import { format, isPast, parseISO } from "date-fns"
 
 export const DetalleVisita = () => {
     const params = useParams()
@@ -31,13 +31,22 @@ export const DetalleVisita = () => {
     const [visita, setVisita] = useState<IVisita | null>(null)
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
-    const [isModalOpen, setIsModalOpen] = useState(false) // State for modal
+    const [isModalOpen, setIsModalOpen] = useState(false)
     const [formData, setFormData] = useState({
         date: "",
         startTime: "",
         endTime: "",
         maxAppointments: 1,
     })
+    const [formErrors, setFormErrors] = useState<{
+        date?: string
+        startTime?: string
+        endTime?: string
+        maxAppointments?: string
+    }>({})
+    const [touched, setTouched] = useState<Partial<Record<keyof typeof formData, boolean>>>({}) // Nuevo estado para campos tocados
+    const [formSubmitted, setFormSubmitted] = useState(false) // Nuevo estado para saber si el formulario fue enviado
+    const [isFormValid, setIsFormValid] = useState(true) // Declaración de la variable isFormValid
 
     useEffect(() => {
         const cargarVisita = async () => {
@@ -55,37 +64,117 @@ export const DetalleVisita = () => {
         if (visitaId) cargarVisita()
     }, [visitaId])
 
+    // Función de validación que actualiza los errores
+    const validateForm = (data: typeof formData) => {
+        const errors: typeof formErrors = {}
+        let valid = true
+
+        if (!data.date) {
+            errors.date = "La fecha es obligatoria."
+            valid = false
+        } else {
+            const selectedDate = parseISO(data.date)
+            const today = new Date()
+            today.setHours(0, 0, 0, 0) // Reset time for comparison
+
+            if (isPast(selectedDate) && format(selectedDate, "yyyy-MM-dd") !== format(today, "yyyy-MM-dd")) {
+                errors.date = "No puedes seleccionar una fecha pasada."
+                valid = false
+            }
+        }
+
+        if (!data.startTime) {
+            errors.startTime = "La hora de inicio es obligatoria."
+            valid = false
+        }
+        if (!data.endTime) {
+            errors.endTime = "La hora de finalización es obligatoria."
+            valid = false
+        }
+        if (data.startTime && data.endTime) {
+            const start = new Date(`2000-01-01T${data.startTime}`)
+            const end = new Date(`2000-01-01T${data.endTime}`)
+            if (start >= end) {
+                errors.endTime = "La hora de finalización debe ser posterior a la hora de inicio."
+                valid = false
+            }
+        }
+
+        if (data.maxAppointments <= 0 || isNaN(data.maxAppointments)) {
+            errors.maxAppointments = "La cantidad máxima de citas debe ser al menos 1."
+            valid = false
+        }
+
+        setFormErrors(errors)
+        return valid
+    }
+
+    // Efecto para revalidar el formulario cuando cambian los datos o el estado de 'touched'/'formSubmitted'
+    useEffect(() => {
+        // Solo valida si el formulario ha sido enviado o si algún campo ha sido tocado
+        if (formSubmitted || Object.keys(touched).length > 0) {
+            const isValid = validateForm(formData)
+            // Actualiza isFormValid basado en la validación actual
+            setIsFormValid(isValid)
+        } else {
+            // Si no se ha tocado nada ni enviado, el formulario se considera válido inicialmente
+            setIsFormValid(true)
+        }
+    }, [formData, touched, formSubmitted])
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        setFormData((prev) => ({
-            ...prev,
+        const newFormData = {
+            ...formData,
             [name]: name === "maxAppointments" ? Number.parseInt(value) : value,
-        }))
+        }
+        setFormData(newFormData)
+        // Marcar el campo como tocado al cambiar
+        setTouched((prev) => ({ ...prev, [name]: true }))
+    }
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const { name } = e.target
+        // Marcar el campo como tocado al salir de él
+        setTouched((prev) => ({ ...prev, [name]: true }))
+        // Validar el formulario al salir de un campo
+        validateForm(formData)
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setFormSubmitted(true) // Marcar el formulario como enviado
+
+        if (!validateForm(formData)) {
+            toast.error("Por favor, corrige los errores del formulario.")
+            return
+        }
         setSubmitting(true)
         try {
             await agregarTurnoAVisita(visitaId, formData)
-            toast.success("Slot agregado correctamente")
+            toast.success("Horario agregado correctamente")
             setFormData({
                 date: "",
                 startTime: "",
                 endTime: "",
                 maxAppointments: 1,
             })
+            setFormErrors({}) // Limpiar errores
+            setTouched({}) // Limpiar campos tocados
+            setFormSubmitted(false) // Resetear estado de enviado
             // Refrescar los datos de la visita
             const visitas = await fetchVisitas()
             const encontrada = visitas.find((v) => v.id === visitaId)
             setVisita(encontrada || null)
-            setIsModalOpen(false) // Close modal on success
+            setIsModalOpen(false) // Cerrar modal
         } catch (error) {
-            toast.error("Error al agregar el Slot")
+            toast.error("Error al agregar el horario")
         } finally {
             setSubmitting(false)
         }
     }
+
+    const todayString = format(new Date(), "yyyy-MM-dd") // Obtener la fecha de hoy en formato YYYY-MM-DD
 
     if (loading) {
         return (
@@ -137,32 +226,36 @@ export const DetalleVisita = () => {
                         </div>
                         Detalle de Visita
                     </h1>
-                    <p className="text-gray-600 mt-1">Gestiona los Slots y horarios de la visita</p>
+                    <p className="text-gray-600 mt-1">Gestiona los horarios de la visita</p>
                 </div>
                 <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                     <DialogTrigger asChild>
                         <Button className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md">
                             <Plus className="w-4 h-4 mr-2" />
-                            Agregar Slot
+                            Agregar Horario
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle>Agregar Nuevo Slot</DialogTitle>
-                            <DialogDescription>Completa los datos para agregar un nuevo slot a esta visita.</DialogDescription>
+                            <DialogTitle>Agregar Nuevo Horario</DialogTitle>
+                            <DialogDescription>Completa los datos para agregar un nuevo horario a esta visita.</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <Label htmlFor="date">Fecha del slot</Label>
+                                <Label htmlFor="date">Fecha del horario</Label>
                                 <Input
                                     id="date"
                                     type="date"
                                     name="date"
                                     value={formData.date}
                                     onChange={handleChange}
-                                    required
+                                    onBlur={handleBlur} // Validar al salir del campo
+                                    min={todayString} // Deshabilitar fechas pasadas
                                     className="w-full"
                                 />
+                                {formErrors?.date && (touched.date || formSubmitted) && (
+                                    <p className="text-red-500 text-sm">{formErrors.date}</p>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="maxAppointments">Cantidad máxima de citas</Label>
@@ -170,12 +263,14 @@ export const DetalleVisita = () => {
                                     id="maxAppointments"
                                     type="number"
                                     name="maxAppointments"
-                                    value={formData.maxAppointments}
+                                    value={isNaN(formData.maxAppointments) ? "" : formData.maxAppointments} // Manejar NaN para la visualización
                                     onChange={handleChange}
-                                    required
-                                    min={1}
+                                    onBlur={handleBlur} // Validar al salir del campo
                                     className="w-full"
                                 />
+                                {formErrors?.maxAppointments && (touched.maxAppointments || formSubmitted) && (
+                                    <p className="text-red-500 text-sm">{formErrors.maxAppointments}</p>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="startTime">Hora de inicio</Label>
@@ -185,9 +280,12 @@ export const DetalleVisita = () => {
                                     name="startTime"
                                     value={formData.startTime}
                                     onChange={handleChange}
-                                    required
+                                    onBlur={handleBlur} // Validar al salir del campo
                                     className="w-full"
                                 />
+                                {formErrors?.startTime && (touched.startTime || formSubmitted) && (
+                                    <p className="text-red-500 text-sm">{formErrors.startTime}</p>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="endTime">Hora de finalización</Label>
@@ -197,25 +295,28 @@ export const DetalleVisita = () => {
                                     name="endTime"
                                     value={formData.endTime}
                                     onChange={handleChange}
-                                    required
+                                    onBlur={handleBlur} // Validar al salir del campo
                                     className="w-full"
                                 />
+                                {formErrors?.endTime && (touched.endTime || formSubmitted) && (
+                                    <p className="text-red-500 text-sm">{formErrors.endTime}</p>
+                                )}
                             </div>
                             <DialogFooter>
                                 <Button
                                     type="submit"
-                                    disabled={submitting}
+                                    disabled={submitting || !isFormValid}
                                     className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md"
                                 >
                                     {submitting ? (
                                         <>
                                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Guardando slot...
+                                            Guardando horario...
                                         </>
                                     ) : (
                                         <>
                                             <Plus className="w-4 h-4 mr-2" />
-                                            Agregar Slot
+                                            Agregar Horario
                                         </>
                                     )}
                                 </Button>
@@ -251,7 +352,7 @@ export const DetalleVisita = () => {
                                 <Clock className="w-6 h-6 text-purple-600" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-gray-600">Slots Disponibles</p>
+                                <p className="text-sm font-medium text-gray-600">Horarios Disponibles</p>
                                 <p className="text-2xl font-bold text-gray-900">{visita.availableSlots?.length || 0}</p>
                             </div>
                         </div>
@@ -312,7 +413,7 @@ export const DetalleVisita = () => {
                             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-2">
                                     <Clock className="w-4 h-4 text-gray-500" />
-                                    <span className="text-sm font-medium text-gray-700">Slots:</span>
+                                    <span className="text-sm font-medium text-gray-700">Horarios:</span>
                                     <span className="font-semibold text-gray-900">{visita.availableSlots?.length || 0}</span>
                                 </div>
                             </div>
@@ -335,15 +436,15 @@ export const DetalleVisita = () => {
                 </CardContent>
             </Card>
 
-            {/* LISTADO DE Slots */}
+            {/* LISTADO DE Horarios */}
             {visita.availableSlots && visita.availableSlots.length > 0 && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Clock className="w-5 h-5" />
-                            Slots Cargados
+                            Horarios Cargados
                         </CardTitle>
-                        <CardDescription>Lista de Slots agregados a esta visita</CardDescription>
+                        <CardDescription>Lista de Horarios agregados a esta visita</CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {visita.availableSlots.map((slot, idx) => (
@@ -371,34 +472,38 @@ export const DetalleVisita = () => {
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                             <Clock className="w-8 h-8 text-gray-400" />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No hay Slots cargados</h3>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No hay horarios cargados</h3>
                         <p className="text-gray-500 text-center mb-4">
-                            Agrega el primer slot para esta visita usando el botón "Agregar Slot".
+                            Agrega el primer horario para esta visita usando el botón "Agregar Horario".
                         </p>
                         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                             <DialogTrigger asChild>
                                 <Button className="bg-[#017d74] hover:bg-[#015d54] text-white">
                                     <Plus className="w-4 h-4 mr-2" />
-                                    Agregar Slot
+                                    Agregar Horario
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
-                                    <DialogTitle>Agregar Nuevo Slot</DialogTitle>
-                                    <DialogDescription>Completa los datos para agregar un nuevo slot a esta visita.</DialogDescription>
+                                    <DialogTitle>Agregar Nuevo Horario</DialogTitle>
+                                    <DialogDescription>Completa los datos para agregar un nuevo horario a esta visita.</DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="date">Fecha del slot</Label>
+                                        <Label htmlFor="date">Fecha del horario</Label>
                                         <Input
                                             id="date"
                                             type="date"
                                             name="date"
                                             value={formData.date}
                                             onChange={handleChange}
-                                            required
+                                            onBlur={handleBlur} // Validar al salir del campo
+                                            min={todayString} // Deshabilitar fechas pasadas
                                             className="w-full"
                                         />
+                                        {formErrors?.date && (touched.date || formSubmitted) && (
+                                            <p className="text-red-500 text-sm">{formErrors.date}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="maxAppointments">Cantidad máxima de citas</Label>
@@ -406,12 +511,14 @@ export const DetalleVisita = () => {
                                             id="maxAppointments"
                                             type="number"
                                             name="maxAppointments"
-                                            value={formData.maxAppointments}
+                                            value={isNaN(formData.maxAppointments) ? "" : formData.maxAppointments} // Manejar NaN para la visualización
                                             onChange={handleChange}
-                                            required
-                                            min={1}
+                                            onBlur={handleBlur} // Validar al salir del campo
                                             className="w-full"
                                         />
+                                        {formErrors?.maxAppointments && (touched.maxAppointments || formSubmitted) && (
+                                            <p className="text-red-500 text-sm">{formErrors.maxAppointments}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="startTime">Hora de inicio</Label>
@@ -421,9 +528,12 @@ export const DetalleVisita = () => {
                                             name="startTime"
                                             value={formData.startTime}
                                             onChange={handleChange}
-                                            required
+                                            onBlur={handleBlur} // Validar al salir del campo
                                             className="w-full"
                                         />
+                                        {formErrors?.startTime && (touched.startTime || formSubmitted) && (
+                                            <p className="text-red-500 text-sm">{formErrors.startTime}</p>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="endTime">Hora de finalización</Label>
@@ -433,25 +543,28 @@ export const DetalleVisita = () => {
                                             name="endTime"
                                             value={formData.endTime}
                                             onChange={handleChange}
-                                            required
+                                            onBlur={handleBlur} // Validar al salir del campo
                                             className="w-full"
                                         />
+                                        {formErrors?.endTime && (touched.endTime || formSubmitted) && (
+                                            <p className="text-red-500 text-sm">{formErrors.endTime}</p>
+                                        )}
                                     </div>
                                     <DialogFooter>
                                         <Button
                                             type="submit"
-                                            disabled={submitting}
+                                            disabled={submitting || !isFormValid}
                                             className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md"
                                         >
                                             {submitting ? (
                                                 <>
                                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                    Guardando slot...
+                                                    Guardando horario...
                                                 </>
                                             ) : (
                                                 <>
                                                     <Plus className="w-4 h-4 mr-2" />
-                                                    Agregar Slot
+                                                    Agregar Horario
                                                 </>
                                             )}
                                         </Button>
