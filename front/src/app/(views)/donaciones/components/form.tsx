@@ -8,6 +8,7 @@ import { Button } from "../../../../components/ui/button";
 import { useState } from "react";
 import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
+
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DonarFormulario() {
@@ -21,8 +22,10 @@ export default function DonarFormulario() {
     },
     validationSchema: Yup.object({
       amount: Yup.number()
+        .typeError("El monto debe ser un número válido")
         .required("El monto es obligatorio")
-        .min(1, "El monto mínimo es $1"),
+        .min(1, "El monto mínimo es $1")
+        .max(10_000_000, "El monto máximo es $5.000.000"),
       message: Yup.string()
         .required("El mensaje es obligatorio")
         .min(3, "El mensaje debe tener al menos 3 caracteres"),
@@ -37,7 +40,7 @@ export default function DonarFormulario() {
         const res = await axios.post(
           `${BACKEND_URL}/payments/create-preference/${user?.id}`,
           {
-            amount: values.amount,
+            amount: Number(values.amount),
             message: values.message,
           },
           {
@@ -51,20 +54,43 @@ export default function DonarFormulario() {
         if (res.data && res.data.initPoint) {
           window.location.href = res.data.initPoint;
         } else {
-          toast("Error al generar el pago.");
+          toast.error("Error al generar el pago.");
         }
       } catch (err) {
         console.error(err);
-        toast("Hubo un error al conectar con Mercado Pago.");
+        toast.error("Hubo un error al conectar con Mercado Pago.");
       } finally {
         setLoading(false);
       }
     },
   });
 
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+
+    // Validar con Yup
+    const errors = await formik.validateForm();
+
+    formik.setTouched(
+      Object.keys(formik.values).reduce<Record<string, boolean>>((acc, key) => {
+        acc[key] = true;
+        return acc;
+      }, {}),
+      true
+    );
+
+    if (Object.keys(errors).length) {
+      Object.values(errors).forEach((msg) => toast.error(String(msg)));
+      return;
+    }
+
+    await formik.submitForm();
+  };
+
   return (
     <form
-      onSubmit={formik.handleSubmit}
+      onSubmit={handleSubmit}
+      noValidate
       className="bg-white p-6 rounded-2xl shadow-lg max-w-md w-full mx-auto border border-[#017d74]/30"
     >
       <h2 className="text-2xl font-bold mb-6 text-center font-chewy text-[#017d74]">
@@ -75,8 +101,8 @@ export default function DonarFormulario() {
         <Input
           id="amount"
           name="amount"
-          type="number"
-          max={1000000}
+          type="text"
+          inputMode="numeric"
           placeholder="Ingresá un monto (mínimo $1)"
           value={formik.values.amount}
           onChange={formik.handleChange}

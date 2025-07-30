@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
@@ -20,22 +20,42 @@ export default function ReservaForm() {
   >();
   const [slotsDisponibles, setSlotsDisponibles] = useState<Slot[]>([]);
   const [fechasConSlots, setFechasConSlots] = useState<Date[]>([]);
+  const [capMax, setCapMax] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchVisitas = async () => {
       try {
         const res = await axios.get(`${BACKEND_URL}/visits`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         setVisitas(res.data);
       } catch (error) {
         console.error("Error al obtener visitas:", error);
+        toast.error("No se pudieron cargar las visitas.");
       }
     };
     fetchVisitas();
-  }, []);
+  }, [token]);
+
+  const validationSchema = useMemo(
+    () =>
+      Yup.object({
+        visitaId: Yup.string().required("Selecciona una visita"),
+        slotId: Yup.string().required("Selecciona un horario"),
+        cantidad: Yup.number()
+          .typeError("Debe ser un número")
+          .required("Campo obligatorio")
+          .min(1, "Mínimo 1 persona")
+          .max(
+            capMax ?? 1,
+            capMax != null
+              ? `Máximo ${capMax} personas disponibles para este horario`
+              : "Seleccioná un horario para ver el máximo"
+          ),
+        description: Yup.string().required("Campo obligatorio"),
+      }),
+    [capMax]
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -44,15 +64,7 @@ export default function ReservaForm() {
       slotId: "",
       description: "",
     },
-    validationSchema: Yup.object({
-      visitaId: Yup.string().required("Selecciona una visita"),
-      cantidad: Yup.number()
-        .required("Campo obligatorio")
-        .min(1, "Mínimo 1 persona")
-        .max(15, "Máximo 15 personas"),
-      slotId: Yup.string().required("Selecciona un horario"),
-      description: Yup.string().required("Campo obligatorio"),
-    }),
+    validationSchema,
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values) => {
@@ -61,16 +73,33 @@ export default function ReservaForm() {
         toast.error("El horario seleccionado ya no está disponible.");
         return;
       }
+
       const slotDateTime = new Date(`${slot.date}T${slot.startTime}`);
       if (slotDateTime <= new Date()) {
-        toast.error("El horario ya pasó, por favor elige otro.");
+        toast.error("El horario ya pasó, por favor elegí otro.");
         return;
       }
+
+      const remaining =
+        (slot.maxAppointments ?? 0) - (slot.currentAppointmentsCount ?? 0);
+      const cantidad = parseInt(values.cantidad, 10);
+
+      if (remaining < cantidad) {
+        toast.error(
+          `Quedan ${Math.max(
+            remaining,
+            0
+          )} lugares para este horario. Ajustá la cantidad.`
+        );
+        return;
+      }
+
       const payload = {
         visitSlotId: values.slotId,
-        numberOfPeople: parseInt(values.cantidad),
+        numberOfPeople: cantidad,
         description: values.description,
       };
+
       try {
         await axios.post(`${BACKEND_URL}/visits/appointments`, payload, {
           headers: {
@@ -83,9 +112,12 @@ export default function ReservaForm() {
         setFechaSeleccionada(undefined);
         setFechasConSlots([]);
         setSlotsDisponibles([]);
-      } catch (err) {
-        console.error("Error al enviar reserva", err);
-        toast.error("Ocurrió un error al enviar la reserva");
+        setCapMax(null);
+      } catch (err: any) {
+        const msg =
+          err?.response?.data?.message ||
+          "Ocurrió un error al enviar la reserva";
+        toast.error(msg);
       }
     },
   });
@@ -94,38 +126,70 @@ export default function ReservaForm() {
     const visita = visitas.find((v) => v.id === formik.values.visitaId);
     if (!visita) {
       setFechasConSlots([]);
+      setFechaSeleccionada(undefined);
+      setSlotsDisponibles([]);
+      setCapMax(null);
       return;
     }
     const now = new Date();
     const fechas = visita.availableSlots
       .filter((slot) => {
         const slotDateTime = new Date(`${slot.date}T${slot.startTime}`);
-        return !slot.isBooked && slotDateTime > now;
+        const remaining =
+          (slot.maxAppointments ?? 0) - (slot.currentAppointmentsCount ?? 0);
+        return slotDateTime > now && remaining > 0;
       })
       .map((slot) => new Date(slot.date + "T00:00:00"));
+
     const fechasUnicas = Array.from(
       new Set(fechas.map((f) => f.toDateString()))
     ).map((str) => new Date(str));
+
     setFechasConSlots(fechasUnicas);
     setFechaSeleccionada(undefined);
     setSlotsDisponibles([]);
-  }, [formik.values.visitaId, visitas]);
+    setCapMax(null);
+    formik.setFieldValue("slotId", "");
+  }, [formik.values.visitaId, visitas]); // eslint-disable-line
 
   useEffect(() => {
     if (!fechaSeleccionada || !formik.values.visitaId) {
       setSlotsDisponibles([]);
+      setCapMax(null);
       return;
     }
     const visita = visitas.find((v) => v.id === formik.values.visitaId);
     if (!visita) return;
+
     const fechaStr = fechaSeleccionada.toISOString().split("T")[0];
     const now = new Date();
+
     const slots = visita.availableSlots.filter((slot) => {
       const slotDateTime = new Date(`${slot.date}T${slot.startTime}`);
-      return slot.date === fechaStr && !slot.isBooked && slotDateTime > now;
+      const remaining =
+        (slot.maxAppointments ?? 0) - (slot.currentAppointmentsCount ?? 0);
+      return slot.date === fechaStr && remaining > 0 && slotDateTime > now;
     });
+
     setSlotsDisponibles(slots);
-  }, [fechaSeleccionada, visitas, formik.values.visitaId]);
+    setCapMax(null);
+    formik.setFieldValue("slotId", "");
+  }, [fechaSeleccionada, visitas, formik.values.visitaId]); // eslint-disable-line
+
+  useEffect(() => {
+    if (!formik.values.slotId) {
+      setCapMax(null);
+      return;
+    }
+    const slotSel = slotsDisponibles.find((s) => s.id === formik.values.slotId);
+    if (!slotSel) {
+      setCapMax(null);
+      return;
+    }
+    const remaining =
+      (slotSel.maxAppointments ?? 0) - (slotSel.currentAppointmentsCount ?? 0);
+    setCapMax(Math.max(0, remaining));
+  }, [formik.values.slotId, slotsDisponibles]);
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-xl space-y-6">
@@ -141,7 +205,10 @@ export default function ReservaForm() {
           {visitas.map((visita) => {
             const slotsValidos = visita.availableSlots.filter((slot) => {
               const fechaHora = new Date(`${slot.date}T${slot.startTime}`);
-              return !slot.isBooked && fechaHora > new Date();
+              const remaining =
+                (slot.maxAppointments ?? 0) -
+                (slot.currentAppointmentsCount ?? 0);
+              return remaining > 0 && fechaHora > new Date();
             });
             if (slotsValidos.length === 0) return null;
             return (
@@ -153,11 +220,17 @@ export default function ReservaForm() {
                   {visita.title}
                 </h3>
                 <ul className="mt-2 space-y-1 text-gray-700">
-                  {slotsValidos.map((slot) => (
-                    <li key={slot.id} className="text-sm">
-                      📅 {slot.date} - 🕒 {slot.startTime}
-                    </li>
-                  ))}
+                  {slotsValidos.map((slot) => {
+                    const remaining =
+                      (slot.maxAppointments ?? 0) -
+                      (slot.currentAppointmentsCount ?? 0);
+                    return (
+                      <li key={slot.id} className="text-sm">
+                        📅 {slot.date} - 🕒 {slot.startTime} — cupos de personas
+                        :{remaining}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             );
@@ -188,6 +261,7 @@ export default function ReservaForm() {
             <p className="text-red-500 text-sm">{formik.errors.visitaId}</p>
           )}
         </div>
+
         {fechasConSlots.length > 0 && (
           <div>
             <label className="block text-m font-semibold font-bebas text-gray-700 mb-2">
@@ -250,6 +324,7 @@ export default function ReservaForm() {
             />
           </div>
         )}
+
         {fechaSeleccionada && slotsDisponibles.length === 0 && (
           <div className="p-3 bg-yellow-100 border border-yellow-400 rounded-lg">
             <p className="text-yellow-700 text-sm">
@@ -257,6 +332,7 @@ export default function ReservaForm() {
             </p>
           </div>
         )}
+
         {slotsDisponibles.length > 0 && (
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -270,17 +346,23 @@ export default function ReservaForm() {
               className="w-full p-2 border rounded-lg"
             >
               <option value="">-- Seleccionar horario --</option>
-              {slotsDisponibles.map((slot) => (
-                <option key={slot.id} value={slot.id}>
-                  {slot.startTime}
-                </option>
-              ))}
+              {slotsDisponibles.map((slot) => {
+                const remaining =
+                  (slot.maxAppointments ?? 0) -
+                  (slot.currentAppointmentsCount ?? 0);
+                return (
+                  <option key={slot.id} value={slot.id}>
+                    {slot.startTime} — quedan {remaining}
+                  </option>
+                );
+              })}
             </select>
             {formik.touched.slotId && formik.errors.slotId && (
               <p className="text-red-500 text-sm">{formik.errors.slotId}</p>
             )}
           </div>
         )}
+
         <div>
           <label className="block text-m font-bebas font-semibold text-gray-700">
             Cantidad de personas
@@ -288,18 +370,25 @@ export default function ReservaForm() {
           <input
             type="number"
             name="cantidad"
-            min="1"
-            max="15"
+            min={1}
+            max={capMax ?? 1}
             value={formik.values.cantidad}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className="w-full mt-1 p-2 border rounded-lg"
+            disabled={!capMax}
+            className="w-full mt-1 p-2 border rounded-lg disabled:bg-gray-100"
             placeholder="¿Cuántas personas asistirán?"
           />
+          <div className="text-xs text-gray-600 mt-1">
+            {capMax != null
+              ? `Quedan ${capMax} lugares para este horario`
+              : "Seleccioná un horario para ver los lugares disponibles"}
+          </div>
           {formik.touched.cantidad && formik.errors.cantidad && (
             <p className="text-red-500 text-sm">{formik.errors.cantidad}</p>
           )}
         </div>
+
         <div>
           <label className="block text-m font-bebas font-semibold text-gray-700">
             Descripcion de la visita
@@ -317,6 +406,7 @@ export default function ReservaForm() {
             <p className="text-red-500 text-sm">{formik.errors.description}</p>
           )}
         </div>
+
         <button
           type="submit"
           disabled={!formik.values.slotId}
