@@ -9,7 +9,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { changePassword } from "@/src/services/password";
+import { resetPassword } from "@/src/services/password";
 
 
 interface ChangePasswordForm {
@@ -43,7 +43,7 @@ const CambiarPass = () => {
   ) => {
     try {
 
-      await changePassword(values);
+      await resetPassword(values);
       toast.success("Contraseña actualizada con éxito.");
       setTimeout(() => {
         router.push("/login");

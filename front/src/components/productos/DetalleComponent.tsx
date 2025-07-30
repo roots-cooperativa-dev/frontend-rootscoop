@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { IProducto } from "../../app/types/index";
 import { Badge } from "../../components/ui/badge";
@@ -10,7 +10,10 @@ import { useState } from "react";
 import CartAddBtn from "../cart/cartAddBtn";
 import { toast } from "sonner";
 import { useCartContext } from "../../context/cartContext";
+import { useAuthContext } from "../../context/authContext";
 import { useRouter } from "next/navigation";
+import { addProductToCart } from "../../services/cart"; // importa tu función que llama al backend
+import AuthNav from "../authNav/authNav";
 
 interface Props {
   producto: IProducto;
@@ -19,12 +22,17 @@ interface Props {
 const ProductoDetalle = ({ producto }: Props) => {
   const stock = producto.sizes[0]?.stock ?? 0;
   const price = producto.sizes[0]?.price ?? "-";
+  const sizeId = producto.sizes[0]?.id ?? "";
+  const sizeName = producto.sizes[0]?.size ?? "Único";
   const imagenes = producto.files || [];
 
-  const [imagenSeleccionada, setImagenSeleccionada] = useState(imagenes[0]?.url || "/img/image-not-found.jpg");
+  const [imagenSeleccionada, setImagenSeleccionada] = useState(
+    imagenes[0]?.url || "/img/image-not-found.jpg"
+  );
   const [cantidad, setCantidad] = useState<number>(1);
 
-  const { cart } = useCartContext();
+  const { cart, addToCart } = useCartContext();
+  const { token, isAuth } = useAuthContext();
   const router = useRouter();
 
   const incrementarCantidad = () => {
@@ -35,11 +43,40 @@ const ProductoDetalle = ({ producto }: Props) => {
     if (cantidad > 1) setCantidad((prev) => prev - 1);
   };
 
-  const handleComprarAhora = () => {
-    if (cart.length === 0) {
-      toast.error("Tienes que agregar al menos un producto al carrito para poder comprar");
+  const handleComprarAhora = async () => {
+    if (!isAuth) {
+      toast.error("Para comprar debes iniciar sesión");
+      router.push("/login");
       return;
     }
+
+    if (stock === 0) {
+      toast.error("Este producto está agotado.");
+      return;
+    }
+
+    if (cart.length === 0) {
+      try {
+        const datos = {
+          productId: producto.id,
+          productSizeId: sizeId,
+          quantity: cantidad,
+        };
+
+        const productCart = await addProductToCart(datos, token);
+        if (!productCart) {
+          throw new Error("No se pudo añadir el producto");
+        }
+
+        addToCart(productCart);
+        toast.success("Producto agregado al carrito");
+      } catch (error) {
+        toast.error("Error al añadir el producto al carrito");
+        console.error(error);
+        return;
+      }
+    }
+
     router.push("/profile/carrito");
   };
 
@@ -57,15 +94,19 @@ const ProductoDetalle = ({ producto }: Props) => {
               priority
             />
           </Link>
-          <Link
-            href="/productos"
-            className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Volver a productos</span>
-          </Link>
+          <div className="flex gap-6">
+            <Link
+              href="/productos"
+              className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Volver a productos</span>
+            </Link>
+            <AuthNav />
+          </div>
         </div>
       </header>
+
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-12 items-start">
           {/* Galería de imágenes */}
@@ -79,7 +120,7 @@ const ProductoDetalle = ({ producto }: Props) => {
                 className="rounded-lg object-cover w-full max-h-[500px]"
               />
             </div>
-            {/* Miniaturas */}
+
             <div className="flex gap-3 overflow-x-auto">
               {imagenes.map((img, i) => (
                 <Image
@@ -88,9 +129,12 @@ const ProductoDetalle = ({ producto }: Props) => {
                   alt={`Imagen ${i + 1}`}
                   width={100}
                   height={100}
-                  onClick={() => setImagenSeleccionada(img.url || "/img/image-not-found.jpg")}
+                  onClick={() =>
+                    setImagenSeleccionada(img.url || "/img/image-not-found.jpg")
+                  }
                   className={`cursor-pointer rounded-lg border-2 ${
-                    (img.url || "/img/image-not-found.jpg") === imagenSeleccionada
+                    (img.url || "/img/image-not-found.jpg") ===
+                    imagenSeleccionada
                       ? "border-[#017d74]"
                       : "border-transparent"
                   }`}
@@ -98,16 +142,25 @@ const ProductoDetalle = ({ producto }: Props) => {
               ))}
             </div>
           </div>
-          {/* Info del producto */}
+
+          {/* Información del producto */}
           <div>
-            <h1 className="text-4xl font-bold text-[#017d74] mb-2">{producto.name}</h1>
-            <Badge className="mb-4 bg-[#febb07] text-black">{producto.category.name}</Badge>
-            <p className="text-lg text-gray-700 font-popular mb-6">{producto.details}</p>
+            <h1 className="text-4xl font-bold text-[#017d74] mb-2">
+              {producto.name}
+            </h1>
+            <Badge className="mb-4 bg-[#febb07] text-black">
+              {producto.category.name}
+            </Badge>
+            <p className="text-lg text-gray-700 font-popular mb-6">
+              {producto.details}
+            </p>
             <div className="flex items-center mb-6">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-5 h-5 ${i < 4 ? "fill-[#febb07] text-[#febb07]" : "text-gray-300"}`}
+                  className={`w-5 h-5 ${
+                    i < 4 ? "fill-[#febb07] text-[#febb07]" : "text-gray-300"
+                  }`}
                 />
               ))}
               <span className="ml-2 text-sm text-gray-500">(12 reseñas)</span>
@@ -115,9 +168,13 @@ const ProductoDetalle = ({ producto }: Props) => {
             <p className="text-3xl font-bold text-[#922f4e] mb-2">${price}</p>
             <p className="mb-6 text-gray-600">
               {stock > 0 ? (
-                <span className="text-green-600 font-medium">En stock ({stock} disponibles)</span>
+                <span className="text-green-600 font-medium">
+                  En stock ({stock} disponibles)
+                </span>
               ) : (
-                <span className="text-red-500 font-medium">Producto sin stock</span>
+                <span className="text-red-500 font-medium">
+                  Producto sin stock
+                </span>
               )}
             </p>
 
@@ -143,10 +200,12 @@ const ProductoDetalle = ({ producto }: Props) => {
               </div>
             </div>
 
-            {/* Botón Comprar */}
+            {/* Botón Comprar ahora */}
             <Button
               className={`w-full text-lg font-bold shadow-md ${
-                stock > 0 ? "bg-[#922f4e] hover:bg-[#642d91] text-white" : "bg-gray-300 text-gray-500"
+                stock > 0
+                  ? "bg-[#922f4e] hover:bg-[#642d91] text-white"
+                  : "bg-gray-300 text-gray-500"
               }`}
               disabled={stock === 0}
               onClick={handleComprarAhora}

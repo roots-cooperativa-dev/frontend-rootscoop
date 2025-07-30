@@ -24,8 +24,8 @@ export interface UserGoogle {
   donates: any[];         // podés tiparlo mejor si querés
   orders: any[];
   appointments: any[];
-  cart: any[]; 
-  address?: {
+  cart?: any[]; 
+  address: {
     street: string;
     lat: number;
     long: number;
@@ -65,4 +65,17 @@ export interface Icart {
   productId: string;
   productSizeId: string;
   quantity: number;
+}
+
+export interface UpdateUserDTO {
+  name: string;
+  birthdate: string;
+  phone: number;
+  username: string;
+  password: string; 
+  address: {
+    street: string;
+    latitude: number;
+    longitude: number;
+  };
 }
