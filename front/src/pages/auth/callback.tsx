@@ -1,4 +1,6 @@
 // pages/auth/callback.tsx
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuthContext } from "@/src/context/authContext";
@@ -10,7 +12,11 @@ import { toast } from "sonner";
 import { UpdateUserDTO } from "@/src/types";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import mapboxgl from "mapbox-gl";
-
+import DatePicker from "react-datepicker";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import "react-datepicker/dist/react-datepicker.css";
+import { es } from "date-fns/locale";
 
 export default function Callback() {
   const router = useRouter();
@@ -36,13 +42,11 @@ export default function Callback() {
           : null;
         const currentYear = new Date().getFullYear();
 
-        // ✅ Si la fecha ya fue modificada (≠ año actual), redirigimos al home
         if (birthYear && birthYear !== currentYear) {
-          router.push("/"); // Ya tiene una fecha válida, no necesita completar nada
+          router.push("/");
           return;
         }
 
-        // ⬇️ Si la fecha es del año actual o no existe, dejamos que complete el perfil
         saveUserData({
           user: {
             id: userId,
@@ -70,52 +74,97 @@ export default function Callback() {
     fetchUser();
   }, [router.isReady, router.query, saveUserData]);
 
-  const [formData, setFormData] = useState<UpdateUserDTO>({
-    name: "",
-    birthdate: "",
-    username: "",
-    phone: 0,
-    password: "",
-    address: {
-      street: "",
-      latitude: -34.6037,
-      longitude: -58.3816,
-    },
-  });
-
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState<
-    string | null
-  >(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
 
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      birthdate: "",
+      username: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      address: {
+        street: "",
+        latitude: -34.6037,
+        longitude: -58.3816,
+      },
+    },
+    validationSchema: Yup.object({
+      name: Yup.string().required("Requerido"),
+      password: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
+        .required("Requerido"),
+      birthdate: Yup.date()
+        .required("Requerido")
+        .test("is-18", "Debes tener al menos 18 años", function (value) {
+          if (!value) return false;
+          const today = new Date();
+          const birthDate = new Date(value);
+          const age = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          return (
+            age > 18 ||
+            (age === 18 && m >= 0 && today.getDate() >= birthDate.getDate())
+          );
+        }),
+      phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
+      username: Yup.string().required("Requerido"),
+    }),
+    onSubmit: async (values) => {
+      if (!user?.id || !token) {
+        setError("No se pudo identificar al usuario.");
+        return;
+      }
+      setLoadingSubmit(true);
+      try {
+        const payload: UpdateUserDTO = {
+          name: values.name,
+          birthdate: values.birthdate,
+          username: values.username,
+          phone: Number(values.phone),
+          password: values.password,
+          address: values.address,
+        };
+
+        const updatedUser = await updateUser(user.id, token, payload);
+        saveUserData({ user: updatedUser, accessToken: token, isAuth: true });
+        toast.success("Datos actualizados correctamente");
+        router.push("/");
+      } catch {
+        toast.error("Error actualizando datos del usuario");
+      } finally {
+        setLoadingSubmit(false);
+      }
+    },
+    validateOnChange: true,
+    validateOnBlur: true,
+  });
+
   useEffect(() => {
     if (user?.id && token) {
       getUserById(user.id, token)
         .then((data) => {
-          const cleanedData: UpdateUserDTO = {
-            name: data.name,
-            birthdate: data.birthdate,
-            username: data.username,
-            phone: Number(data.phone),
+          formik.setValues({
+            name: data.name || "",
+            birthdate: data.birthdate || "",
+            username: data.username || "",
+            phone: data.phone?.toString() || "",
             password: "",
+            confirmPassword: "",
             address: {
               street: data.address?.street || "",
               latitude: data.address?.latitude || -34.6037,
               longitude: data.address?.longitude || -58.3816,
             },
-          };
-          setFormData(cleanedData);
+          });
         })
         .catch(() => setError("Error cargando datos del usuario"))
         .finally(() => setLoadingUser(false));
@@ -127,9 +176,8 @@ export default function Callback() {
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    const { latitude, longitude } = formData.address;
+    const { latitude, longitude } = formik.values.address;
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
-
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current as HTMLElement,
@@ -152,27 +200,21 @@ export default function Callback() {
 
     geocoder.on("result", (e: any) => {
       const { center, place_name } = e.result;
-      setFormData((prev) => ({
-        ...prev,
-        address: {
-          street: place_name,
-          latitude: center[1],
-          longitude: center[0],
-        },
-      }));
+      formik.setFieldValue("address", {
+        street: place_name,
+        latitude: center[1],
+        longitude: center[0],
+      });
       marker.setLngLat(center);
     });
 
     marker.on("dragend", () => {
       const lngLat = marker.getLngLat();
-      setFormData((prev) => ({
-        ...prev,
-        address: {
-          street: "Ubicación personalizada",
-          latitude: lngLat.lat,
-          longitude: lngLat.lng,
-        },
-      }));
+      formik.setFieldValue("address", {
+        street: "Ubicación personalizada",
+        latitude: lngLat.lat,
+        longitude: lngLat.lng,
+      });
     });
 
     mapRef.current = map;
@@ -181,56 +223,7 @@ export default function Callback() {
     return () => {
       if (mapRef.current) mapRef.current.remove();
     };
-  }, [formData.address]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "phone" ? Number(value) : value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-    setConfirmPasswordError(null);
-    setLoadingSubmit(true);
-
-    if (!user?.id || !token) {
-      setError("No se pudo identificar al usuario.");
-      setLoadingSubmit(false);
-      return;
-    }
-
-    if (!formData.password) {
-      setError("La contraseña es obligatoria para guardar los cambios.");
-      setLoadingSubmit(false);
-      return;
-    }
-
-    if (formData.password !== confirmPassword) {
-      setConfirmPasswordError("Las contraseñas no coinciden.");
-      setLoadingSubmit(false);
-      return;
-    }
-
-    try {
-      const payload = { ...formData }; // confirmPassword no se incluye
-      const updatedUser = await updateUser(user.id, token, payload);
-      saveUserData({ user: updatedUser, accessToken: token, isAuth: true });
-      toast.success("Datos actualizados correctamente");
-      setSuccess("Datos actualizados correctamente");
-      router.push("/");
-      
-    } catch {
-      toast.error("Error actualizando datos del usuario");
-      setError("Error actualizando datos del usuario");
-    } finally {
-      setLoadingSubmit(false);
-    }
-  };
+  }, [formik.values.address.latitude, formik.values.address.longitude]);
 
   if (loadingUser) return <Loading />;
 
@@ -239,115 +232,106 @@ export default function Callback() {
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Completá tus datos para finalizar el registro</CardTitle>
-          <p>
-            Para poder validar tus datos te pediremos que termines de completar
-            tu perfil
-          </p>
+          <p>Para poder validar tus datos te pediremos que termines de completar tu perfil</p>
           {error && <p className="text-red-600">{error}</p>}
-          {success && <p className="text-green-600">{success}</p>}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
+          <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4 mt-4">
             <input
               type="text"
               name="name"
               placeholder="Nombre completo"
-              value={formData.name}
-              onChange={handleChange}
-              className="border p-2 rounded"
-              required
-            />
-            <input
-              type="date"
-              name="birthdate"
-              value={formData.birthdate}
-              onChange={handleChange}
+              value={formik.values.name}
+              onChange={formik.handleChange}
               className="border p-2 rounded"
             />
+            {formik.touched.name && formik.errors.name && (
+              <p className="text-red-500 text-sm">{formik.errors.name}</p>
+            )}
+
+            <div>
+              <DatePicker
+                selected={
+                  formik.values.birthdate ? new Date(formik.values.birthdate) : null
+                }
+                onChange={(date: Date | null) => {
+                  formik.setFieldTouched("birthdate", true);
+                  formik.setFieldValue(
+                    "birthdate",
+                    date?.toISOString().split("T")[0] || ""
+                  );
+                }}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Ingresar fecha de nacimiento"
+                maxDate={new Date()}
+                showYearDropdown
+                scrollableYearDropdown
+                yearDropdownItemNumber={100}
+                locale={es}
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+              {formik.touched.birthdate && formik.errors.birthdate && (
+                <p className="text-red-500 text-xs">{formik.errors.birthdate}</p>
+              )}
+            </div>
+
             <input
               type="text"
               name="username"
               placeholder="Nombre de usuario"
-              value={formData.username}
-              onChange={handleChange}
+              value={formik.values.username}
+              onChange={formik.handleChange}
               className="border p-2 rounded"
-              required
             />
+            {formik.touched.username && formik.errors.username && (
+              <p className="text-red-500 text-sm">{formik.errors.username}</p>
+            )}
+
             <input
               type="tel"
               name="phone"
               placeholder="Teléfono"
-              value={formData.phone}
-              onChange={handleChange}
+              value={formik.values.phone}
+              onChange={formik.handleChange}
               className="border p-2 rounded"
             />
+            {formik.touched.phone && formik.errors.phone && (
+              <p className="text-red-500 text-sm">{formik.errors.phone}</p>
+            )}
 
             {/* Password */}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Ingrese su nueva contraseña"
-                value={formData.password}
-                onChange={handleChange}
-                className="border p-2 rounded w-full"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
-              >
-                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-              </button>
-            </div>
+            <input
+              type="password"
+              name="password"
+              placeholder="Ingrese su nueva contraseña"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              className="border p-2 rounded"
+            />
+            {formik.touched.password && formik.errors.password && (
+              <p className="text-red-500 text-sm">{formik.errors.password}</p>
+            )}
 
             {/* Confirm password */}
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="Confirmar contraseña"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  setConfirmPasswordError(null);
-                }}
-                className="border p-2 rounded w-full"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
-              >
-                {showConfirmPassword ? (
-                  <FiEyeOff size={18} />
-                ) : (
-                  <FiEye size={18} />
-                )}
-              </button>
-            </div>
-            {confirmPasswordError && (
-              <p className="text-red-500 text-sm">{confirmPasswordError}</p>
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirmar contraseña"
+              value={formik.values.confirmPassword}
+              onChange={formik.handleChange}
+              className="border p-2 rounded"
+            />
+            {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+              <p className="text-red-500 text-sm">{formik.errors.confirmPassword}</p>
             )}
 
             {/* Dirección */}
             <div className="space-y-2">
               <label className="font-medium text-sm">Dirección:</label>
-              <div
-                ref={mapContainerRef}
-                className="h-64 w-full rounded border"
-              />
+              <div ref={mapContainerRef} className="h-64 rounded border" />
               <div className="text-sm text-gray-600 mt-2">
-                <p>
-                  <strong>Dirección:</strong> {formData.address.street}
-                </p>
-                <p>
-                  <strong>Latitud:</strong> {formData.address.latitude}
-                </p>
-                <p>
-                  <strong>Longitud:</strong> {formData.address.longitude}
-                </p>
+                <p><strong>Dirección:</strong> {formik.values.address.street}</p>
+                <p><strong>Latitud:</strong> {formik.values.address.latitude}</p>
+                <p><strong>Longitud:</strong> {formik.values.address.longitude}</p>
               </div>
             </div>
 
