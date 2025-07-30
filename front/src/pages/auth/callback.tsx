@@ -43,29 +43,28 @@ export default function Callback() {
         const currentYear = new Date().getFullYear();
 
         if (birthYear && birthYear !== currentYear) {
+          saveUserData({
+            user: {
+              id: userId,
+              name: userData.name,
+              username: userData.username,
+              birthdate: userData.birthdate,
+              phone: userData.phone,
+              email: userData.email,
+              isAdmin: userData.isAdmin,
+              isDonator: userData.isDonator,
+              address: userData.address,
+              orders: userData.orders,
+              appointments: userData.appointments,
+              cart: userData.cart,
+              donates: userData.donates,
+            },
+            accessToken: accessToken,
+            isAuth: true,
+          });
           router.push("/");
           return;
         }
-
-        saveUserData({
-          user: {
-            id: userId,
-            name: userData.name,
-            username: userData.username,
-            birthdate: userData.birthdate,
-            phone: userData.phone,
-            email: userData.email,
-            isAdmin: userData.isAdmin,
-            isDonator: userData.isDonator,
-            address: userData.address,
-            orders: userData.orders,
-            appointments: userData.appointments,
-            cart: userData.cart,
-            donates: userData.donates,
-          },
-          accessToken: accessToken,
-          isAuth: true,
-        });
       } catch (error) {
         console.error("Error al obtener datos del usuario:", error);
       }
@@ -98,7 +97,9 @@ export default function Callback() {
     },
     validationSchema: Yup.object({
       name: Yup.string().required("Requerido"),
-      password: Yup.string().min(6, "Mínimo 6 caracteres").required("Requerido"),
+      password: Yup.string()
+        .min(6, "Mínimo 6 caracteres")
+        .required("Requerido"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
         .required("Requerido"),
@@ -232,10 +233,16 @@ export default function Callback() {
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Completá tus datos para finalizar el registro</CardTitle>
-          <p>Para poder validar tus datos te pediremos que termines de completar tu perfil</p>
+          <p>
+            Para poder validar tus datos te pediremos que termines de completar
+            tu perfil
+          </p>
           {error && <p className="text-red-600">{error}</p>}
 
-          <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4 mt-4">
+          <form
+            onSubmit={formik.handleSubmit}
+            className="flex flex-col gap-4 mt-4"
+          >
             <input
               type="text"
               name="name"
@@ -251,7 +258,9 @@ export default function Callback() {
             <div>
               <DatePicker
                 selected={
-                  formik.values.birthdate ? new Date(formik.values.birthdate) : null
+                  formik.values.birthdate
+                    ? new Date(formik.values.birthdate)
+                    : null
                 }
                 onChange={(date: Date | null) => {
                   formik.setFieldTouched("birthdate", true);
@@ -270,7 +279,9 @@ export default function Callback() {
                 className="w-full p-2 border border-gray-300 rounded-md text-sm"
               />
               {formik.touched.birthdate && formik.errors.birthdate && (
-                <p className="text-red-500 text-xs">{formik.errors.birthdate}</p>
+                <p className="text-red-500 text-xs">
+                  {formik.errors.birthdate}
+                </p>
               )}
             </div>
 
@@ -320,18 +331,27 @@ export default function Callback() {
               onChange={formik.handleChange}
               className="border p-2 rounded"
             />
-            {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-              <p className="text-red-500 text-sm">{formik.errors.confirmPassword}</p>
-            )}
+            {formik.touched.confirmPassword &&
+              formik.errors.confirmPassword && (
+                <p className="text-red-500 text-sm">
+                  {formik.errors.confirmPassword}
+                </p>
+              )}
 
             {/* Dirección */}
             <div className="space-y-2">
               <label className="font-medium text-sm">Dirección:</label>
               <div ref={mapContainerRef} className="h-64 rounded border" />
               <div className="text-sm text-gray-600 mt-2">
-                <p><strong>Dirección:</strong> {formik.values.address.street}</p>
-                <p><strong>Latitud:</strong> {formik.values.address.latitude}</p>
-                <p><strong>Longitud:</strong> {formik.values.address.longitude}</p>
+                <p>
+                  <strong>Dirección:</strong> {formik.values.address.street}
+                </p>
+                <p>
+                  <strong>Latitud:</strong> {formik.values.address.latitude}
+                </p>
+                <p>
+                  <strong>Longitud:</strong> {formik.values.address.longitude}
+                </p>
               </div>
             </div>
 
