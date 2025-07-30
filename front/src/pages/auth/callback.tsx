@@ -62,6 +62,7 @@ export default function Callback() {
             accessToken: accessToken,
             isAuth: true,
           });
+          toast.success("Inicio de sesion completo");
           router.push("/");
           return;
         }
