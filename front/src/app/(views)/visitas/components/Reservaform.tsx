@@ -226,8 +226,8 @@ export default function ReservaForm() {
                       (slot.currentAppointmentsCount ?? 0);
                     return (
                       <li key={slot.id} className="text-sm">
-                        📅 {slot.date} - 🕒 {slot.startTime} — cupos de personas
-                        :{remaining}
+                        📅 {slot.date} - 🕒 {slot.startTime} hasta las 🕜{" "}
+                        {slot.endTime} — cupos de personas :{remaining}
                       </li>
                     );
                   })}
