@@ -34,6 +34,7 @@ import {
     Loader2,
     Building,
     ClipboardList,
+    AlertTriangle,
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "../../lib/utils"
@@ -176,12 +177,45 @@ export const GestionTurnos = () => {
     }
 
     const getInitials = (name: string) => {
+        if (!name) return "??"
         return name
             .split(" ")
             .map((word) => word.charAt(0))
             .join("")
             .toUpperCase()
             .slice(0, 2)
+    }
+
+    // Helper function to safely get user name
+    const getUserName = (user: any) => {
+        return user?.name || "Usuario sin nombre"
+    }
+
+    // Helper function to safely get user email
+    const getUserEmail = (user: any) => {
+        return user?.email || "Sin email"
+    }
+
+    // Helper function to safely get user phone
+    const getUserPhone = (user: any) => {
+        return user?.phone || "Sin teléfono"
+    }
+
+    // Helper function to safely get visit title
+    const getVisitTitle = (visitSlot: any) => {
+        return visitSlot?.visit?.title || "Visita sin título"
+    }
+
+    // Helper function to safely get visit slot date
+    const getVisitDate = (visitSlot: any) => {
+        return visitSlot?.date || "Fecha no disponible"
+    }
+
+    // Helper function to safely get visit slot times
+    const getVisitTimes = (visitSlot: any) => {
+        const startTime = visitSlot?.startTime || "00:00"
+        const endTime = visitSlot?.endTime || "00:00"
+        return { startTime, endTime }
     }
 
     // Stats calculations
@@ -371,8 +405,20 @@ export const GestionTurnos = () => {
                     ) : (
                         <div className="space-y-4">
                             {appointmentsData.data.map((appt) => {
-                                const statusConfig = getStatusConfig(appt.status)
+                                // Validar que el appointment tenga los datos mínimos necesarios
+                                if (!appt || !appt.id) {
+                                    return null
+                                }
+
+                                const statusConfig = getStatusConfig(appt.status || "pending")
                                 const StatusIcon = statusConfig.icon
+                                const userName = getUserName(appt.user)
+                                const userEmail = getUserEmail(appt.user)
+                                const userPhone = getUserPhone(appt.user)
+                                const visitTitle = getVisitTitle(appt.visitSlot)
+                                const visitDate = getVisitDate(appt.visitSlot)
+                                const { startTime, endTime } = getVisitTimes(appt.visitSlot)
+
                                 return (
                                     <Card key={appt.id} className="hover:shadow-md transition-shadow">
                                         <CardContent className="p-6">
@@ -380,30 +426,34 @@ export const GestionTurnos = () => {
                                                 {/* User Info */}
                                                 <div className="flex items-start gap-4 flex-1">
                                                     <Avatar className="h-12 w-12">
-                                                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${appt.user.name}`} />
-                                                        <AvatarFallback className="bg-[#017d74] text-white">
-                                                            {getInitials(appt.user.name)}
-                                                        </AvatarFallback>
+                                                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName}`} />
+                                                        <AvatarFallback className="bg-[#017d74] text-white">{getInitials(userName)}</AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 mb-2">
-                                                            <h3 className="text-lg font-semibold text-gray-900">{appt.user.name}</h3>
-                                                            <span className="text-gray-500">@{appt.user.username}</span>
+                                                            <h3 className="text-lg font-semibold text-gray-900">{userName}</h3>
+                                                            {appt.user?.username && <span className="text-gray-500">@{appt.user.username}</span>}
                                                             <Badge variant="outline" className={statusConfig.color}>
                                                                 <StatusIcon className="w-3 h-3 mr-1" />
                                                                 {statusConfig.label}
                                                             </Badge>
+                                                            {!appt.user && (
+                                                                <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-200">
+                                                                    <AlertTriangle className="w-3 h-3 mr-1" />
+                                                                    Datos incompletos
+                                                                </Badge>
+                                                            )}
                                                         </div>
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
                                                             <div className="flex items-center gap-2">
                                                                 <Mail className="w-4 h-4 text-gray-400" />
-                                                                {appt.user.email}
+                                                                {userEmail}
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                 <Phone className="w-4 h-4 text-gray-400" />
-                                                                {appt.user.phone}
+                                                                {userPhone}
                                                             </div>
-                                                            {appt.user.address && (
+                                                            {appt.user?.address?.street && (
                                                                 <div className="flex items-center gap-2 md:col-span-2">
                                                                     <MapPin className="w-4 h-4 text-gray-400" />
                                                                     {appt.user.address.street}
@@ -418,19 +468,19 @@ export const GestionTurnos = () => {
                                                     <div className="p-4 bg-gray-50 rounded-lg space-y-2">
                                                         <div className="flex items-center gap-2 text-sm">
                                                             <Building className="w-4 h-4 text-gray-500" />
-                                                            <span className="font-medium">{appt.visitSlot.visit.title}</span>
+                                                            <span className="font-medium">{visitTitle}</span>
                                                         </div>
                                                         <div className="flex items-center gap-2 text-sm text-gray-600">
                                                             <Calendar className="w-4 h-4 text-gray-400" />
-                                                            {appt.visitSlot.date}
+                                                            {visitDate}
                                                         </div>
                                                         <div className="flex items-center gap-2 text-sm text-gray-600">
                                                             <Clock className="w-4 h-4 text-gray-400" />
-                                                            {appt.visitSlot.startTime} - {appt.visitSlot.endTime}
+                                                            {startTime} - {endTime}
                                                         </div>
                                                         <div className="flex items-center gap-2 text-sm text-gray-600">
                                                             <Users className="w-4 h-4 text-gray-400" />
-                                                            {appt.numberOfPeople} persona{appt.numberOfPeople !== 1 ? "s" : ""}
+                                                            {appt.numberOfPeople || 1} persona{(appt.numberOfPeople || 1) !== 1 ? "s" : ""}
                                                         </div>
                                                         {appt.description && (
                                                             <div className="flex items-start gap-2 text-sm text-gray-600">
@@ -467,9 +517,8 @@ export const GestionTurnos = () => {
                                                                                 <AlertDialogTitle>¿Confirmar {actionConfig.description}?</AlertDialogTitle>
                                                                                 <AlertDialogDescription>
                                                                                     ¿Estás seguro de que deseas {actionConfig.description} el turno de{" "}
-                                                                                    <strong>{appt.user.name}</strong> para{" "}
-                                                                                    <strong>{appt.visitSlot.visit.title}</strong> el día{" "}
-                                                                                    <strong>{appt.visitSlot.date}</strong>?
+                                                                                    <strong>{userName}</strong> para <strong>{visitTitle}</strong> el día{" "}
+                                                                                    <strong>{visitDate}</strong>?
                                                                                     <br />
                                                                                     <br />
                                                                                     Esta acción no se puede deshacer.
@@ -480,8 +529,8 @@ export const GestionTurnos = () => {
                                                                                 <AlertDialogAction
                                                                                     onClick={() =>
                                                                                         handleStatusChange(appt.id, action as any, {
-                                                                                            userName: appt.user.name,
-                                                                                            visitTitle: appt.visitSlot.visit.title,
+                                                                                            userName,
+                                                                                            visitTitle,
                                                                                         })
                                                                                     }
                                                                                     className={actionConfig.color}
@@ -495,6 +544,7 @@ export const GestionTurnos = () => {
                                                             })}
                                                         </div>
                                                     )}
+
                                                     {appt.status === "approved" && (
                                                         <div className="flex flex-wrap gap-2">
                                                             {["completed", "cancelled"].map((action) => {
@@ -521,9 +571,8 @@ export const GestionTurnos = () => {
                                                                                 <AlertDialogTitle>¿Confirmar {actionConfig.description}?</AlertDialogTitle>
                                                                                 <AlertDialogDescription>
                                                                                     ¿Estás seguro de que deseas {actionConfig.description} el turno de{" "}
-                                                                                    <strong>{appt.user.name}</strong> para{" "}
-                                                                                    <strong>{appt.visitSlot.visit.title}</strong> el día{" "}
-                                                                                    <strong>{appt.visitSlot.date}</strong>?
+                                                                                    <strong>{userName}</strong> para <strong>{visitTitle}</strong> el día{" "}
+                                                                                    <strong>{visitDate}</strong>?
                                                                                     <br />
                                                                                     <br />
                                                                                     Esta acción no se puede deshacer.
@@ -534,8 +583,8 @@ export const GestionTurnos = () => {
                                                                                 <AlertDialogAction
                                                                                     onClick={() =>
                                                                                         handleStatusChange(appt.id, action as any, {
-                                                                                            userName: appt.user.name,
-                                                                                            visitTitle: appt.visitSlot.visit.title,
+                                                                                            userName,
+                                                                                            visitTitle,
                                                                                         })
                                                                                     }
                                                                                     className={actionConfig.color}
