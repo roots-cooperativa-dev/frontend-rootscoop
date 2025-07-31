@@ -9,20 +9,50 @@ import { Card, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { toast } from "sonner";
 import { UpdateUserDTO } from "@/src/types";
-import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import mapboxgl from "mapbox-gl";
+import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import DatePicker from "react-datepicker";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import "react-datepicker/dist/react-datepicker.css";
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { es } from "date-fns/locale";
+import { Input } from "@/src/components/ui/input";
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 export default function Callback() {
   const router = useRouter();
   const { user, token, saveUserData } = useAuthContext();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const hasRun = useRef(false);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  const passwordRequirements = [
+    {
+      label: "Al menos una letra minúscula",
+      test: (value: string) => /[a-z]/.test(value),
+    },
+    {
+      label: "Al menos una letra mayúscula",
+      test: (value: string) => /[A-Z]/.test(value),
+    },
+    {
+      label: "Al menos un número",
+      test: (value: string) => /\d/.test(value),
+    },
+    {
+      label: "Al menos un carácter especial (!@#$%^&)",
+      test: (value: string) => /[!@#$%^&]/.test(value),
+    },
+  ];
   useEffect(() => {
+    setLoadingUser(false)
     if (!router.isReady || hasRun.current) return;
 
     const accessToken = router.query.token as string;
@@ -72,14 +102,6 @@ export default function Callback() {
     fetchUser();
   }, [router.isReady, router.query, saveUserData]);
 
-  const [loadingUser, setLoadingUser] = useState(true);
-  const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markerRef = useRef<mapboxgl.Marker | null>(null);
-
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -98,7 +120,14 @@ export default function Callback() {
       name: Yup.string().required("Requerido"),
       password: Yup.string()
         .min(6, "Mínimo 6 caracteres")
-        .required("Requerido"),
+        .required("Requerido")
+        .matches(/^(?=.*[a-z])/, "Debe incluir al menos una letra minúscula")
+        .matches(/^(?=.*[A-Z])/, "Debe incluir al menos una letra mayúscula")
+        .matches(/^(?=.*\d)/, "Debe incluir al menos un número")
+        .matches(
+          /^(?=.*[!@#$%^&])/,
+          "Debe incluir un carácter especial (!@#$%^&)"
+        ),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
         .required("Requerido"),
@@ -115,7 +144,9 @@ export default function Callback() {
             (age === 18 && m >= 0 && today.getDate() >= birthDate.getDate())
           );
         }),
-      phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
+      phone: Yup.number()
+        .typeError("Escribe solo número")
+        .required("Requerido"),
       username: Yup.string().required("Requerido"),
     }),
     onSubmit: async (values) => {
@@ -176,54 +207,67 @@ export default function Callback() {
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    const { latitude, longitude } = formik.values.address;
-    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+    let map: mapboxgl.Map | null = null;
+    let marker: mapboxgl.Marker | null = null;
 
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current as HTMLElement,
-      style: "mapbox://styles/mapbox/streets-v11",
-      center: [longitude, latitude],
-      zoom: 12,
-    });
+    const initializeMap = async () => {
+      const MapboxGeocoder = (await import("@mapbox/mapbox-gl-geocoder"))
+        .default;
 
-    const marker = new mapboxgl.Marker({ draggable: true })
-      .setLngLat([longitude, latitude])
-      .addTo(map);
-
-    const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken!,
-      mapboxgl: mapboxgl as unknown as typeof import("mapbox-gl"),
-      marker: false,
-      placeholder: "Buscar dirección...",
-    });
-    map.addControl(geocoder);
-
-    geocoder.on("result", (e: any) => {
-      const { center, place_name } = e.result;
-      formik.setFieldValue("address", {
-        street: place_name,
-        latitude: center[1],
-        longitude: center[0],
+      map = new mapboxgl.Map({
+        container: mapContainerRef.current!,
+        style: "mapbox://styles/mapbox/streets-v11",
+        center: [
+          formik.values.address.longitude || -58.3816,
+          formik.values.address.latitude || -34.6037,
+        ],
+        zoom: 12,
       });
-      marker.setLngLat(center);
-    });
 
-    marker.on("dragend", () => {
-      const lngLat = marker.getLngLat();
-      formik.setFieldValue("address", {
-        street: "Ubicación personalizada",
-        latitude: lngLat.lat,
-        longitude: lngLat.lng,
+      marker = new mapboxgl.Marker({ draggable: true })
+        .setLngLat([
+          formik.values.address.longitude || -58.3816,
+          formik.values.address.latitude || -34.6037,
+        ])
+        .addTo(map);
+
+      const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken ?? "",
+        mapboxgl: mapboxgl as any,
+        marker: false,
+        placeholder: "Buscar dirección...",
       });
-    });
 
-    mapRef.current = map;
-    markerRef.current = marker;
+      map.addControl(geocoder);
+
+      geocoder.on("result", (e: any) => {
+        const { center, place_name } = e.result;
+        if (center) {
+          marker!.setLngLat(center);
+          formik.setFieldValue("address", {
+            street: place_name,
+            latitude: center[1],
+            longitude: center[0],
+          });
+        }
+      });
+
+      marker.on("dragend", () => {
+        const lngLat = marker!.getLngLat();
+        formik.setFieldValue("address", {
+          street: "Ubicación personalizada",
+          latitude: lngLat.lat,
+          longitude: lngLat.lng,
+        });
+      });
+    };
+
+    initializeMap();
 
     return () => {
-      if (mapRef.current) mapRef.current.remove();
+      if (map) map.remove();
     };
-  }, [formik.values.address.latitude, formik.values.address.longitude]);
+  }, [mapContainerRef.current]);
 
   if (loadingUser) return <Loading />;
 
@@ -242,19 +286,20 @@ export default function Callback() {
             onSubmit={formik.handleSubmit}
             className="flex flex-col gap-4 mt-4"
           >
-            <input
+            <Input
               type="text"
               name="name"
               placeholder="Nombre completo"
               value={formik.values.name}
               onChange={formik.handleChange}
-              className="border p-2 rounded"
+              onBlur={formik.handleBlur}
             />
             {formik.touched.name && formik.errors.name && (
               <p className="text-red-500 text-sm">{formik.errors.name}</p>
             )}
 
             <div>
+              <h2 className="text-sm font-medium">Fecha de nacimiento</h2>
               <DatePicker
                 selected={
                   formik.values.birthdate
@@ -269,7 +314,7 @@ export default function Callback() {
                   );
                 }}
                 dateFormat="yyyy-MM-dd"
-                placeholderText="Ingresar fecha de nacimiento"
+                placeholderText="Año-mes-día"
                 maxDate={new Date()}
                 showYearDropdown
                 scrollableYearDropdown
@@ -284,60 +329,95 @@ export default function Callback() {
               )}
             </div>
 
-            <input
+            <Input
               type="text"
               name="username"
               placeholder="Nombre de usuario"
               value={formik.values.username}
               onChange={formik.handleChange}
-              className="border p-2 rounded"
+              onBlur={formik.handleBlur}
             />
             {formik.touched.username && formik.errors.username && (
               <p className="text-red-500 text-sm">{formik.errors.username}</p>
             )}
 
-            <input
+            <Input
               type="tel"
               name="phone"
               placeholder="Teléfono"
               value={formik.values.phone}
               onChange={formik.handleChange}
-              className="border p-2 rounded"
+              onBlur={formik.handleBlur}
             />
             {formik.touched.phone && formik.errors.phone && (
               <p className="text-red-500 text-sm">{formik.errors.phone}</p>
             )}
 
-            {/* Password */}
-            <input
-              type="password"
-              name="password"
-              placeholder="Ingrese su nueva contraseña"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              className="border p-2 rounded"
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Contraseña"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
             {formik.touched.password && formik.errors.password && (
               <p className="text-red-500 text-sm">{formik.errors.password}</p>
             )}
+            <div className="text-sm mt-2 space-y-1">
+              {passwordRequirements.map((req, index) => {
+                const passed = req.test(formik.values.password);
+                return (
+                  <div
+                    key={index}
+                    className={`flex items-center gap-2 ${
+                      passed ? "text-green-600" : "text-red-500"
+                    }`}
+                  >
+                    <span>{passed ? "✔️" : "❌"}</span>
+                    <span>{req.label}</span>
+                  </div>
+                );
+              })}
+            </div>
 
-            {/* Confirm password */}
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirmar contraseña"
-              value={formik.values.confirmPassword}
-              onChange={formik.handleChange}
-              className="border p-2 rounded"
-            />
+            <div className="relative">
+              <Input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Repetir contraseña"
+                value={formik.values.confirmPassword}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+              >
+                {showConfirmPassword ? (
+                  <FiEyeOff size={18} />
+                ) : (
+                  <FiEye size={18} />
+                )}
+              </button>
+            </div>
             {formik.touched.confirmPassword &&
               formik.errors.confirmPassword && (
-                <p className="text-red-500 text-sm">
+                <p className="text-red-500 text-xs">
                   {formik.errors.confirmPassword}
                 </p>
               )}
 
-            {/* Dirección */}
             <div className="space-y-2">
               <label className="font-medium text-sm">Dirección:</label>
               <div ref={mapContainerRef} className="h-64 rounded border" />
