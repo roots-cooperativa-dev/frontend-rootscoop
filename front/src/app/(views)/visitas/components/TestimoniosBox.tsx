@@ -68,7 +68,7 @@ export function TestimoniosBox() {
               WhatsApp
             </p>
             <p className="text-sm text-[#4b5563] font-popular">
-              +54 9 2215 62-6003
+              +54 9 2215 560-6991
             </p>
           </div>
           <div className="flex flex-col items-center">
