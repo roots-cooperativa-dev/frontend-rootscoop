@@ -94,7 +94,6 @@ export const Productos = () => {
           limit: itemsPerPage,
         });
 
-        console.log("Respuesta de la API:", response); // Para debug
 
         const activos = response.products.filter((p) => !p.deletedAt);
         setProductos(activos);
