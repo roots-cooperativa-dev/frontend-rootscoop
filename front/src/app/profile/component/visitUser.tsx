@@ -21,6 +21,7 @@ const VisitasAgendadas = () => {
   const { user, token, loading } = useAuthContext();
   const [visit, setVisits] = useState<Appointment[]>([]);
   const [loadingVisits, setLoadingVisits] = useState(true);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   const fetchAppointments = async () => {
     if (!user?.id || !token) return;
@@ -39,28 +40,57 @@ const VisitasAgendadas = () => {
     fetchAppointments();
   }, [user?.id, token]);
 
-  // 🔴 FUNCIÓN PARA CANCELAR
   const cancelarCita = async (appointmentId: string) => {
+    if (!token) {
+      toast.error("No hay sesión activa");
+      return;
+    }
+
+    setCancellingId(appointmentId);
+
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/appointments/${appointmentId}/cancel`,
+        `${process.env.NEXT_PUBLIC_API_URL}/visits/appointments/${appointmentId}/cancel`,
         {
-          method: "PATCH",
+          method: "DELETE",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      if (!res.ok) throw new Error("No se pudo cancelar el turno");
+      if (res.status === 204) {
+        toast.success("Visita cancelada correctamente");
 
-      toast.success("Turno cancelado exitosamente");
-      fetchAppointments(); // refresca la lista
-    } catch (error) {
-      toast.error("Error al cancelar el turno");
-      console.error(error);
+        setVisits((prev) =>
+          prev.map((v) =>
+            v.id === appointmentId ? { ...v, status: "cancelled" } : v
+          )
+        );
+      } else if (res.status === 400) {
+        toast.error("La cita ya fue cancelada o completada");
+      } else if (res.status === 401) {
+        toast.error("No autorizado. Iniciá sesión nuevamente.");
+      } else if (res.status === 404) {
+        toast.error("La cita no existe o no tenés permiso");
+      } else {
+        throw new Error("Error desconocido al cancelar");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo cancelar el turno");
+    } finally {
+      setCancellingId(null);
     }
+  };
+
+  const confirmarCancelacion = (appointmentId: string) => {
+    toast("¿Querés cancelar esta visita?", {
+      action: {
+        label: "Sí, cancelar",
+        onClick: () => cancelarCita(appointmentId),
+      },
+    });
   };
 
   if (loading || loadingVisits) return <Loading />;
@@ -119,10 +149,13 @@ const VisitasAgendadas = () => {
 
               {appointment.status !== "cancelled" && (
                 <button
-                  onClick={() => cancelarCita(appointment.id)}
+                  onClick={() => confirmarCancelacion(appointment.id)}
                   className="mt-3 bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded transition-all"
+                  disabled={cancellingId === appointment.id}
                 >
-                  Cancelar turno
+                  {cancellingId === appointment.id
+                    ? "Cancelando..."
+                    : "Cancelar turno"}
                 </button>
               )}
             </li>
