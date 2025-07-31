@@ -9,6 +9,7 @@ import "react-day-picker/dist/style.css";
 import { useAuthContext } from "@/src/context/authContext";
 import { toast } from "sonner";
 import { Slot, Visita } from "../types/index";
+import { Button } from "../../../../components/ui/button";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -30,7 +31,6 @@ export default function ReservaForm() {
         });
         setVisitas(res.data);
       } catch (error) {
-        console.error("Error al obtener visitas:", error);
         toast.error("No se pudieron cargar las visitas.");
       }
     };
@@ -67,7 +67,7 @@ export default function ReservaForm() {
     validationSchema,
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: async (values) => {
+    onSubmit: async (values, helpers) => {
       const slot = slotsDisponibles.find((s) => s.id === values.slotId);
       if (!slot) {
         toast.error("El horario seleccionado ya no está disponible.");
@@ -108,7 +108,7 @@ export default function ReservaForm() {
           },
         });
         toast.success("Reserva enviada con éxito");
-        formik.resetForm();
+        helpers.resetForm();
         setFechaSeleccionada(undefined);
         setFechasConSlots([]);
         setSlotsDisponibles([]);
@@ -407,13 +407,13 @@ export default function ReservaForm() {
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
-          disabled={!formik.values.slotId}
-          className="w-full bg-[#017d74] text-white py-2 rounded-lg hover:bg-[#016c64] transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full"
+          disabled={!formik.values.slotId || formik.isSubmitting}
         >
-          Reservar
-        </button>
+          {formik.isSubmitting ? "Reservando..." : "Reservar"}
+        </Button>
       </form>
     </div>
   );
