@@ -22,23 +22,46 @@ const VisitasAgendadas = () => {
   const [visit, setVisits] = useState<Appointment[]>([]);
   const [loadingVisits, setLoadingVisits] = useState(true);
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      if (!user?.id || !token) return;
-      try {
-        const userData = await getUserById(user.id, token);
-        // asumiendo que el backend mete appointments en el user
-        setVisits(userData.appointments || []);
-      } catch (error) {
-        toast.error("Error al obtener tus visitas");
-        console.error(error);
-      } finally {
-        setLoadingVisits(false);
-      }
-    };
+  const fetchAppointments = async () => {
+    if (!user?.id || !token) return;
+    try {
+      const userData = await getUserById(user.id, token);
+      setVisits(userData.appointments || []);
+    } catch (error) {
+      toast.error("Error al obtener tus visitas");
+      console.error(error);
+    } finally {
+      setLoadingVisits(false);
+    }
+  };
 
+  useEffect(() => {
     fetchAppointments();
-  }, [user?.id, token]); // <-- agrego token
+  }, [user?.id, token]);
+
+  // 🔴 FUNCIÓN PARA CANCELAR
+  const cancelarCita = async (appointmentId: string) => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/appointments/${appointmentId}/cancel`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("No se pudo cancelar el turno");
+
+      toast.success("Turno cancelado exitosamente");
+      fetchAppointments(); // refresca la lista
+    } catch (error) {
+      toast.error("Error al cancelar el turno");
+      console.error(error);
+    }
+  };
 
   if (loading || loadingVisits) return <Loading />;
 
@@ -63,6 +86,7 @@ const VisitasAgendadas = () => {
           const isValidBookedAt =
             appointment.bookedAt &&
             !isNaN(new Date(appointment.bookedAt).getTime());
+
           return (
             <li
               key={appointment.id}
@@ -92,6 +116,15 @@ const VisitasAgendadas = () => {
               <p className="text-xs text-gray-500">
                 <strong>Slot ID:</strong> {appointment.visitSlotId}
               </p>
+
+              {appointment.status !== "cancelled" && (
+                <button
+                  onClick={() => cancelarCita(appointment.id)}
+                  className="mt-3 bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded transition-all"
+                >
+                  Cancelar turno
+                </button>
+              )}
             </li>
           );
         })}
