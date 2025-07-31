@@ -7,7 +7,7 @@ const ButtonHome = () => {
     <>
       <Button
         variant="outline"
-        className="border-[#017d74] text-[#017d74] bg-transparent"
+        className="border-[#017d74] text-[#017d74] bg-transparent hidden md:flex"
         asChild
       >
         <Link href="/">

@@ -37,6 +37,7 @@ export default function LoginForm() {
         const userId = response.data.user.id;
         const Token = response.data.accessToken;
         const dataUser = await getUserById(userId, Token);
+        console.log(dataUser);
 
         saveUserData({
           accessToken: Token,
@@ -48,6 +49,7 @@ export default function LoginForm() {
             phone: dataUser.phone,
             email: dataUser.email,
             isAdmin: dataUser.isAdmin,
+            isSuperAdmin: dataUser.isSuperAdmin,
             isDonator: dataUser.isDonator,
             address: dataUser.address,
             donates: dataUser.donates,

@@ -1,6 +1,13 @@
-'use client'
+"use client";
 
-import { Banknote, Calendar, ChartBarStacked, ClipboardPaste, HelpCircle, Home, LogOut, Package, Plus, Settings, ShoppingCart, UserRound, UserRoundPen } from "lucide-react";
+import {
+  Banknote,
+  Calendar,
+  ClipboardPaste,
+  ShoppingCart,
+  UserRound,
+  UserRoundPen,
+} from "lucide-react";
 
 import Link from "next/link";
 import { Badge } from "../ui/badge";
@@ -41,7 +48,6 @@ const sidebarLinks = [
     icon: Banknote,
     description: "Donaciones realizadas",
     badge: "",
-    
   },
   {
     href: "/profile/carrito",
@@ -51,76 +57,125 @@ const sidebarLinks = [
     badge: "",
   },
 ];
-const Sidebar = () => {
+
+type SidebarProps = {
+  isOpen?: boolean;
+  onClose?: () => void;
+};
+const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
   const pathname = usePathname();
   return (
-    <aside className="hidden md:flex flex-col w-60 h-screen bg-gradient-to-b from-gray-50 to-white border-r border-gray-200/60 shadow-sm">
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex flex-col w-60 h-screen bg-gradient-to-b from-gray-50 to-white border-r border-gray-200/60 shadow-sm">
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
+          <div className="mb-4">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+              Principal
+            </h3>
+            <div className="space-y-1">
+              {sidebarLinks.map((link) => {
+                const isActive = pathname === link.href;
+                const Icon = link.icon;
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        <div className="mb-4">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
-            Principal
-          </h3>
-          <div className="space-y-1">
-            {sidebarLinks.map((link) => {
-              const isActive = pathname === link.href;
-              const Icon = link.icon;
-
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "group flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 relative",
-                    isActive
-                      ? "bg-[#017d74] text-white shadow-md shadow-[#017d74]/25"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                  )}
-                >
-                  <Icon
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
                     className={cn(
-                      "w-5 h-5 transition-colors",
+                      "group flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 relative",
                       isActive
-                        ? "text-white"
-                        : "text-gray-500 group-hover:text-gray-700"
+                        ? "bg-[#017d74] text-white shadow-md shadow-[#017d74]/25"
+                        : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                     )}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="truncate">{link.label}</span>
-                      {link.badge && (
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            "ml-2 h-5 px-2 text-xs",
-                            isActive
-                              ? "bg-white/20 text-white border-white/30"
-                              : "bg-gray-200 text-gray-600"
-                          )}
-                        >
-                          {link.badge}
-                        </Badge>
+                  >
+                    <Icon
+                      className={cn(
+                        "w-5 h-5 transition-colors",
+                        isActive
+                          ? "text-white"
+                          : "text-gray-500 group-hover:text-gray-700"
+                      )}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="truncate">{link.label}</span>
+                        {link.badge && (
+                          <Badge
+                            variant="secondary"
+                            className={cn(
+                              "ml-2 h-5 px-2 text-xs",
+                              isActive
+                                ? "bg-white/20 text-white border-white/30"
+                                : "bg-gray-200 text-gray-600"
+                            )}
+                          >
+                            {link.badge}
+                          </Badge>
+                        )}
+                      </div>
+                      {!isActive && (
+                        <p className="text-xs text-gray-500 mt-0.5 truncate">
+                          {link.description}
+                        </p>
                       )}
                     </div>
-                    {!isActive && (
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">
-                        {link.description}
-                      </p>
+                    {isActive && (
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full" />
                     )}
-                  </div>
-                  {isActive && (
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-l-full" />
-                  )}
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        <Separator className="my-4" />
-      </nav>
-    </aside>
+          <Separator className="my-4" />
+        </nav>
+      </aside>
+      {/* Mobile sidebar */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 md:hidden bg-black/50"
+          onClick={onClose}
+        >
+          <aside
+            className="fixed left-0 top-0 h-full w-64 bg-white shadow-xl z-50 p-4 overflow-y-auto"
+            onClick={(e) => e.stopPropagation()} // para que no cierre al hacer clic dentro
+          >
+            <button
+              onClick={onClose}
+              className="mb-4 text-sm text-gray-500 hover:text-gray-700"
+            >
+              Cerrar ✖
+            </button>
+            {/* ...navegación igual que antes... */}
+            <nav className="space-y-1">
+              {sidebarLinks.map((link) => {
+                const isActive = pathname === link.href;
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={onClose}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium",
+                      isActive
+                        ? "bg-[#017d74] text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                  >
+                    <Icon className="w-5 h-5" />
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </aside>
+        </div>
+      )}
+    </>
   );
 };
 

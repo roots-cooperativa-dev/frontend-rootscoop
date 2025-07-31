@@ -1,4 +1,3 @@
-// pages/auth/callback.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -17,32 +16,11 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale";
-import { Input } from "@/src/components/ui/input";
 
 export default function Callback() {
   const router = useRouter();
   const { user, token, saveUserData } = useAuthContext();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const hasRun = useRef(false);
-  const passwordRequirements = [
-    {
-      label: "Al menos una letra minúscula",
-      test: (value: string) => /[a-z]/.test(value),
-    },
-    {
-      label: "Al menos una letra mayúscula",
-      test: (value: string) => /[A-Z]/.test(value),
-    },
-    {
-      label: "Al menos un número",
-      test: (value: string) => /\d/.test(value),
-    },
-    {
-      label: "Al menos un carácter especial (!@#$%^&)",
-      test: (value: string) => /[!@#$%^&]/.test(value),
-    },
-  ];
 
   useEffect(() => {
     if (!router.isReady || hasRun.current) return;
@@ -57,33 +35,32 @@ export default function Callback() {
     const fetchUser = async () => {
       try {
         const userData = await getUserById(userId, accessToken);
-
+        saveUserData({
+          user: {
+            id: userId,
+            name: userData.name,
+            username: userData.username,
+            birthdate: userData.birthdate,
+            phone: userData.phone,
+            email: userData.email,
+            isAdmin: userData.isAdmin,
+            isSuperAdmin: userData.isAdmin,
+            isDonator: userData.isDonator,
+            address: userData.address,
+            orders: userData.orders,
+            appointments: userData.appointments,
+            cart: userData.cart,
+            donates: userData.donates,
+          },
+          accessToken: accessToken,
+          isAuth: true,
+        });
         const birthYear = userData.birthdate
           ? new Date(userData.birthdate).getFullYear()
           : null;
         const currentYear = new Date().getFullYear();
 
         if (birthYear && birthYear !== currentYear) {
-          saveUserData({
-            user: {
-              id: userId,
-              name: userData.name,
-              username: userData.username,
-              birthdate: userData.birthdate,
-              phone: userData.phone,
-              email: userData.email,
-              isAdmin: userData.isAdmin,
-              isDonator: userData.isDonator,
-              address: userData.address,
-              orders: userData.orders,
-              appointments: userData.appointments,
-              cart: userData.cart,
-              donates: userData.donates,
-            },
-            accessToken: accessToken,
-            isAuth: true,
-          });
-          toast.success("Inicio de sesion completo");
           router.push("/");
           return;
         }
@@ -120,14 +97,8 @@ export default function Callback() {
     validationSchema: Yup.object({
       name: Yup.string().required("Requerido"),
       password: Yup.string()
-        .required("Requerido")
-        .matches(/^(?=.*[a-z])/, "Debe incluir al menos una letra minúscula")
-        .matches(/^(?=.*[A-Z])/, "Debe incluir al menos una letra mayúscula")
-        .matches(/^(?=.*\d)/, "Debe incluir al menos un número")
-        .matches(
-          /^(?=.*[!@#$%^&])/,
-          "Debe incluir al menos un carácter especial (!@#$%^&)"
-        ),
+        .min(6, "Mínimo 6 caracteres")
+        .required("Requerido"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "Las contraseñas no coinciden")
         .required("Requerido"),
@@ -139,15 +110,12 @@ export default function Callback() {
           const birthDate = new Date(value);
           const age = today.getFullYear() - birthDate.getFullYear();
           const m = today.getMonth() - birthDate.getMonth();
-
           return (
             age > 18 ||
             (age === 18 && m >= 0 && today.getDate() >= birthDate.getDate())
           );
         }),
-      phone: Yup.number()
-        .typeError("Escribe solo número")
-        .required("Requerido"),
+      phone: Yup.number().typeError("Debe ser un número").required("Requerido"),
       username: Yup.string().required("Requerido"),
     }),
     onSubmit: async (values) => {
@@ -279,10 +247,7 @@ export default function Callback() {
               name="name"
               placeholder="Nombre completo"
               value={formik.values.name}
-              onChange={(e) => {
-                formik.setFieldTouched("name", true);
-                formik.handleChange(e);
-              }}
+              onChange={formik.handleChange}
               className="border p-2 rounded"
             />
             {formik.touched.name && formik.errors.name && (
@@ -290,7 +255,6 @@ export default function Callback() {
             )}
 
             <div>
-              <h2>Fecha de nacimiento</h2>
               <DatePicker
                 selected={
                   formik.values.birthdate
@@ -305,7 +269,7 @@ export default function Callback() {
                   );
                 }}
                 dateFormat="yyyy-MM-dd"
-                placeholderText="Año-mes-dia"
+                placeholderText="Ingresar fecha de nacimiento"
                 maxDate={new Date()}
                 showYearDropdown
                 scrollableYearDropdown
@@ -337,10 +301,7 @@ export default function Callback() {
               name="phone"
               placeholder="Teléfono"
               value={formik.values.phone}
-              onChange={(e) => {
-                formik.setFieldTouched("phone", true);
-                formik.handleChange(e);
-              }}
+              onChange={formik.handleChange}
               className="border p-2 rounded"
             />
             {formik.touched.phone && formik.errors.phone && (
@@ -348,72 +309,33 @@ export default function Callback() {
             )}
 
             {/* Password */}
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="********"
-                value={formik.values.password}
-                onChange={(e) => {
-                  formik.setFieldTouched("password", true);
-                  formik.handleChange(e);
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
-              >
-                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-              </button>
-            </div>
+            <input
+              type="password"
+              name="password"
+              placeholder="Ingrese su nueva contraseña"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              className="border p-2 rounded"
+            />
             {formik.touched.password && formik.errors.password && (
               <p className="text-red-500 text-sm">{formik.errors.password}</p>
             )}
-            <div className="text-sm mt-2 space-y-1">
-              {passwordRequirements.map((req, index) => {
-                const passed = req.test(formik.values.password);
-                return (
-                  <div
-                    key={index}
-                    className={`flex items-center gap-2 ${
-                      passed ? "text-green-600" : "text-red-500"
-                    }`}
-                  >
-                    <span>{passed ? "✔️" : "❌"}</span>
-                    <span>{req.label}</span>
-                  </div>
-                );
-              })}
-            </div>
 
             {/* Confirm password */}
-            <div className="relative">
-              <Input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="Repetir contraseña"
-                value={formik.values.confirmPassword}
-                onChange={(e) => {
-                  formik.setFieldTouched("confirmPassword", true);
-                  formik.handleChange(e);
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
-              >
-                {showConfirmPassword ? (
-                  <FiEyeOff size={18} />
-                ) : (
-                  <FiEye size={18} />
-                )}
-              </button>
-            </div>
-            {formik.touched.password && formik.errors.password && (
-              <p className="text-red-500 text-xs">{formik.errors.password}</p>
-            )}
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirmar contraseña"
+              value={formik.values.confirmPassword}
+              onChange={formik.handleChange}
+              className="border p-2 rounded"
+            />
+            {formik.touched.confirmPassword &&
+              formik.errors.confirmPassword && (
+                <p className="text-red-500 text-sm">
+                  {formik.errors.confirmPassword}
+                </p>
+              )}
 
             {/* Dirección */}
             <div className="space-y-2">
