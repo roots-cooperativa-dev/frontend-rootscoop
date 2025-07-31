@@ -116,7 +116,6 @@ export const DonacionesComponent = () => {
     const handleViewDetail = (donacion: IDonation) => {
         // Aquí puedes implementar la lógica para ver el detalle
         // Por ejemplo, navegar a una página de detalle o abrir un modal
-        console.log("Ver detalle de donación:", donacion)
         // Ejemplo de navegación:
         // router.push(`/donaciones/${donacion.id}`)
     }

@@ -37,7 +37,6 @@ export default function LoginForm() {
         const userId = response.data.user.id;
         const Token = response.data.accessToken;
         const dataUser = await getUserById(userId, Token);
-        console.log(dataUser);
 
         saveUserData({
           accessToken: Token,
