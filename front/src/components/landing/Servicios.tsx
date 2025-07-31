@@ -67,7 +67,7 @@ export const Servicios = () => {
                     </CardHeader>
                     <CardContent>
                         <Button className="w-full bg-[#922f4e] hover:bg-[#642d91] text-white font-bold shadow-lg" asChild>
-                            <Link href="/ubicaciones">Ver mapa</Link>
+                            <Link href="/ubicacion">Ver mapa</Link>
                         </Button>
                     </CardContent>
                 </Card>
