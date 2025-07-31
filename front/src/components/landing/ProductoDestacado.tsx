@@ -104,7 +104,7 @@ export const ProductoDestacado = () => {
                 className="border-[#017d74] text-[#017d74] hover:bg-[#017d74] hover:text-white font-bold shadow-lg bg-transparent"
                 asChild
               >
-                <Link href="/" className="font-popular">
+                <Link href="/ubicacion" className="font-popular">
                   <MapPin className="w-5 h-5 mr-2" />
                   Dónde encontrarnos
                 </Link>
