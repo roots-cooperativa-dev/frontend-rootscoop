@@ -50,6 +50,7 @@ import {
 import { toast } from "sonner"
 import { cn } from "../../lib/utils"
 import Link from "next/link"
+import { useAuthContext } from "../../context/authContext"
 
 // Hook personalizado para debounce
 const useDebounce = (value: string, delay: number) => {
@@ -77,6 +78,9 @@ export const GestionUsuarios = () => {
     const [usernameFilter, setUsernameFilter] = useState("")
     const [emailFilter, setEmailFilter] = useState("")
     const [showDeleted, setShowDeleted] = useState(false)
+
+    // Obtener usuario actual del contexto
+    const { user: currentUser } = useAuthContext()
 
     // Debounce para búsqueda en tiempo real
     const debouncedUsernameFilter = useDebounce(usernameFilter, 500)
@@ -235,6 +239,21 @@ export const GestionUsuarios = () => {
         }
     }
 
+    // Función para verificar si el usuario actual puede gestionar roles
+    const canManageRoles = () => {
+        // Si no hay usuario actual, no permitir
+        if (!currentUser) return false
+
+        // Si el usuario actual es admin, no puede gestionar roles (independientemente de si es superadmin o no)
+        if (currentUser.isAdmin) return false
+
+        // Si el usuario actual es superadmin (pero no admin), puede gestionar roles
+        if (currentUser.isSuperAdmin) return true
+
+        // Si no es admin ni superadmin, no puede gestionar roles
+        return false
+    }
+
     const hasActiveFilters = usernameFilter || emailFilter || showDeleted
 
     return (
@@ -284,6 +303,7 @@ export const GestionUsuarios = () => {
                     </Link>
                 </div>
             </div>
+
             {/* Filtros */}
             <Card className="shadow-sm">
                 <CardHeader>
@@ -483,6 +503,7 @@ export const GestionUsuarios = () => {
                                                             <DropdownMenuContent align="end" className="w-56">
                                                                 <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                                                                 <DropdownMenuSeparator />
+
                                                                 <Link href={`/dashboard/usuarios/${usuario.id}`}>
                                                                     <DropdownMenuItem className="cursor-pointer">
                                                                         <Eye className="mr-2 h-4 w-4" />
@@ -491,7 +512,8 @@ export const GestionUsuarios = () => {
                                                                 </Link>
                                                                 <DropdownMenuSeparator />
 
-                                                                {!usuario.deletedAt && (
+                                                                {/* Mostrar opciones de roles solo si el usuario actual puede gestionarlos */}
+                                                                {!usuario.deletedAt && canManageRoles() && (
                                                                     <>
                                                                         <DropdownMenuLabel className="text-xs font-normal text-gray-500">
                                                                             Roles Administrativos (Excluyentes)
@@ -526,6 +548,17 @@ export const GestionUsuarios = () => {
                                                                         >
                                                                             <Heart className="mr-2 h-4 w-4" />
                                                                             {usuario.isDonator ? "Quitar" : "Hacer"} Donador
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuSeparator />
+                                                                    </>
+                                                                )}
+
+                                                                {/* Mostrar mensaje informativo si el usuario actual es admin pero no superadmin */}
+                                                                {!usuario.deletedAt && currentUser?.isAdmin && !currentUser?.isSuperAdmin && (
+                                                                    <>
+                                                                        <DropdownMenuItem disabled className="cursor-not-allowed opacity-50">
+                                                                            <Shield className="mr-2 h-4 w-4" />
+                                                                            <span className="text-xs">Solo SuperAdmin puede gestionar roles</span>
                                                                         </DropdownMenuItem>
                                                                         <DropdownMenuSeparator />
                                                                     </>
