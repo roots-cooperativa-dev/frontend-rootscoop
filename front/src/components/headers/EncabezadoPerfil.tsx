@@ -17,9 +17,13 @@ import { useAuthContext } from "@/src/context/authContext";
 import { useRouter } from "next/navigation";
 import { useCartContext } from "@/src/context/cartContext";
 
-const HeaderProfile = () => {
+type Props = {
+  onToggleSidebar?: () => void;
+};
+
+const HeaderProfile = ({ onToggleSidebar }: Props) => {
   const { resetUserData, user, isAuth } = useAuthContext();
-  const {resetCart} = useCartContext();
+  const { resetCart } = useCartContext();
   const router = useRouter();
   const Logout = () => {
     resetUserData();
@@ -31,6 +35,12 @@ const HeaderProfile = () => {
       <header className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
+            <button
+              className="md:hidden text-white text-3xl rounded bg-[#017D74] p-2"
+              onClick={onToggleSidebar}
+            >
+              ☰
+            </button>
             <Link href="/" className="flex">
               <Image
                 src="/logos/roots.png"
