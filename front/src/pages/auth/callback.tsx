@@ -52,7 +52,6 @@ export default function Callback() {
     },
   ];
   useEffect(() => {
-    setLoadingUser(false)
     if (!router.isReady || hasRun.current) return;
 
     const accessToken = router.query.token as string;
@@ -93,6 +92,8 @@ export default function Callback() {
         if (birthYear && birthYear !== currentYear) {
           router.push("/");
           return;
+        }else{
+          setLoadingUser(false)
         }
       } catch (error) {
         console.error("Error al obtener datos del usuario:", error);
@@ -198,9 +199,9 @@ export default function Callback() {
           });
         })
         .catch(() => setError("Error cargando datos del usuario"))
-        .finally(() => setLoadingUser(false));
+        //.finally(() => setLoadingUser(false));
     } else {
-      setLoadingUser(false);
+        //setLoadingUser(false);
     }
   }, [user, token]);
 

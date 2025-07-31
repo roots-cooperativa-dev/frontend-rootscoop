@@ -67,7 +67,7 @@ export const Productos = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalProducts, setTotalProducts] = useState<number>(0);
-  const itemsPerPage = 2;
+  const itemsPerPage = 4;
 
   const debouncedSearchTerm = useDebounce(name, 500);
 
@@ -432,14 +432,6 @@ export const Productos = () => {
                           </Badge>
                         </div>
                       )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white shadow-md border-0 hover:scale-110 transition-transform"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
-                      </Button>
                       {producto.sizes[0]?.stock > 0 &&
                         producto.sizes[0]?.stock <= 5 && (
                           <Badge className="absolute top-3 left-3 bg-orange-500 text-white text-xs">
