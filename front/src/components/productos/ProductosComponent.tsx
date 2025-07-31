@@ -235,7 +235,7 @@ export const Productos = () => {
               />
             </Link>
             <div className="flex items-center space-x-4">
-              <AuthNav />
+              <AuthNav/>
               <Link
                 href="/"
                 className="flex items-center space-x-2 text-gray-600 hover:text-[#017d74] transition-colors"
