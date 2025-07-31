@@ -85,8 +85,9 @@ export interface IDonation {
   paymentTypeId: string;
   paymentMethodId: string;
   dateApproved: string; // ISO string
-  createdAt: string; // ISO string
+  createdAt: string;    // ISO string
   userId: string;
+  user?: IUsuario | null; // ⬅️ Datos del usuario asociados (opcional)
 }
 
 export interface IDonationWithUser {
