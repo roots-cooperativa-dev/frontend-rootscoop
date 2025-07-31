@@ -41,7 +41,7 @@ export const CategoriasCRUD = () => {
     const [isCreating, setIsCreating] = useState(false)
     const [mostrarEliminadas, setMostrarEliminadas] = useState(false)
     const [page, setPage] = useState(1)
-    const [limit] = useState(5) // Increased limit for better display
+    const [limit] = useState(5)
     const [totalPages, setTotalPages] = useState(1)
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null) // For individual action loading
     const [isDuplicateName, setIsDuplicateName] = useState(false) // New state for duplicate name validation
@@ -442,8 +442,6 @@ export const CategoriasCRUD = () => {
                             ))}
                         </div>
                     )}
-
-                    {/* Pagination */}
                     {totalPages > 1 && !loading && filteredCategorias.length > 0 && (
                         <div className="flex justify-center items-center gap-4 mt-6">
                             <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1} variant="outline">

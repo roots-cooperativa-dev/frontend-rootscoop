@@ -52,7 +52,11 @@ export interface ProductoQueryParams {
 }
 
 export interface IUsuario {
-  createdAt: string; // o Date, según tu backend
+  roles: any;
+  profilePicture: undefined;
+  deletedAt?: string | null;
+  isSuperAdmin: boolean;
+  createdAt: string;
   id: string;
   name: string;
   email: string;
@@ -72,22 +76,22 @@ export interface IUsuario {
 
 
 export interface IDonation {
-    id: string;
-    pagoId: string;
-    status: string;
-    statusDetail: string;
-    amount: number;
-    currencyId: string;
-    paymentTypeId: string;
-    paymentMethodId: string;
-    dateApproved: string; // ISO string
-    createdAt: string; // ISO string
-    userId: string;
+  id: string;
+  pagoId: string;
+  status: string;
+  statusDetail: string;
+  amount: number;
+  currencyId: string;
+  paymentTypeId: string;
+  paymentMethodId: string;
+  dateApproved: string; // ISO string
+  createdAt: string; // ISO string
+  userId: string;
 }
 
 export interface IDonationWithUser {
-    donation: IDonation;
-    user: IUsuario;
+  donation: IDonation;
+  user: IUsuario;
 }
 
 
@@ -265,12 +269,12 @@ export interface IAppointmentsPaginatedResponse {
 }
 export interface AppointmentsQueryParams {
   status?:
-    | "pending"
-    | "approved"
-    | "rejected"
-    | "cancelled"
-    | "completed"
-    | undefined;
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "cancelled"
+  | "completed"
+  | undefined;
   page?: number;
   limit?: number;
 }

@@ -5,14 +5,29 @@ import { CrearUsuarioDTO } from "../dto/CrearUsuarioDTO";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export const fetchUsers = async (
-    page: number = 1,
-    limit: number = 10
-): Promise<{ users: IUsuario[]; total: number; pages: number }> => {
+interface FetchUsersParams {
+    page?: number;
+    limit?: number;
+    username?: string;
+    email?: string;
+    statusFilter?: "all" | "active" | "deleted";
+}
+
+export const fetchUsers = async ({
+    page = 1,
+    limit = 10,
+    username,
+    email
+}: FetchUsersParams): Promise<{ users: IUsuario[]; total: number; pages: number }> => {
     try {
         const response = await axios.get(`${API_URL}/users`, {
-            params: { page, limit },
-            headers: getAuthHeader().headers
+            params: {
+                page,
+                limit,
+                username,
+                email
+            },
+            headers: (await getAuthHeader()).headers
         });
 
         return {
@@ -91,7 +106,7 @@ export const updateUser = async (userId: string, userData: Partial<IUsuario>): P
 
 export const updateUserRoles = async (
     userId: string,
-    roles: { isAdmin: boolean; isDonator: boolean }
+    roles: { isAdmin: boolean; isDonator: boolean; isSuperAdmin: boolean }
 ): Promise<boolean> => {
     try {
         const config = await getAuthHeader();
@@ -115,6 +130,28 @@ export const updateUserRoles = async (
             }
 
         } else {
+            console.error("Error desconocido:", error);
+        }
+        return false;
+    }
+};
+
+export const restoreUser = async (userId: string): Promise<boolean> => {
+    try {
+        const config = await getAuthHeader();
+        await axios.patch(`${API_URL}/users/restore/${userId}`, {}, config);
+        return true;
+    } catch (error: any) {
+        if (axios.isAxiosError(error)) {
+            const data = error.response?.data;
+            console.error("Error al restaurar usuario:");
+            if (data?.message) {
+                console.error("Mensaje:", data.message);
+            } else {
+                console.error("Mensaje genérico:", error.message);
+            }
+        }
+        else {
             console.error("Error desconocido:", error);
         }
         return false;

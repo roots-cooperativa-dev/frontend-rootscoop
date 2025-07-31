@@ -20,6 +20,7 @@ export interface UserGoogle {
   phone: string;
   username: string;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   isDonator: boolean;
   donates: any[];         // podés tiparlo mejor si querés
   orders: any[];
