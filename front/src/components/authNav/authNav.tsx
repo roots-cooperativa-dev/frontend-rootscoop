@@ -9,9 +9,9 @@ const AuthNav = () => {
   const { total } = useCartContext(); 
 
   if (isAuth === null) return <p>...cargando</p>;
-  if (user?.isAdmin) {
+  if (user?.isAdmin || user?.isSuperAdmin) {
     return (
-      <div className="flex items-center space-x-4 rtl:space-x-reverse">
+      <div className="flex flex-col sm:flex-row  space-y-2 sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
         <Link href="/profile/carrito">
           <div className="relative w-fit h-8 flex items-center justify-center">
             {Boolean(total) && (
@@ -33,7 +33,7 @@ const AuthNav = () => {
   }
   if (isAuth) {
     return (
-      <div className="flex items-center space-x-4 rtl:space-x-reverse">
+      <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
         <Link href="/profile/carrito">
           <div className="relative w-fit h-8 flex items-center justify-center">
             {Boolean(total) && (
