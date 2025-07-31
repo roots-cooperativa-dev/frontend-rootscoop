@@ -11,11 +11,12 @@ import EditUser from "../component/editUser";
 //import { UserGoogle } from "@/src/interfaces/userGoogle"; // ajusta ruta
 
 const ProfileEdit = () => {
+   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <>
-      <HeaderProfile />
+      <HeaderProfile onToggleSidebar={() => setSidebarOpen(true)} />
       <div className="flex bg-slate-50">
-        <Sidebar/>
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)}/>
         <EditUser/>
       </div>
     </>
