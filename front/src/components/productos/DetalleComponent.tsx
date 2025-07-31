@@ -23,7 +23,7 @@ const ProductoDetalle = ({ producto }: Props) => {
   const stock = producto.sizes[0]?.stock ?? 0;
   const price = producto.sizes[0]?.price ?? "-";
   const sizeId = producto.sizes[0]?.id ?? "";
-  const sizeName = producto.sizes[0]?.size ?? "Único";
+  const size = producto.sizes[0]?.size ?? "-";
   const imagenes = producto.files || [];
 
   const [imagenSeleccionada, setImagenSeleccionada] = useState(
@@ -166,6 +166,9 @@ const ProductoDetalle = ({ producto }: Props) => {
               <span className="ml-2 text-sm text-gray-500">(12 reseñas)</span>
             </div>
             <p className="text-3xl font-bold text-[#922f4e] mb-2">${price}</p>
+            <p className="mb-2 text-gray-600">
+              <span className="font-semibold">Talla:</span> {size}
+            </p>
             <p className="mb-6 text-gray-600">
               {stock > 0 ? (
                 <span className="text-green-600 font-medium">
