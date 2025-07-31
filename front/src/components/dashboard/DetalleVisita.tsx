@@ -23,7 +23,7 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "../../components/ui/dialog"
-import { format, isPast, parseISO } from "date-fns"
+import { format, parseISO, addDays, isBefore, isSameDay } from "date-fns"
 
 export const DetalleVisita = () => {
     const params = useParams()
@@ -44,9 +44,10 @@ export const DetalleVisita = () => {
         endTime?: string
         maxAppointments?: string
     }>({})
-    const [touched, setTouched] = useState<Partial<Record<keyof typeof formData, boolean>>>({}) // Nuevo estado para campos tocados
-    const [formSubmitted, setFormSubmitted] = useState(false) // Nuevo estado para saber si el formulario fue enviado
-    const [isFormValid, setIsFormValid] = useState(true) // Declaración de la variable isFormValid
+    const [touched, setTouched] = useState<Partial<Record<keyof typeof formData, boolean>>>({})
+    const [formSubmitted, setFormSubmitted] = useState(false)
+    const [isFormValid, setIsFormValid] = useState(true)
+    const [isDateToday, setIsDateToday] = useState(false) // Nuevo estado para detectar si la fecha es hoy
 
     useEffect(() => {
         const cargarVisita = async () => {
@@ -60,7 +61,6 @@ export const DetalleVisita = () => {
                 setLoading(false)
             }
         }
-
         if (visitaId) cargarVisita()
     }, [visitaId])
 
@@ -68,6 +68,7 @@ export const DetalleVisita = () => {
     const validateForm = (data: typeof formData) => {
         const errors: typeof formErrors = {}
         let valid = true
+        let dateIsToday = false
 
         if (!data.date) {
             errors.date = "La fecha es obligatoria."
@@ -75,22 +76,40 @@ export const DetalleVisita = () => {
         } else {
             const selectedDate = parseISO(data.date)
             const today = new Date()
-            today.setHours(0, 0, 0, 0) // Reset time for comparison
+            const tomorrow = addDays(new Date(), 1)
 
-            if (isPast(selectedDate) && format(selectedDate, "yyyy-MM-dd") !== format(today, "yyyy-MM-dd")) {
-                errors.date = "No puedes seleccionar una fecha pasada."
+            // Normalizar fechas para comparación (sin horas)
+            today.setHours(0, 0, 0, 0)
+            tomorrow.setHours(0, 0, 0, 0)
+            selectedDate.setHours(0, 0, 0, 0)
+
+            // Verificar si la fecha seleccionada es hoy
+            dateIsToday = isSameDay(selectedDate, today)
+
+            // No permitir el día actual ni fechas pasadas
+            if (isBefore(selectedDate, tomorrow)) {
+                if (dateIsToday) {
+                    errors.date = "No puedes seleccionar el día de hoy. Debes programar con al menos 24 horas de anticipación."
+                } else {
+                    errors.date = "No puedes seleccionar fechas pasadas. Debes programar con al menos 24 horas de anticipación."
+                }
                 valid = false
             }
         }
+
+        // Actualizar el estado de si la fecha es hoy
+        setIsDateToday(dateIsToday)
 
         if (!data.startTime) {
             errors.startTime = "La hora de inicio es obligatoria."
             valid = false
         }
+
         if (!data.endTime) {
             errors.endTime = "La hora de finalización es obligatoria."
             valid = false
         }
+
         if (data.startTime && data.endTime) {
             const start = new Date(`2000-01-01T${data.startTime}`)
             const end = new Date(`2000-01-01T${data.endTime}`)
@@ -119,6 +138,14 @@ export const DetalleVisita = () => {
         } else {
             // Si no se ha tocado nada ni enviado, el formulario se considera válido inicialmente
             setIsFormValid(true)
+            // Pero aún así verificar si la fecha es hoy para desactivar el botón
+            if (formData.date) {
+                const selectedDate = parseISO(formData.date)
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                selectedDate.setHours(0, 0, 0, 0)
+                setIsDateToday(isSameDay(selectedDate, today))
+            }
         }
     }, [formData, touched, formSubmitted])
 
@@ -131,6 +158,15 @@ export const DetalleVisita = () => {
         setFormData(newFormData)
         // Marcar el campo como tocado al cambiar
         setTouched((prev) => ({ ...prev, [name]: true }))
+
+        // Si es el campo de fecha, verificar inmediatamente si es hoy para desactivar el botón
+        if (name === "date" && value) {
+            const selectedDate = parseISO(value)
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            selectedDate.setHours(0, 0, 0, 0)
+            setIsDateToday(isSameDay(selectedDate, today))
+        }
     }
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -149,6 +185,13 @@ export const DetalleVisita = () => {
             toast.error("Por favor, corrige los errores del formulario.")
             return
         }
+
+        // Verificación adicional para prevenir envío si la fecha es hoy
+        if (isDateToday) {
+            toast.error("No puedes seleccionar el día de hoy. Selecciona una fecha futura.")
+            return
+        }
+
         setSubmitting(true)
         try {
             await agregarTurnoAVisita(visitaId, formData)
@@ -162,6 +205,7 @@ export const DetalleVisita = () => {
             setFormErrors({}) // Limpiar errores
             setTouched({}) // Limpiar campos tocados
             setFormSubmitted(false) // Resetear estado de enviado
+            setIsDateToday(false) // Resetear estado de fecha hoy
             // Refrescar los datos de la visita
             const visitas = await fetchVisitas()
             const encontrada = visitas.find((v) => v.id === visitaId)
@@ -174,7 +218,11 @@ export const DetalleVisita = () => {
         }
     }
 
-    const todayString = format(new Date(), "yyyy-MM-dd") // Obtener la fecha de hoy en formato YYYY-MM-DD
+    // Fecha mínima: mañana (24 horas de anticipación)
+    const tomorrowString = format(addDays(new Date(), 1), "yyyy-MM-dd")
+
+    // El botón está deshabilitado si: está enviando, el formulario no es válido, o la fecha seleccionada es hoy
+    const isButtonDisabled = submitting || !isFormValid || isDateToday
 
     if (loading) {
         return (
@@ -238,7 +286,13 @@ export const DetalleVisita = () => {
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Agregar Nuevo Horario</DialogTitle>
-                            <DialogDescription>Completa los datos para agregar un nuevo horario a esta visita.</DialogDescription>
+                            <DialogDescription>
+                                Completa los datos para agregar un nuevo horario a esta visita.
+                                <span className="block mt-2 text-amber-600 font-medium">
+                                    ⚠️ No se puede seleccionar el día de hoy. Los horarios deben programarse con al menos 24 horas de
+                                    anticipación.
+                                </span>
+                            </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4 py-4">
                             <div className="space-y-2">
@@ -249,13 +303,22 @@ export const DetalleVisita = () => {
                                     name="date"
                                     value={formData.date}
                                     onChange={handleChange}
-                                    onBlur={handleBlur} // Validar al salir del campo
-                                    min={todayString} // Deshabilitar fechas pasadas
-                                    className="w-full"
+                                    onBlur={handleBlur}
+                                    min={tomorrowString} // Fecha mínima: mañana (24hs anticipación)
+                                    className={cn("w-full", isDateToday && "border-red-500 focus:border-red-500 focus:ring-red-500")}
                                 />
                                 {formErrors?.date && (touched.date || formSubmitted) && (
                                     <p className="text-red-500 text-sm">{formErrors.date}</p>
                                 )}
+                                {isDateToday && (
+                                    <p className="text-red-500 text-sm font-medium">
+                                        🚫 Has seleccionado el día de hoy. El botón de envío está deshabilitado.
+                                    </p>
+                                )}
+                                <p className="text-xs text-gray-500">
+                                    No se puede seleccionar hoy ({format(new Date(), "dd/MM/yyyy")}). Fecha mínima:{" "}
+                                    {format(addDays(new Date(), 1), "dd/MM/yyyy")} (24hs de anticipación)
+                                </p>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="maxAppointments">Cantidad máxima de citas</Label>
@@ -263,10 +326,11 @@ export const DetalleVisita = () => {
                                     id="maxAppointments"
                                     type="number"
                                     name="maxAppointments"
-                                    value={isNaN(formData.maxAppointments) ? "" : formData.maxAppointments} // Manejar NaN para la visualización
+                                    value={isNaN(formData.maxAppointments) ? "" : formData.maxAppointments}
                                     onChange={handleChange}
-                                    onBlur={handleBlur} // Validar al salir del campo
+                                    onBlur={handleBlur}
                                     className="w-full"
+                                    min="1"
                                 />
                                 {formErrors?.maxAppointments && (touched.maxAppointments || formSubmitted) && (
                                     <p className="text-red-500 text-sm">{formErrors.maxAppointments}</p>
@@ -280,7 +344,7 @@ export const DetalleVisita = () => {
                                     name="startTime"
                                     value={formData.startTime}
                                     onChange={handleChange}
-                                    onBlur={handleBlur} // Validar al salir del campo
+                                    onBlur={handleBlur}
                                     className="w-full"
                                 />
                                 {formErrors?.startTime && (touched.startTime || formSubmitted) && (
@@ -295,7 +359,7 @@ export const DetalleVisita = () => {
                                     name="endTime"
                                     value={formData.endTime}
                                     onChange={handleChange}
-                                    onBlur={handleBlur} // Validar al salir del campo
+                                    onBlur={handleBlur}
                                     className="w-full"
                                 />
                                 {formErrors?.endTime && (touched.endTime || formSubmitted) && (
@@ -305,14 +369,21 @@ export const DetalleVisita = () => {
                             <DialogFooter>
                                 <Button
                                     type="submit"
-                                    disabled={submitting || !isFormValid}
-                                    className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md"
+                                    disabled={isButtonDisabled}
+                                    className={cn(
+                                        "shadow-md transition-all",
+                                        isDateToday
+                                            ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
+                                            : "bg-[#017d74] hover:bg-[#015d54] text-white",
+                                    )}
                                 >
                                     {submitting ? (
                                         <>
                                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                             Guardando horario...
                                         </>
+                                    ) : isDateToday ? (
+                                        <>🚫 No se puede seleccionar hoy</>
                                     ) : (
                                         <>
                                             <Plus className="w-4 h-4 mr-2" />
@@ -344,7 +415,6 @@ export const DetalleVisita = () => {
                         </div>
                     </CardContent>
                 </Card>
-
                 <Card>
                     <CardContent className="p-6">
                         <div className="flex items-center gap-4">
@@ -358,7 +428,6 @@ export const DetalleVisita = () => {
                         </div>
                     </CardContent>
                 </Card>
-
                 <Card>
                     <CardContent className="p-6">
                         <div className="flex items-center gap-4">
@@ -466,6 +535,7 @@ export const DetalleVisita = () => {
                     </CardContent>
                 </Card>
             )}
+
             {visita.availableSlots && visita.availableSlots.length === 0 && !loading && (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">
@@ -486,7 +556,13 @@ export const DetalleVisita = () => {
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
                                     <DialogTitle>Agregar Nuevo Horario</DialogTitle>
-                                    <DialogDescription>Completa los datos para agregar un nuevo horario a esta visita.</DialogDescription>
+                                    <DialogDescription>
+                                        Completa los datos para agregar un nuevo horario a esta visita.
+                                        <span className="block mt-2 text-amber-600 font-medium">
+                                            ⚠️ No se puede seleccionar el día de hoy. Los horarios deben programarse con al menos 24 horas de
+                                            anticipación.
+                                        </span>
+                                    </DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                                     <div className="space-y-2">
@@ -497,13 +573,22 @@ export const DetalleVisita = () => {
                                             name="date"
                                             value={formData.date}
                                             onChange={handleChange}
-                                            onBlur={handleBlur} // Validar al salir del campo
-                                            min={todayString} // Deshabilitar fechas pasadas
-                                            className="w-full"
+                                            onBlur={handleBlur}
+                                            min={tomorrowString} // Fecha mínima: mañana (24hs anticipación)
+                                            className={cn("w-full", isDateToday && "border-red-500 focus:border-red-500 focus:ring-red-500")}
                                         />
                                         {formErrors?.date && (touched.date || formSubmitted) && (
                                             <p className="text-red-500 text-sm">{formErrors.date}</p>
                                         )}
+                                        {isDateToday && (
+                                            <p className="text-red-500 text-sm font-medium">
+                                                🚫 Has seleccionado el día de hoy. El botón de envío está deshabilitado.
+                                            </p>
+                                        )}
+                                        <p className="text-xs text-gray-500">
+                                            No se puede seleccionar hoy ({format(new Date(), "dd/MM/yyyy")}). Fecha mínima:{" "}
+                                            {format(addDays(new Date(), 1), "dd/MM/yyyy")} (24hs de anticipación)
+                                        </p>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="maxAppointments">Cantidad máxima de citas</Label>
@@ -511,10 +596,11 @@ export const DetalleVisita = () => {
                                             id="maxAppointments"
                                             type="number"
                                             name="maxAppointments"
-                                            value={isNaN(formData.maxAppointments) ? "" : formData.maxAppointments} // Manejar NaN para la visualización
+                                            value={isNaN(formData.maxAppointments) ? "" : formData.maxAppointments}
                                             onChange={handleChange}
-                                            onBlur={handleBlur} // Validar al salir del campo
+                                            onBlur={handleBlur}
                                             className="w-full"
+                                            min="1"
                                         />
                                         {formErrors?.maxAppointments && (touched.maxAppointments || formSubmitted) && (
                                             <p className="text-red-500 text-sm">{formErrors.maxAppointments}</p>
@@ -528,7 +614,7 @@ export const DetalleVisita = () => {
                                             name="startTime"
                                             value={formData.startTime}
                                             onChange={handleChange}
-                                            onBlur={handleBlur} // Validar al salir del campo
+                                            onBlur={handleBlur}
                                             className="w-full"
                                         />
                                         {formErrors?.startTime && (touched.startTime || formSubmitted) && (
@@ -543,7 +629,7 @@ export const DetalleVisita = () => {
                                             name="endTime"
                                             value={formData.endTime}
                                             onChange={handleChange}
-                                            onBlur={handleBlur} // Validar al salir del campo
+                                            onBlur={handleBlur}
                                             className="w-full"
                                         />
                                         {formErrors?.endTime && (touched.endTime || formSubmitted) && (
@@ -553,14 +639,21 @@ export const DetalleVisita = () => {
                                     <DialogFooter>
                                         <Button
                                             type="submit"
-                                            disabled={submitting || !isFormValid}
-                                            className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md"
+                                            disabled={isButtonDisabled}
+                                            className={cn(
+                                                "shadow-md transition-all",
+                                                isDateToday
+                                                    ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
+                                                    : "bg-[#017d74] hover:bg-[#015d54] text-white",
+                                            )}
                                         >
                                             {submitting ? (
                                                 <>
                                                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                                     Guardando horario...
                                                 </>
+                                            ) : isDateToday ? (
+                                                <>🚫 No se puede seleccionar hoy</>
                                             ) : (
                                                 <>
                                                     <Plus className="w-4 h-4 mr-2" />

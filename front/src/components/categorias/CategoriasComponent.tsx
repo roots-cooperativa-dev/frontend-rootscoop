@@ -57,7 +57,7 @@ export const CategoriasCRUD = () => {
     const [isCreating, setIsCreating] = useState(false)
     const [mostrarEliminadas, setMostrarEliminadas] = useState(false)
     const [page, setPage] = useState(1)
-    const [limit] = useState(2)
+    const [limit] = useState(5)
     const [totalPages, setTotalPages] = useState(1)
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null) // For individual action loading
     const [isDuplicateName, setIsDuplicateName] = useState(false) // New state for duplicate name validation
