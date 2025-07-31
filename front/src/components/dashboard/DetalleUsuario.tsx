@@ -21,6 +21,7 @@ import {
     Loader2,
     UserCheck,
     Hash,
+    Crown,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "../../lib/utils"
@@ -57,16 +58,26 @@ export const DetalleUsuario = () => {
     }
 
     const getRoleColor = (usuario: IUsuario) => {
-        if (usuario.isAdmin) return "bg-red-100 text-red-800 border-red-200"
+        if (usuario.isSuperAdmin) return "bg-red-100 text-red-800 border-red-200"
+        if (usuario.isAdmin) return "bg-blue-100 text-blue-800 border-blue-200"
         if (usuario.isDonator) return "bg-green-100 text-green-800 border-green-200"
         return "bg-gray-100 text-gray-800 border-gray-200"
     }
 
     const getRoleText = (usuario: IUsuario) => {
-        if (usuario.isAdmin && usuario.isDonator) return "Admin • Donador"
-        if (usuario.isAdmin) return "Administrador"
-        if (usuario.isDonator) return "Donador"
-        return "Usuario"
+        const roles = []
+        if (usuario.isSuperAdmin) roles.push("SuperAdmin")
+        if (usuario.isAdmin) roles.push("Admin")
+        if (usuario.isDonator) roles.push("Donador")
+
+        if (roles.length === 0) return "Usuario"
+        return roles.join(" • ")
+    }
+
+    const getMainRole = (usuario: IUsuario) => {
+        if (usuario.isSuperAdmin) return { text: "SuperAdmin", priority: 3 }
+        if (usuario.isAdmin) return { text: "Administrador", priority: 2 }
+        return { text: "Usuario", priority: 1 }
     }
 
     if (loading) {
@@ -100,6 +111,8 @@ export const DetalleUsuario = () => {
         )
     }
 
+    const mainRole = getMainRole(usuario)
+
     return (
         <div className="p-6 space-y-6">
             {/* Header */}
@@ -121,12 +134,6 @@ export const DetalleUsuario = () => {
                     </h1>
                     <p className="text-gray-600 mt-1">Información detallada del usuario seleccionado</p>
                 </div>
-                <Link href={`/dashboard/usuarios/edit/${usuario.id}`}>
-                    <Button className="bg-[#017d74] hover:bg-[#015d54] text-white shadow-md">
-                        <UserCheck className="w-4 h-4 mr-2" />
-                        Editar Usuario
-                    </Button>
-                </Link>
             </div>
 
             {/* User Profile Card */}
@@ -144,8 +151,14 @@ export const DetalleUsuario = () => {
                                 <Badge variant="outline" className={getRoleColor(usuario)}>
                                     {getRoleText(usuario)}
                                 </Badge>
-                                {usuario.isAdmin && (
+                                {usuario.isSuperAdmin && (
                                     <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">
+                                        <Crown className="w-3 h-3 mr-1" />
+                                        SuperAdmin
+                                    </Badge>
+                                )}
+                                {usuario.isAdmin && !usuario.isSuperAdmin && (
+                                    <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
                                         <Shield className="w-3 h-3 mr-1" />
                                         Administrador
                                     </Badge>
@@ -245,33 +258,78 @@ export const DetalleUsuario = () => {
                     <CardDescription>Configuración de roles del usuario</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {/* SuperAdmin Role */}
                         <div
                             className={cn(
                                 "p-4 rounded-lg border-2 transition-colors",
-                                usuario.isAdmin ? "bg-red-50 border-red-200" : "bg-gray-50 border-gray-200",
+                                usuario.isSuperAdmin ? "bg-red-50 border-red-200" : "bg-gray-50 border-gray-200",
                             )}
                         >
                             <div className="flex items-center gap-3">
                                 <div
                                     className={cn(
                                         "w-10 h-10 rounded-full flex items-center justify-center",
-                                        usuario.isAdmin ? "bg-red-100" : "bg-gray-100",
+                                        usuario.isSuperAdmin ? "bg-red-100" : "bg-gray-100",
                                     )}
                                 >
-                                    <Shield className={cn("w-5 h-5", usuario.isAdmin ? "text-red-600" : "text-gray-400")} />
+                                    <Crown className={cn("w-5 h-5", usuario.isSuperAdmin ? "text-red-600" : "text-gray-400")} />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-gray-900">SuperAdmin</h3>
+                                    <p className="text-sm text-gray-600">
+                                        {usuario.isSuperAdmin ? "Control total del sistema" : "Sin permisos de SuperAdmin"}
+                                    </p>
+                                </div>
+                            </div>
+                            <Badge
+                                className={cn("mt-3", usuario.isSuperAdmin ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-600")}
+                            >
+                                {usuario.isSuperAdmin ? "Activo" : "Inactivo"}
+                            </Badge>
+                        </div>
+
+                        {/* Admin Role */}
+                        <div
+                            className={cn(
+                                "p-4 rounded-lg border-2 transition-colors",
+                                usuario.isAdmin && !usuario.isSuperAdmin ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-200",
+                            )}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div
+                                    className={cn(
+                                        "w-10 h-10 rounded-full flex items-center justify-center",
+                                        usuario.isAdmin && !usuario.isSuperAdmin ? "bg-blue-100" : "bg-gray-100",
+                                    )}
+                                >
+                                    <Shield
+                                        className={cn(
+                                            "w-5 h-5",
+                                            usuario.isAdmin && !usuario.isSuperAdmin ? "text-blue-600" : "text-gray-400",
+                                        )}
+                                    />
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-gray-900">Administrador</h3>
                                     <p className="text-sm text-gray-600">
-                                        {usuario.isAdmin ? "Acceso completo al sistema" : "Sin permisos administrativos"}
+                                        {usuario.isAdmin && !usuario.isSuperAdmin
+                                            ? "Acceso administrativo"
+                                            : "Sin permisos administrativos"}
                                     </p>
                                 </div>
                             </div>
-                            <Badge className={cn("mt-3", usuario.isAdmin ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-600")}>
-                                {usuario.isAdmin ? "Activo" : "Inactivo"}
+                            <Badge
+                                className={cn(
+                                    "mt-3",
+                                    usuario.isAdmin && !usuario.isSuperAdmin ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-600",
+                                )}
+                            >
+                                {usuario.isAdmin && !usuario.isSuperAdmin ? "Activo" : "Inactivo"}
                             </Badge>
                         </div>
+
+                        {/* Donator Role */}
                         <div
                             className={cn(
                                 "p-4 rounded-lg border-2 transition-colors",
@@ -299,6 +357,29 @@ export const DetalleUsuario = () => {
                             >
                                 {usuario.isDonator ? "Activo" : "Inactivo"}
                             </Badge>
+                        </div>
+                    </div>
+
+                    {/* Role Hierarchy Info */}
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-3">
+                            <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
+                            <div>
+                                <h4 className="font-semibold text-blue-900 mb-1">Jerarquía de Roles</h4>
+                                <p className="text-sm text-blue-700 mb-2">
+                                    Los roles administrativos son excluyentes. Un usuario puede ser SuperAdmin O Admin, pero no ambos.
+                                </p>
+                                <div className="flex items-center gap-2 text-sm text-blue-600">
+                                    <Crown className="w-4 h-4" />
+                                    <span className="font-medium">SuperAdmin</span>
+                                    <span>{">"}</span>
+                                    <Shield className="w-4 h-4" />
+                                    <span className="font-medium">Admin</span>
+                                    <span>{">"}</span>
+                                    <User className="w-4 h-4" />
+                                    <span className="font-medium">Usuario</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </CardContent>

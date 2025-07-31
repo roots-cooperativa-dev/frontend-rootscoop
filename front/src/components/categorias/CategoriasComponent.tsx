@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
 import {
     fetchCategorias,
@@ -30,6 +29,23 @@ import {
 } from "../../components/ui/alert-dialog"
 import { cn } from "../../lib/utils"
 
+// Hook personalizado para debounce
+const useDebounce = (value: string, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value)
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value)
+        }, delay)
+
+        return () => {
+            clearTimeout(handler)
+        }
+    }, [value, delay])
+
+    return debouncedValue
+}
+
 export const CategoriasCRUD = () => {
     const [categorias, setCategorias] = useState<ICategory[]>([])
     const [loading, setLoading] = useState(true)
@@ -41,15 +57,18 @@ export const CategoriasCRUD = () => {
     const [isCreating, setIsCreating] = useState(false)
     const [mostrarEliminadas, setMostrarEliminadas] = useState(false)
     const [page, setPage] = useState(1)
-    const [limit] = useState(5)
+    const [limit] = useState(2)
     const [totalPages, setTotalPages] = useState(1)
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null) // For individual action loading
     const [isDuplicateName, setIsDuplicateName] = useState(false) // New state for duplicate name validation
 
-    const loadCategorias = async () => {
+    // Debounce para búsqueda en tiempo real
+    const debouncedSearchTerm = useDebounce(searchTerm, 500)
+
+    const loadCategorias = async (searchName = "") => {
         setLoading(true)
         try {
-            const { categories, pages } = await fetchCategorias(page, limit)
+            const { categories, pages } = await fetchCategorias(page, limit, searchName)
             const filtradas = mostrarEliminadas
                 ? categories.filter((c) => c.deletedAt)
                 : categories.filter((c) => !c.deletedAt)
@@ -62,9 +81,16 @@ export const CategoriasCRUD = () => {
         }
     }
 
+    // Efecto para búsqueda en tiempo real
     useEffect(() => {
-        loadCategorias()
-    }, [page, mostrarEliminadas])
+        setPage(1) // Resetear a página 1 cuando se busca
+        loadCategorias(debouncedSearchTerm)
+    }, [debouncedSearchTerm, mostrarEliminadas])
+
+    // Efecto para cambio de página
+    useEffect(() => {
+        loadCategorias(debouncedSearchTerm)
+    }, [page])
 
     // Effect to re-check duplicate name when categories or newName changes
     useEffect(() => {
@@ -72,10 +98,6 @@ export const CategoriasCRUD = () => {
         const duplicate = categorias.some((cat) => cat.name.toLowerCase() === trimmedNewName && !cat.deletedAt)
         setIsDuplicateName(duplicate)
     }, [newName, categorias])
-
-    const filteredCategorias = categorias.filter((categoria) =>
-        categoria.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
 
     const handleCrear = async () => {
         if (!newName.trim()) {
@@ -92,7 +114,7 @@ export const CategoriasCRUD = () => {
             if (nueva) {
                 setNewName("")
                 toast.success("Categoría creada con éxito")
-                await loadCategorias()
+                await loadCategorias(debouncedSearchTerm)
             } else {
                 toast.error("Error al crear categoría")
             }
@@ -117,12 +139,11 @@ export const CategoriasCRUD = () => {
             toast.error("Ya existe otra categoría con este nombre.")
             return
         }
-
         setActionLoadingId(id)
         try {
             const updated = await actualizarCategoria(id, editingName.trim())
             if (updated) {
-                await loadCategorias()
+                await loadCategorias(debouncedSearchTerm)
                 setEditingId(null)
                 setEditingName("")
                 toast.success("Categoría actualizada")
@@ -142,7 +163,7 @@ export const CategoriasCRUD = () => {
         toast.promise(eliminarCategoria(categoriaAEliminar.id), {
             loading: "Eliminando categoría...",
             success: async () => {
-                await loadCategorias()
+                await loadCategorias(debouncedSearchTerm)
                 setCategoriaAEliminar(null)
                 setActionLoadingId(null)
                 return "Categoría eliminada"
@@ -159,7 +180,7 @@ export const CategoriasCRUD = () => {
         toast.promise(restaurarCategoria(id), {
             loading: "Restaurando categoría...",
             success: async () => {
-                await loadCategorias()
+                await loadCategorias(debouncedSearchTerm)
                 setActionLoadingId(null)
                 return "Categoría restaurada"
             },
@@ -208,7 +229,6 @@ export const CategoriasCRUD = () => {
                     )}
                 </Button>
             </div>
-
             {/* Create New Category Card */}
             {!mostrarEliminadas && (
                 <Card className="border-2 border-dashed border-gray-200 hover:border-[#017d74]/30 transition-colors">
@@ -265,7 +285,6 @@ export const CategoriasCRUD = () => {
                     </CardContent>
                 </Card>
             )}
-
             {/* Search and Categories List */}
             <Card>
                 <CardHeader className="pb-4">
@@ -279,19 +298,23 @@ export const CategoriasCRUD = () => {
                     <div className="relative mb-6">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <Input
-                            placeholder="Buscar categorías..."
+                            placeholder="Buscar categorías en tiempo real..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 focus:border-[#017d74] focus:ring-[#017d74]"
+                            className="pl-10 pr-10 focus:border-[#017d74] focus:ring-[#017d74]"
                         />
+                        {searchTerm && (
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div className="w-2 h-2 bg-[#017d74] rounded-full animate-pulse"></div>
+                            </div>
+                        )}
                     </div>
-
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <Loader2 className="w-8 h-8 animate-spin text-[#017d74] mb-4" />
                             <p className="text-gray-500">Cargando categorías...</p>
                         </div>
-                    ) : filteredCategorias.length === 0 ? (
+                    ) : categorias.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-center">
                             <Tag className="w-12 h-12 text-gray-300 mb-4" />
                             <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron categorías</h3>
@@ -314,7 +337,7 @@ export const CategoriasCRUD = () => {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {filteredCategorias.map((categoria) => (
+                            {categorias.map((categoria) => (
                                 <Card key={categoria.id} className="shadow-sm">
                                     <CardContent className="py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                                         {editingId === categoria.id ? (
@@ -442,7 +465,7 @@ export const CategoriasCRUD = () => {
                             ))}
                         </div>
                     )}
-                    {totalPages > 1 && !loading && filteredCategorias.length > 0 && (
+                    {totalPages > 1 && !loading && categorias.length > 0 && (
                         <div className="flex justify-center items-center gap-4 mt-6">
                             <Button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1} variant="outline">
                                 Anterior

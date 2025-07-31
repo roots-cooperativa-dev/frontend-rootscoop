@@ -30,11 +30,12 @@ export const getAuthHeader = () => {
 
 export const fetchCategorias = async (
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    name: string = ""
 ): Promise<{ categories: ICategory[]; total: number; pages: number }> => {
     try {
         const response = await axios.get(`${API_URL}/category`, {
-            params: { page, limit },
+            params: { page, limit, name },
         });
         return {
             categories: response.data.categories,
@@ -50,6 +51,8 @@ export const fetchCategorias = async (
         };
     }
 };
+
+
 
 
 export const crearCategoria = async (name: string): Promise<ICategory | null> => {
@@ -106,7 +109,7 @@ export const restaurarCategoria = async (id: string): Promise<boolean> => {
     try {
         const config = await getAuthHeader();
         const response = await axios.post(`${API_URL}/category/restore/${id}`, null, config);
-        return true; 
+        return true;
     } catch (error: any) {
         console.error("Error restaurando categoría", error?.response?.data || error.message);
         return false;

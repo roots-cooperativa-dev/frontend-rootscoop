@@ -7,10 +7,19 @@ import { IOrderById } from "../types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export const fetchOrders = async (): Promise<IOrdersResponse> => {
+export const fetchOrders = async (
+    page: number = 1,
+    limit: number = 10,
+    status?: "active" | "cancelled" | "processed" | "finalized"
+): Promise<IOrdersResponse> => {
     try {
         const response = await axios.get<IOrdersResponse>(`${API_URL}/orders`, {
             headers: getAuthHeader().headers,
+            params: {
+                page,
+                limit,
+                status,
+            },
         });
         return response.data;
     } catch (error) {
@@ -18,6 +27,7 @@ export const fetchOrders = async (): Promise<IOrdersResponse> => {
         return { data: [], total: 0 };
     }
 };
+
 
 export const updateOrderStatus = async (
     orderId: string,
