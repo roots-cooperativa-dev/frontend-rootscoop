@@ -17,7 +17,6 @@ export const fetchDonationByIdUser = async (id: string | null | undefined) => {
 
     try {
         const { headers } = await getAuthHeader();
-        console.log(`📡 Consultando donación con ID: ${id}`);
 
         const response = await axios.get(`${API_URL}/donations/${id}`, { headers });
         const donation = response.data;
