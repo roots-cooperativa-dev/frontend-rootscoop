@@ -83,7 +83,7 @@ const HeaderProfile = ({ onToggleSidebar }: Props) => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {user?.isAdmin ? (
+                  {user?.isAdmin || user?.isSuperAdmin ? (
                     <Link href="/dashboard">
                       <DropdownMenuItem>
                         <User className="w-4 h-4 mr-2" />
