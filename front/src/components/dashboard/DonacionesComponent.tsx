@@ -1,30 +1,32 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { fetchDonationsWithUsers } from "../../app/utils/DonacionesHelper"
-import { Input } from "../../components/ui/input"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../components/ui/select"
+import { fetchDonacionesConUsuarios } from "../../app/utils/DonacionesHelper"
+import type { IDonation } from "../../app/types"
+import { format } from "date-fns"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { Badge } from "../../components/ui/badge"
 import { Button } from "../../components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
+import { Skeleton } from "../../components/ui/skeleton"
 import {
     Gift,
     DollarSign,
     User,
+    Calendar,
+    CreditCard,
     CheckCircle,
     Clock,
     XCircle,
+    AlertCircle,
     Filter,
-    Search,
-    Calendar,
+    ChevronLeft,
+    ChevronRight,
     Loader2,
-    CreditCard,
     Eye,
 } from "lucide-react"
 import { cn } from "../../lib/utils"
 import Link from "next/link"
-
 
 // Helper para configurar el estilo de los badges de estado
 const getStatusConfig = (status: string) => {
@@ -47,6 +49,12 @@ const getStatusConfig = (status: string) => {
                 color: "bg-red-100 text-red-800 border-red-200",
                 icon: XCircle,
             }
+        case "in_process":
+            return {
+                label: "En Proceso",
+                color: "bg-blue-100 text-blue-800 border-blue-200",
+                icon: AlertCircle,
+            }
         default:
             return {
                 label: status,
@@ -57,122 +65,137 @@ const getStatusConfig = (status: string) => {
 }
 
 export const DonacionesComponent = () => {
-    const [donations, setDonations] = useState<any[]>([])
-    const [filtered, setFiltered] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
-    const [currentPage, setCurrentPage] = useState(1)
-    const [pages, setPages] = useState(1)
-    const [searchUser, setSearchUser] = useState("")
-    const [statusFilter, setStatusFilter] = useState("all")
-    const [order, setOrder] = useState<"desc" | "asc">("desc")
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-
+    const [donaciones, setDonaciones] = useState<IDonation[]>([])
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [loading, setLoading] = useState(false)
+    const [status, setStatus] = useState<"pending" | "in_process" | "approved" | "rejected" | "all">("all")
+    const limit = 10
 
     useEffect(() => {
-        const loadDonations = async () => {
-            setLoading(true);
+        const loadDonaciones = async () => {
+            setLoading(true)
             try {
-                const data = await fetchDonationsWithUsers(currentPage, itemsPerPage);
-                setDonations(data.items);
-                setFiltered(data.items);
-                setPages(data.pages);
+                const { donations, pages } = await fetchDonacionesConUsuarios(
+                    page,
+                    limit,
+                    status === "all" ? undefined : status,
+                )
+                setDonaciones(donations)
+                setTotalPages(pages)
             } catch (error) {
-                console.error("Error al cargar donaciones:", error);
+                console.error("Error al cargar donaciones:", error)
+                setDonaciones([])
             } finally {
-                setLoading(false);
+                setLoading(false)
             }
-        };
-        loadDonations();
-    }, [currentPage, itemsPerPage]);
-
-
-    useEffect(() => {
-        let result = [...donations]
-
-        if (searchUser) {
-            result = result.filter((d) => d.user?.name?.toLowerCase().includes(searchUser.toLowerCase()))
         }
 
-        if (statusFilter !== "all") {
-            result = result.filter((d) => d.status === statusFilter)
+        loadDonaciones()
+    }, [page, status])
+
+    const formatDate = (iso: string) => {
+        try {
+            return format(new Date(iso), "dd/MM/yyyy HH:mm")
+        } catch {
+            return iso
         }
+    }
 
-        result.sort((a, b) => {
-            const dateA = new Date(a.dateApproved).getTime()
-            const dateB = new Date(b.dateApproved).getTime()
-            return order === "desc" ? dateB - dateA : dateA - dateB
-        })
+    const handleStatusChange = (value: string) => {
+        setStatus(value as any)
+        setPage(1) // Resetear página al cambiar filtro
+    }
 
-        setFiltered(result)
-    }, [searchUser, statusFilter, order, donations])
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages && !loading) {
+            setPage(newPage)
+        }
+    }
 
-    const clearFilters = () => {
-        setSearchUser("")
-        setStatusFilter("all")
-        setOrder("desc")
+    const handleViewDetail = (donacion: IDonation) => {
+        // Aquí puedes implementar la lógica para ver el detalle
+        // Por ejemplo, navegar a una página de detalle o abrir un modal
+        console.log("Ver detalle de donación:", donacion)
+        // Ejemplo de navegación:
+        // router.push(`/donaciones/${donacion.id}`)
     }
 
     // Calcular estadísticas
-    const totalDonations = donations.length
-    const approvedDonations = donations.filter((d) => d.status === "approved").length
-    const pendingDonations = donations.filter((d) => d.status === "pending").length
-    const rejectedDonations = donations.filter((d) => d.status === "rejected").length
+    const stats = {
+        total: donaciones.length,
+        approved: donaciones.filter((d) => d.status === "approved").length,
+        pending: donaciones.filter((d) => d.status === "pending").length,
+        rejected: donaciones.filter((d) => d.status === "rejected").length,
+        in_process: donaciones.filter((d) => d.status === "in_process").length,
+    }
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#017d74] to-[#015d54] rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#017d74] to-[#015d54] rounded-xl flex items-center justify-center shadow-lg">
                             <Gift className="w-5 h-5 text-white" />
                         </div>
-                        Historial de Donaciones
+                        Listado de Donaciones
                     </h1>
-                    <p className="text-gray-600 mt-1">Visualiza y filtra el historial de donaciones.</p>
+                    <p className="text-gray-600 mt-1">Gestiona y visualiza todas las donaciones del sistema.</p>
                 </div>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                <Card className="shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-4 flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-600">Total Donaciones</p>
-                            <p className="text-2xl font-bold text-gray-900">{totalDonations}</p>
+                            <p className="text-sm font-medium text-gray-600">Total</p>
+                            <p className="text-2xl font-bold text-gray-900">{loading ? "..." : stats.total}</p>
                         </div>
                         <div className="p-2 bg-blue-100 rounded-lg">
                             <Gift className="w-6 h-6 text-blue-600" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-4 flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">Aprobadas</p>
-                            <p className="text-2xl font-bold text-green-600">{approvedDonations}</p>
+                            <p className="text-2xl font-bold text-green-600">{loading ? "..." : stats.approved}</p>
                         </div>
                         <div className="p-2 bg-green-100 rounded-lg">
                             <CheckCircle className="w-6 h-6 text-green-600" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-4 flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">Pendientes</p>
-                            <p className="text-2xl font-bold text-yellow-600">{pendingDonations}</p>
+                            <p className="text-2xl font-bold text-yellow-600">{loading ? "..." : stats.pending}</p>
                         </div>
                         <div className="p-2 bg-yellow-100 rounded-lg">
                             <Clock className="w-6 h-6 text-yellow-600" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-medium text-gray-600">En Proceso</p>
+                            <p className="text-2xl font-bold text-blue-600">{loading ? "..." : stats.in_process}</p>
+                        </div>
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                            <AlertCircle className="w-6 h-6 text-blue-600" />
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-4 flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-600">Rechazadas</p>
-                            <p className="text-2xl font-bold text-red-600">{rejectedDonations}</p>
+                            <p className="text-2xl font-bold text-red-600">{loading ? "..." : stats.rejected}</p>
                         </div>
                         <div className="p-2 bg-red-100 rounded-lg">
                             <XCircle className="w-6 h-6 text-red-600" />
@@ -182,43 +205,38 @@ export const DonacionesComponent = () => {
             </div>
 
             {/* Filtros */}
-            <Card>
-                <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-center">
-                        <div className="relative flex-1 min-w-[200px]">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <Input
-                                placeholder="Buscar por usuario..."
-                                value={searchUser}
-                                onChange={(e) => setSearchUser(e.target.value)}
-                                className="pl-10 w-full"
-                            />
-                        </div>
-                        <Select onValueChange={(value) => setStatusFilter(value)} value={statusFilter}>
-                            <SelectTrigger className="w-full sm:w-48">
-                                <Filter className="w-4 h-4 mr-2 text-gray-500" />
-                                <SelectValue placeholder="Filtrar por estado" />
+            <Card className="shadow-sm">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Filter className="w-5 h-5 text-[#017d74]" />
+                        Filtros
+                    </CardTitle>
+                    <CardDescription>Filtra las donaciones por estado</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                            Estado:
+                        </label>
+                        <Select value={status} onValueChange={handleStatusChange}>
+                            <SelectTrigger className="w-full sm:w-64 border-gray-200 focus:border-[#017d74] focus:ring-[#017d74]">
+                                <SelectValue placeholder="Seleccionar estado" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">Todos</SelectItem>
-                                <SelectItem value="approved">Aprobado</SelectItem>
+                                <SelectItem value="all">Todos los estados</SelectItem>
                                 <SelectItem value="pending">Pendiente</SelectItem>
+                                <SelectItem value="in_process">En Proceso</SelectItem>
+                                <SelectItem value="approved">Aprobado</SelectItem>
                                 <SelectItem value="rejected">Rechazado</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Select onValueChange={(value: "asc" | "desc") => setOrder(value)} value={order}>
-                            <SelectTrigger className="w-full sm:w-48">
-                                <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                                <SelectValue placeholder="Ordenar por fecha" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="desc">Más reciente</SelectItem>
-                                <SelectItem value="asc">Más antigua</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        {(searchUser || statusFilter !== "all" || order !== "desc") && (
-                            <Button variant="outline" onClick={clearFilters} className="w-full sm:w-auto bg-transparent">
-                                Limpiar filtros
+                        {status !== "all" && (
+                            <Button
+                                variant="outline"
+                                onClick={() => handleStatusChange("all")}
+                                className="w-full sm:w-auto bg-transparent"
+                            >
+                                Limpiar filtro
                             </Button>
                         )}
                     </div>
@@ -226,139 +244,219 @@ export const DonacionesComponent = () => {
             </Card>
 
             {/* Lista de donaciones */}
-            <Card>
+            <Card className="shadow-sm">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <DollarSign className="w-5 h-5" />
-                        Lista de Donaciones
+                        <DollarSign className="w-5 h-5 text-[#017d74]" />
+                        Donaciones
                     </CardTitle>
                     <CardDescription>
-                        Mostrando {filtered.length} donacion{filtered.length !== 1 ? "es" : ""}
+                        {loading
+                            ? "Cargando donaciones..."
+                            : `Mostrando ${donaciones.length} donacion${donaciones.length !== 1 ? "es" : ""}`}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 animate-spin text-[#017d74] mb-4" />
-                            <p className="text-gray-500">Cargando donaciones...</p>
+                        <div className="space-y-4">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <Card key={i} className="p-4">
+                                    <div className="flex items-center space-x-4">
+                                        <Skeleton className="h-12 w-12 rounded-full" />
+                                        <div className="space-y-2 flex-1">
+                                            <Skeleton className="h-4 w-[250px]" />
+                                            <Skeleton className="h-4 w-[200px]" />
+                                            <Skeleton className="h-4 w-[150px]" />
+                                        </div>
+                                        <Skeleton className="h-6 w-20" />
+                                        <Skeleton className="h-8 w-24" />
+                                    </div>
+                                </Card>
+                            ))}
                         </div>
-                    ) : filtered.length === 0 ? (
+                    ) : donaciones.length === 0 ? (
                         <div className="text-center py-12">
-                            <Gift className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold text-gray-600 mb-2">No se encontraron donaciones</h3>
-                            <p className="text-gray-500">Intenta ajustar los filtros de búsqueda.</p>
-                            {(searchUser || statusFilter !== "all" || order !== "desc") && (
-                                <Button variant="outline" onClick={clearFilters} className="mt-4 bg-transparent">
-                                    Restablecer filtros
+                            <Gift className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                                {status !== "all" ? "No se encontraron donaciones" : "No hay donaciones registradas"}
+                            </h3>
+                            <p className="text-gray-500 mb-4">
+                                {status !== "all"
+                                    ? "No hay donaciones que coincidan con el filtro seleccionado."
+                                    : "Aún no se han registrado donaciones en el sistema."}
+                            </p>
+                            {status !== "all" && (
+                                <Button variant="outline" onClick={() => handleStatusChange("all")} className="bg-transparent">
+                                    Ver todas las donaciones
                                 </Button>
                             )}
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Usuario</TableHead>
-                                        <TableHead>Monto</TableHead>
-                                        <TableHead>Estado</TableHead>
-                                        <TableHead>Método de Pago</TableHead>
-                                        <TableHead>Fecha</TableHead>
-                                        <TableHead>Acciones</TableHead>
+                        <div className="space-y-4">
+                            {donaciones.map((don) => {
+                                const statusConfig = getStatusConfig(don.status)
+                                const StatusIcon = statusConfig.icon
+                                return (
+                                    <Card key={don.id} className="hover:shadow-md transition-shadow border-l-4 border-l-[#017d74]">
+                                        <CardContent className="p-6">
+                                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                                {/* Información principal */}
+                                                <div className="flex-1 space-y-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 bg-gradient-to-br from-[#017d74]/20 to-[#015d54]/10 rounded-full flex items-center justify-center">
+                                                            <DollarSign className="w-5 h-5 text-[#017d74]" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-semibold text-lg text-gray-900">
+                                                                ${don.amount.toLocaleString()} {don.currencyId}
+                                                            </h3>
+                                                            <p className="text-sm text-gray-600">ID: {don.pagoId}</p>
+                                                        </div>
+                                                    </div>
 
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filtered.map((donation) => {
-                                        const statusConfig = getStatusConfig(donation.status)
-                                        const StatusIcon = statusConfig.icon
-                                        return (
-                                            <TableRow key={donation.id} className="hover:bg-gray-50">
-                                                <TableCell>
-                                                    <div className="flex items-center gap-2">
-                                                        <User className="w-4 h-4 text-gray-500" />
-                                                        <span className="font-medium text-gray-900">{donation.user?.name || "Desconocido"}</span>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                                        <div className="flex items-center gap-2">
+                                                            <CreditCard className="w-4 h-4 text-gray-500" />
+                                                            <span className="text-gray-700">
+                                                                <strong>Método:</strong> {don.paymentMethodId} ({don.paymentTypeId})
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <Calendar className="w-4 h-4 text-gray-500" />
+                                                            <span className="text-gray-700">
+                                                                <strong>Fecha:</strong> {formatDate(don.createdAt)}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-1 font-semibold text-[#017d74]">
-                                                        <DollarSign className="w-4 h-4" />
-                                                        {donation.amount}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
+
+                                                    {don.statusDetail && (
+                                                        <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                                                            <strong>Detalle:</strong> {don.statusDetail}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Estado, usuario y acciones */}
+                                                <div className="flex flex-col items-start lg:items-end gap-3">
                                                     <Badge variant="outline" className={cn("font-medium", statusConfig.color)}>
                                                         <StatusIcon className="w-3 h-3 mr-1" />
                                                         {statusConfig.label}
                                                     </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-1 text-sm text-gray-700">
-                                                        <CreditCard className="w-4 h-4 text-gray-500" />
-                                                        {donation.paymentTypeId} - {donation.paymentMethodId}
+
+                                                    <div className="flex items-center gap-2 text-sm">
+                                                        <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
+                                                            <User className="w-3 h-3 text-gray-600" />
+                                                        </div>
+                                                        <div className="text-right">
+                                                            {don.user ? (
+                                                                <div>
+                                                                    <p className="font-medium text-gray-900">{don.user.name}</p>
+                                                                    <p className="text-gray-600">{don.user.email}</p>
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-gray-500 italic">No asignado</p>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </TableCell>
-                                                <TableCell className="text-sm text-gray-600">
-                                                    <div className="flex items-center gap-1">
-                                                        <Calendar className="w-4 h-4 text-gray-500" />
-                                                        {new Date(donation.dateApproved).toLocaleString()}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Link href={`donaciones/${donation.id}`}>
-                                                        <Button variant="ghost" size="sm">
+
+                                                    {/* Botón Ver Detalle */}
+                                                    <div className="flex gap-2 mt-2">
+                                                        <Link href={`/dashboard/donaciones/${don.id}`} className="flex items-center">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => handleViewDetail(don)}
+                                                            className="flex items-center gap-2 hover:bg-[#017d74] hover:text-white transition-colors"
+                                                        >
                                                             <Eye className="w-4 h-4" />
+                                                            Ver Detalle
                                                         </Button>
-                                                    </Link>
-                                                </TableCell>
-                                            </TableRow>
-                                        )
-                                    })}
-                                </TableBody>
-                            </Table>
-                            <div className="flex items-center gap-2 mt-4">
-                                <label className="text-sm text-gray-600">Mostrar:</label>
-                                <select
-                                    className="border rounded px-2 py-1 text-sm"
-                                    value={itemsPerPage}
-                                    onChange={(e) => {
-                                        setItemsPerPage(parseInt(e.target.value));
-                                        setCurrentPage(1); // Reiniciar a la primera página
-                                    }}
-                                >
-                                    <option value={5}>5</option>
-                                    <option value={10}>10</option>
-                                    <option value={20}>20</option>
-                                    <option value={50}>50</option>
-                                </select>
-                                <span className="text-sm text-gray-600">por página</span>
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                )
+                            })}
+                        </div>
+                    )}
+
+                    {/* Paginación */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between mt-8 pt-6 border-t">
+                            <div className="text-sm text-gray-600">
+                                Página {page} de {totalPages}
                             </div>
 
-                            {pages > 1 && (
-                                <div className="flex justify-center items-center gap-4 mt-6">
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                        disabled={currentPage === 1}
-                                    >
-                                        Anterior
-                                    </Button>
-                                    <span className="text-sm text-gray-600">
-                                        Página {currentPage} de {pages}
-                                    </span>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pages))}
-                                        disabled={currentPage === pages}
-                                    >
-                                        Siguiente
-                                    </Button>
-                                </div>
-                            )}
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlePageChange(page - 1)}
+                                    disabled={page <= 1 || loading}
+                                    className="flex items-center gap-1 bg-transparent"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                    Anterior
+                                </Button>
 
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        let pageNum
+                                        if (totalPages <= 5) {
+                                            pageNum = i + 1
+                                        } else if (page <= 3) {
+                                            pageNum = i + 1
+                                        } else if (page >= totalPages - 2) {
+                                            pageNum = totalPages - 4 + i
+                                        } else {
+                                            pageNum = page - 2 + i
+                                        }
+
+                                        return (
+                                            <Button
+                                                key={pageNum}
+                                                variant={page === pageNum ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => handlePageChange(pageNum)}
+                                                disabled={loading}
+                                                className={`w-10 h-8 p-0 ${page === pageNum ? "bg-[#017d74] hover:bg-[#015d54] text-white" : "hover:bg-gray-50"
+                                                    }`}
+                                            >
+                                                {pageNum}
+                                            </Button>
+                                        )
+                                    })}
+                                </div>
+
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlePageChange(page + 1)}
+                                    disabled={page >= totalPages || loading}
+                                    className="flex items-center gap-1 bg-transparent"
+                                >
+                                    Siguiente
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </CardContent>
             </Card>
+
+            {/* Loading overlay */}
+            {loading && (
+                <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+                    <Card className="p-6">
+                        <div className="flex items-center gap-3">
+                            <Loader2 className="w-6 h-6 animate-spin text-[#017d74]" />
+                            <span className="text-gray-700">Cargando donaciones...</span>
+                        </div>
+                    </Card>
+                </div>
+            )}
         </div>
     )
 }

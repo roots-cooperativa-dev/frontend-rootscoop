@@ -8,6 +8,7 @@ import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import { MapPin, Instagram, MessageCircle, Phone, Clock, Navigation, ExternalLink, Mail, Building } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!
 
@@ -88,7 +89,14 @@ export const UbicacionComponent = () => {
                         <CardHeader className="text-center pb-6">
                             <div className="mx-auto mb-6">
                                 <div className="w-24 h-24 bg-gradient-to-br from-[#017d74] to-[#015d54] rounded-3xl flex items-center justify-center shadow-2xl">
-                                    <span className="text-3xl font-bold text-white">R</span>
+                                    <Image
+                                        src="/logos/roots.png"
+                                        alt="Rootscoop Logo"
+                                        width={70}
+                                        height={40}
+                                        className="rounded-full object-contain"
+                                        priority
+                                    />
                                 </div>
                             </div>
                             <CardTitle className="text-2xl text-[#017d74] mb-2">ROOTS Cooperativa</CardTitle>
@@ -115,9 +123,9 @@ export const UbicacionComponent = () => {
                                 </div>
                                 <div>
                                     <p className="font-semibold text-gray-900 mb-1">Horarios de Atención</p>
-                                    <p className="text-gray-700">Lunes a Viernes: 9:00 - 18:00</p>
-                                    <p className="text-gray-700">Sábados: 9:00 - 13:00</p>
-                                    <p className="text-gray-700">Domingos: Cerrado</p>
+                                    <p className="text-gray-700">Martes a sabados de 12 a 15 hs y de  19 a 23 hs</p>
+                                    <p className="text-gray-700">Domingos de 19 a 23 hs</p>
+                                    <p className="text-gray-700">Lunes cerrado 🚫</p>
                                 </div>
                             </div>
 
@@ -128,8 +136,8 @@ export const UbicacionComponent = () => {
                                 </div>
                                 <div>
                                     <p className="font-semibold text-gray-900 mb-1">Contacto</p>
-                                    <p className="text-gray-700">+54 221 123-4567</p>
-                                    <p className="text-gray-700">info@roots.coop</p>
+                                    <p className="text-gray-700">+54 221 4235656</p>
+                                    <p className="text-gray-700">rootscooperativadev@gmail.com</p>
                                 </div>
                             </div>
 
@@ -190,7 +198,7 @@ export const UbicacionComponent = () => {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <Link href="https://instagram.com/roots.cooperativa" target="_blank" className="group">
+                            <Link href="https://www.instagram.com/roots_cooperativa/" target="_blank" className="group">
                                 <Button
                                     variant="outline"
                                     className="w-full h-14 border-2 border-pink-200 hover:border-pink-500 hover:bg-pink-50 transition-all duration-300 bg-transparent group-hover:scale-105"
@@ -202,7 +210,7 @@ export const UbicacionComponent = () => {
                                 </Button>
                             </Link>
 
-                            <Link href="https://wa.me/5492211234567" target="_blank" className="group">
+                            <Link href="https://wa.link/b4wyji" target="_blank" className="group">
                                 <Button
                                     variant="outline"
                                     className="w-full h-14 border-2 border-green-200 hover:border-green-500 hover:bg-green-50 transition-all duration-300 bg-transparent group-hover:scale-105"
@@ -300,7 +308,6 @@ export const UbicacionComponent = () => {
                             </div>
                         </div>
 
-                        {/* Auto */}
                         <div className="text-center space-y-4">
                             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
                                 <span className="text-2xl">🚗</span>
