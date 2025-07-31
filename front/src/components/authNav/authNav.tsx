@@ -9,7 +9,7 @@ const AuthNav = () => {
   const { total } = useCartContext(); 
 
   if (isAuth === null) return <p>...cargando</p>;
-  if (user?.isAdmin) {
+  if (user?.isAdmin || user?.isSuperAdmin) {
     return (
       <div className="flex items-center space-x-4 rtl:space-x-reverse">
         <Link href="/profile/carrito">
