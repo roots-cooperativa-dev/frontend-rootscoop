@@ -12,7 +12,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { ChevronDown, Home, LogOut, User } from "lucide-react";
+import { ChevronDown, Crown, Home, LogOut, User } from "lucide-react";
 import { useAuthContext } from "@/src/context/authContext";
 import { useRouter } from "next/navigation";
 import { useCartContext } from "@/src/context/cartContext";
@@ -83,7 +83,15 @@ const HeaderProfile = ({ onToggleSidebar }: Props) => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {user?.isAdmin || user?.isSuperAdmin ? (
+                  {user?.isSuperAdmin && (
+                    <Link href="/dashboard">
+                      <DropdownMenuItem>
+                        <Crown className="w-4 h-4 mr-2" />
+                        Super Admin
+                      </DropdownMenuItem>
+                    </Link>
+                  )}
+                  {user?.isAdmin ? (
                     <Link href="/dashboard">
                       <DropdownMenuItem>
                         <User className="w-4 h-4 mr-2" />
