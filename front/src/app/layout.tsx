@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "../context/authContext";
-import { Toaster } from 'sonner';
+import { Toaster } from "sonner";
 import { CartProvider } from "../context/cartContext";
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "Roots Cooperativa de Trabajo - Construyendo Soberanía Alimentaria y Economía Social desde 2013",
   generator: "Next.js",
   icons: {
-    icon: "favicon.png",
+    icon: "favico.png",
   },
 };
 
@@ -22,11 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <AuthProvider>
-      <CartProvider>
-        <body>{children}
-          <Toaster />
-        </body>
-      </CartProvider>
+        <CartProvider>
+          <body>
+            {children}
+            <Toaster />
+          </body>
+        </CartProvider>
       </AuthProvider>
     </html>
   );
